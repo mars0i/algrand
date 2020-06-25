@@ -89,6 +89,8 @@
 ;; Note the reduce fns for int-part and fract-part have different forms 
 ;; because ;; left of decimal point, the first digit is unmultiplied, but
 ;; right of the point, even the first digit is in units of 1/base.
+;; TODO parse hexadecimal, etc.
+;; Maybe reorg first few lines of let, mapping parse-int once.
 (defn convert-string
   "Given a string representation s of a number in the given base (possibly 
   with a fractional part after the decimal point), returns a Clojure
