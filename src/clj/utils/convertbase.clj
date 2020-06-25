@@ -63,17 +63,17 @@
   number in the given base with the specified number of digits after the 
   decimal point.  Uses lowercase alphabetic characters for bases greater than 
   10 and less than 37.  If the fourth argument exists and is not nil or false,
-  internal operations use Clojure Ratio numbers, which are slower but avoid 
-  floating-point errors."
+  internal operations use Clojure Ratio numbers for the fractional part, which 
+  are slower but avoid floating-point errors."
   [x base digits & [ratl]]
   (let [x' (if ratl (rationalize x) x)
-        int-part (m/floor x')
+        int-part (bigint (m/floor x'))
         fract-part (- x' int-part)]
-;    (apply str 
+    (apply str 
            (concat
              (map num-to-lowercase
                   (convert-int-seq int-part base))
              ["."]
              (map num-to-lowercase
                   (take digits
-                        (convert-fract-seq fract-part base))))));)
+                        (convert-fract-seq fract-part base)))))))
