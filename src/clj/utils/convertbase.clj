@@ -1,7 +1,6 @@
 ;;;; Functions to convert bases
 (ns utils.convertbase
-    (:require [clojure.math.numeric-tower :as m]
-              [clojure.string :as s]))
+    (:require [clojure.math.numeric-tower :as m]))
 
 (defn div-with-rem
   [x div]
