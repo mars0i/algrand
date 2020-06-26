@@ -86,14 +86,16 @@
   [s]
   (Integer/parseInt s))
 
-;; Note the reduce fns for int-part and fract-part have different forms 
-;; because ;; left of decimal point, the first digit is unmultiplied, but
+;; Version of convert-string that does more work in Clojure.
+;; Useful for seeing the difference between converting an integer
+;; and converting a fraction.
+;; The reduce fns for int-part and fract-part have different forms 
+;; because left of decimal point, the first digit is unmultiplied, but
 ;; right of the point, even the first digit is in units of 1/base.
-;; 
-;; TODO parse hexadecimal, etc.
+;;
 ;; Maybe reorg first few lines of let, mapping parse-int once.
-;; TODO Use Integer/toString for the two parts?
-(defn convert-string
+;; TODO parse hexadecimal, etc.
+(defn convert-string-1
   "Given a string representation s of a number in the given base (possibly 
   with a fractional part after the decimal point), returns a Clojure
   number represented.  This is a Ratio by default.  If the third argument, 
@@ -110,3 +112,38 @@
     (if use-double
       (double result)
       result)))
+
+;; TODO parse hexadecimal, etc.
+(defn convert-string-2
+  "Given a string representation s of a number in the given base (possibly 
+  with a fractional part after the decimal point), returns a Clojure
+  Ratio for the number represented."
+  [s base]
+  (let [[int-string fract-string] (string/split s #"\.")
+        int-part (Integer/parseInt int-string base)
+        fract-xs (map parse-int (string/split fract-string #""))
+        fract-part (reduce (fn [acc n] (/ (+ n acc) base))
+                           0 (reverse fract-xs))]
+    (+ int-part fract-part)))
+
+
+;; Another method.
+;; Processes integer and fractional parts in the same way after determining
+;; the start and end of the exponents.
+;; TODO parse hexadecimal, etc.
+(defn convert-string-3
+  "Given a string representation s of a number in the given base (possibly 
+  with a fractional part after the decimal point), returns a Clojure
+  Ratio for the number represented."
+  [s base]
+  (let [dot-index (string/index-of s ".")
+        nodot-s (string/replace s "." "") ; we don't need the dot from now on
+        s-len (count s) ; TODO WHY DOES THIS WORK?  s/b nodot-s??
+        int-part-len (or dot-index s-len) ; if no dot it's an integer string so use length
+        fract-part-len (- s-len int-part-len)
+        nums (map parse-int (string/split nodot-s #"")) ; make list of ints
+        exponents (range (dec int-part-len)
+                         (- fract-part-len)
+                         -1)
+        components (map (fn [x e] (* x (math/expt base e))) nums exponents)]
+    (apply + components)))
