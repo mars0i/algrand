@@ -15,7 +15,6 @@
       (cons int-part
             (convert-fract-seq fract-part base)))))
 
-;; Only positive numbers and bases <= 36.
 (defn number-to-string
   "Given a float or rational number x, returns a string representation of
   the number in the given base with the specified number of digits after
