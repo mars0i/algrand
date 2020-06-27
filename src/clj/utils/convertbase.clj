@@ -16,7 +16,7 @@
             (convert-fract-seq fract-part base)))))
 
 ;; Only positive numbers and bases <= 36.
-(defn convert-number
+(defn number-to-string
   "Given a float or rational number x, returns a string representation of
   the number in the given base with the specified number of digits after
   the decimal point.  Uses lowercase alphabetic characters for bases
@@ -33,7 +33,7 @@
 
 ;; Code has a lot of setup but the actual calculation doesn't need
 ;; special case for int part vs fract part.
-(defn convert-string
+(defn string-to-number
   "Given a string representation s of a number in the given base (possibly 
   with a fractional part after the decimal point), returns a Clojure
   Ratio for the number represented.  Handles bases from 2 through 36,
