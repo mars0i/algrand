@@ -92,7 +92,36 @@
 ;; The reduce fns for int-part and fract-part have different forms 
 ;; because left of decimal point, the first digit is unmultiplied, but
 ;; right of the point, even the first digit is in units of 1/base.
-;;
+;
+
+
+;; Code has a lot of setup but the actual calculation doesn't need
+;; special case for int part vs fract part.
+(defn convert-string
+  "Given a string representation s of a number in the given base (possibly 
+  with a fractional part after the decimal point), returns a Clojure
+  Ratio for the number represented.  Handles bases from 2 through 36,
+  with either lowercase or uppercase letters for bases > 10.  Uses BigInt 
+  internally. Returns a Ratio." 
+  [s base]
+  (let [nodot (string/replace s "." "") 
+        nodot-len (count nodot)
+        int-part-len (or (string/index-of s ".") ; if nil dot loc, it's an 
+                         nodot-len)              ; integer string, use length
+        fract-part-len (- nodot-len int-part-len) 
+        nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
+                  (string/split nodot #""))
+        exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
+                         (dec (- fract-part-len)) ; dec: range to before bound
+                         -1)
+        components (map (fn [x e] (* x (math/expt base e)))
+                        nums exponents)]
+    (reduce + components)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
+;; OTHER VERSIONS:
+
 ;; Maybe reorg first few lines of let, mapping parse-int once.
 ;; FIXME NPE if no fract part
 ;; TODO parse hexadecimal, etc.
@@ -127,28 +156,3 @@
         fract-part (reduce (fn [acc n] (/ (+ n acc) base))
                            0 (reverse fract-xs))]
     (+ int-part fract-part)))
-
-
-;; Another method.
-;; Processes integer and fractional parts in the same way after determining
-;; the start and end of the exponents.
-;; TODO parse hexadecimal, etc.
-
-;; Code has a lot of setup but the actual calculation doesn't need
-;; special case for int part vs fract part:
-(defn convert-string-3
-  "Given a string representation s of a number in the given base (possibly 
-  with a fractional part after the decimal point), returns a Clojure
-  Ratio for the number represented."
-  [s base]
-  (let [dot-index (string/index-of s ".")
-        nodot (string/replace s "." "") ; we don't need the dot from now on
-        nodot-len (count nodot)
-        int-part-len (or dot-index nodot-len) ; if no dot it's an integer string so use length
-        fract-part-len (- nodot-len int-part-len) 
-        nums (map parse-int (string/split nodot #"")) ; make list of ints
-        exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
-                         (dec (- fract-part-len)) ; dec: range to before bound
-                         -1)
-        components (map (fn [x e] (* x (math/expt base e))) nums exponents)]
-    (apply + components)))
