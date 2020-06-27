@@ -55,6 +55,10 @@
                         nums exponents)]
     (reduce + components)))
 
+(defn string-to-number*
+  "Like string-to-number, but returns a double rather than a Ratio."
+  [x base digits]
+  (double (string-to-number x base digits)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; OTHER VERSIONS:
