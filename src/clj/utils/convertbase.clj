@@ -10,9 +10,9 @@
   [x base]
   (lazy-seq 
     (let [shifted-x (* x base)
-          int-part (math/floor shifted-x)
+          int-part (bigint shifted-x) ; int, bigint :ound toward zero
           fract-part (- shifted-x int-part)]
-      (cons (int int-part)
+      (cons int-part
             (convert-fract-seq fract-part base)))))
 
 ;; Only positive numbers and bases <= 36.
@@ -22,10 +22,11 @@
   the decimal point.  Uses lowercase alphabetic characters for bases
   between 10 and 36."
   [x base digits]
-  (let [int-part (bigint (math/floor x)) ; coerce away ".0", might as well use BigInt rather than Integer
+  (let [int-part (bigint x) ; int, bigint round toward zero
         fract-part (- x int-part)]
     (apply str 
            (concat
+             (Integer/toString int-part base)
              ["."]
              (map (fn [n] (Integer/toString n base))
                   (take digits
