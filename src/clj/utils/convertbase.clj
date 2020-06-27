@@ -102,7 +102,7 @@
   with a fractional part after the decimal point), returns a Clojure
   Ratio for the number represented.  Handles bases from 2 through 36,
   with either lowercase or uppercase letters for bases > 10.  Uses BigInt 
-  internally. Returns a Ratio." 
+  internally. Wrap in double to see output as decimal number." 
   [s base]
   (let [nodot (string/replace s "." "") 
         nodot-len (count nodot)
