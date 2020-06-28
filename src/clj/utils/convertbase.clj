@@ -15,11 +15,13 @@
       (cons int-part
             (convert-fract-seq fract-part base)))))
 
+;; Output is float or integer style.  Returning a ratio would have little
+;; use, and I have no idea at present of a good way to implment it.
 (defn number-to-string
-  "Given a float or rational number x, returns a string representation of
-  the number in the given base with the specified number of digits after
-  the decimal point.  Uses lowercase alphabetic characters for bases
-  between 10 and 36."
+  "Given an integer, ratio, or floating-point number x, returns a float string
+  representation of the number in the given base with the specified number of
+  digits after the decimal point.  Uses lowercase alphabetic characters for
+  digits greater than 9 in bases between 10 and 36."
   [x base digits]
   (let [int-part (bigint x) ; int, bigint round toward zero
         fract-part (- x int-part)]
@@ -32,12 +34,11 @@
                         (convert-fract-seq fract-part base)))))))
 
 ;; Code has a lot of setup but the actual calculation doesn't need
-;; special case for int part vs fract part.
+;; to special-case for int part vs fract part.
 (defn float-string-to-number
   "Given a string representation s of an integer or float in the given base, 
-  returns a Clojure Ratio for the number represented.  Handles bases from
-  2 through 36, with either lowercase or uppercase letters for bases > 10.
-  Uses BigInt internally."
+  returns a Clojure Ratio or BigInt for the number represented.  Handles bases
+  from 2 through 36, with either lowercase or uppercase letters for bases > 10."
   [s base]
   (let [nodot (string/replace s "." "") ; parse float or integer
         nodot-len (count nodot)
@@ -55,9 +56,9 @@
 
 (defn string-to-number
   "Given a string representation s of an integer, float, or ratio in the 
-  given base, returns a Clojure Ratio for the number represented.  Handles 
-  bases from 2 through 36, with either lowercase or uppercase letters for 
-  bases > 10.  Uses BigInt internally."
+  given base, returns a Clojure Ratio or BigInt for the number represented.
+  Handles bases from 2 through 36, with either lowercase or uppercase letters
+  for bases > 10."
   [s base]
   (let [[numator-s denomator-s] (string/split s #"/")] ; parse ratio string?
     (if denomator-s                            ; nil if no slash
@@ -65,7 +66,7 @@
          (float-string-to-number denomator-s base))
       (float-string-to-number s base))))
 
-(defn string-to-number*
+(defn string-to-double
   "Like string-to-number, but returns a double rather than a Ratio."
   [x base]
   (double (string-to-number x base)))
