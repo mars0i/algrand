@@ -33,30 +33,37 @@
 
 ;; Code has a lot of setup but the actual calculation doesn't need
 ;; special case for int part vs fract part.
+(defn float-string-to-number
+  "Given a string representation s of an integer or float in the given base, 
+  returns a Clojure Ratio for the number represented.  Handles bases from
+  2 through 36, with either lowercase or uppercase letters for bases > 10.
+  Uses BigInt internally."
+  [s base]
+  (let [nodot (string/replace s "." "") ; parse float or integer
+        nodot-len (count nodot)
+        int-part-len (or (string/index-of s ".") ; if nil dot loc, it's an 
+                         nodot-len)              ; integer string, use length
+        fract-part-len (- nodot-len int-part-len) 
+        nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
+                  (string/split nodot #""))
+        exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
+                         (dec (- fract-part-len)) ; dec: range to before bound
+                         -1)
+        components (map (fn [x e] (* x (math/expt base e)))
+                        nums exponents)]
+    (reduce + components)))
+
 (defn string-to-number
-  "Given a string representation s of a number in the given base (possibly 
-  with a fractional part after the decimal point), returns a Clojure
-  Ratio for the number represented.  Handles bases from 2 through 36,
-  with either lowercase or uppercase letters for bases > 10.  Uses BigInt 
-  internally. Wrap in double to see output as decimal number." 
+  "Given a string representation s of an integer, float, or ratio in the 
+  given base, returns a Clojure Ratio for the number represented.  Handles 
+  bases from 2 through 36, with either lowercase or uppercase letters for 
+  bases > 10.  Uses BigInt internally."
   [s base]
   (let [[numator-s denomator-s] (string/split s #"/")] ; parse ratio string?
     (if denomator-s                            ; nil if no slash
-      (/ (string-to-number numator-s base) 
-         (string-to-number denomator-s base))
-      (let [nodot (string/replace s "." "") ; parse float or integer
-            nodot-len (count nodot)
-            int-part-len (or (string/index-of s ".") ; if nil dot loc, it's an 
-                             nodot-len)              ; integer string, use length
-            fract-part-len (- nodot-len int-part-len) 
-            nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
-                      (string/split nodot #""))
-            exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
-                             (dec (- fract-part-len)) ; dec: range to before bound
-                             -1)
-            components (map (fn [x e] (* x (math/expt base e)))
-                            nums exponents)]
-        (reduce + components)))))
+      (/ (float-string-to-number numator-s base) 
+         (float-string-to-number denomator-s base))
+      (float-string-to-number s base))))
 
 (defn string-to-number*
   "Like string-to-number, but returns a double rather than a Ratio."
