@@ -40,22 +40,23 @@
   with either lowercase or uppercase letters for bases > 10.  Uses BigInt 
   internally. Wrap in double to see output as decimal number." 
   [s base]
-  (if (string/index-of s "/")
-    (apply / (map (fn [t] (string-to-number t base)) ; parse a ratio
-                  (string/split s #"/")))
-    (let [nodot (string/replace s "." "") ; parse float or integer
-          nodot-len (count nodot)
-          int-part-len (or (string/index-of s ".") ; if nil dot loc, it's an 
-                           nodot-len)              ; integer string, use length
-          fract-part-len (- nodot-len int-part-len) 
-          nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
-                    (string/split nodot #""))
-          exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
-                           (dec (- fract-part-len)) ; dec: range to before bound
-                           -1)
-          components (map (fn [x e] (* x (math/expt base e)))
-                          nums exponents)]
-      (reduce + components))))
+  (let [[numator-s denomator-s] (string/split s #"/")] ; parse ratio string?
+    (if denomator-s                            ; nil if no slash
+      (/ (string-to-number numator-s base) 
+         (string-to-number denomator-s base))
+      (let [nodot (string/replace s "." "") ; parse float or integer
+            nodot-len (count nodot)
+            int-part-len (or (string/index-of s ".") ; if nil dot loc, it's an 
+                             nodot-len)              ; integer string, use length
+            fract-part-len (- nodot-len int-part-len) 
+            nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
+                      (string/split nodot #""))
+            exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
+                             (dec (- fract-part-len)) ; dec: range to before bound
+                             -1)
+            components (map (fn [x e] (* x (math/expt base e)))
+                            nums exponents)]
+        (reduce + components)))))
 
 (defn string-to-number*
   "Like string-to-number, but returns a double rather than a Ratio."
