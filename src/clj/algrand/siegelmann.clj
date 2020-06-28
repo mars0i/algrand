@@ -26,22 +26,6 @@
                       (* (math/expt -1 j)
                          (sigma (- q9 j)))))))))
 
-;; letfn version
-(defn old-lambda-tilde
-  "lambda-tilde [equation (4.6), p. 64] is Siegelmann's continuous version of
-  Lambda, a left-shift on base-9 fractional numbers that use only even digits."
-  [q]
-  (let [q9 (* q 9)]
-    (letfn [(aux [j acc]
-              (if (>= j 0)
-                (aux (- j 1)
-                     (+ acc 
-                        (* (math/expt -1 j)
-                           (sigma (- q9 j)))))
-                acc))]
-      (aux 8 0))))
-
-
 ;(defn xsi-tilde
 ;  "xsi-tilde [equation (4.7), p. 65] is Siegelmann's continuous version of Xsi,
 ;  a select-leftmost-digit function on base-9 fractional numbers that use only 
