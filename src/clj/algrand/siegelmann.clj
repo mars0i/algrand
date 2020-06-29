@@ -16,6 +16,9 @@
 	(> x 1) 1
 	:else x))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Chapter 4:
+
 (defn lambda-tilde
   "lambda-tilde [equation (4.6), p. 64] is Siegelmann's continuous version of
   Lambda, a left-shift on base-9 fractional numbers that use only even digits."
@@ -38,3 +41,24 @@
                    (+ sum
                       (sigma (- q9 (inc (* 2 j))))))
                0 (range 4)))))
+
+(defn defnetwork
+  "Create vector for node value for Siegelmann's circuit-retrieval algorithm
+  in chapter 4.  First element is input u, with index 0, which will never 
+  change.  This makes the rest of the network 1-based, in accordance with
+  Siegelmann's notation.  c-hat, the circuits encoding, will be stored in
+  the 18th element (index 17), which also will never change."
+  [u c-hat]
+  (conj 
+    (vec (cons u (repeat 16 0))
+         c-hat)))
+
+(defn x9+
+  [net]
+  (sigma (* 2 (net 0))))
+
+(defn x10+
+  [net]
+  (+ (* (net 8) (net 17))
+     (net 
+
