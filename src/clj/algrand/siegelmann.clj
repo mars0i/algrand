@@ -38,18 +38,3 @@
                    (+ sum
                       (sigma (- q9 (inc (* 2 j))))))
                0 (range 4)))))
-
-;; loop/recur version
-(defn old-xsi-tilde
-  "xsi-tilde [equation (4.7), p. 65] is Siegelmann's continuous version of Xsi,
-  a select-leftmost-digit function on base-9 fractional numbers that use only 
-  even digits."
-  [q]
-  (let [q9 (* q 9)]
-    (* 2
-       (loop [j 3 acc 0]
-         (if (neg? j)
-           acc
-           (recur (dec j)
-                  (+ acc
-                     (sigma (- q9 (inc (* 2 j)))))))))))
