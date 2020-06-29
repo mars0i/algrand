@@ -15,6 +15,7 @@
       (cons int-part
             (convert-fract-seq fract-part base)))))
 
+;; TODO Handle negative numbers
 ;; Output is float or integer style.  Returning a ratio would have little
 ;; use, and I have no idea at present of a good way to implment it.
 (defn number-to-string
@@ -33,6 +34,7 @@
                   (take digits
                         (convert-fract-seq fract-part base)))))))
 
+;; TODO Handle negative numbers
 ;; Code has a lot of setup but the actual calculation doesn't need
 ;; to special-case for int part vs fract part.
 (defn float-string-to-number
