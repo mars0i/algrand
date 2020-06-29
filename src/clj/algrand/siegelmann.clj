@@ -42,23 +42,17 @@
                       (sigma (- q9 (inc (* 2 j))))))
                0 (range 4)))))
 
-(defn defnetwork
-  "Create vector for node value for Siegelmann's circuit-retrieval algorithm
-  in chapter 4.  First element is input u, with index 0, which will never 
-  change.  This makes the rest of the network 1-based, in accordance with
-  Siegelmann's notation.  c-hat, the circuits encoding, will be stored in
-  the 18th element (index 17), which also will never change."
-  [u c-hat]
-  (conj 
-    (vec (cons u (repeat 16 0))
-         c-hat)))
+(def network (vec (repeat 17 0)))
 
 (defn x9+
-  [net]
-  (sigma (* 2 (net 0))))
+  [u c-hat net]
+  (sigma (* 2 u)))
 
-(defn x10+
-  [net]
-  (+ (* (net 8) (net 17))
-     (net 
+;(defn x10+
+;  [u c-hat net]
+;  (sigma <inner product of network and
+;         [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0  0]>)
+;          (0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16 17)
+
+
 
