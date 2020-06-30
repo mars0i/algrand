@@ -3,7 +3,7 @@
 (ns algrand.siegelmann
     (:require [clojure.math.numeric-tower :as math]
               [utils.convertbase :as base])
-    (:use [uncomplicate.neanderthal.core :only [dot xpy]]
+    (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy]]
           [uncomplicate.neanderthal.native :only [dv]]))
 
 ;; convenience abbreviations
