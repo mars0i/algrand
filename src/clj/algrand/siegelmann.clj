@@ -2,7 +2,9 @@
 ;; *Neural Networks and Analog Computation: Beyond the Turing Limit*
 (ns algrand.siegelmann
     (:require [clojure.math.numeric-tower :as math]
-              [utils.convertbase :as base]))
+              [utils.convertbase :as base]
+              [uncomplicate.neanderthal.core :as nc]
+              [uncomplicate.neanderthal.native :as nn]))
 
 ;; convenience abbreviations
 (def n2s base/number-to-string)
@@ -44,9 +46,20 @@
 
 (def network (vec (repeat 17 0)))
 
+(def network (nn/dv (repeat 17 0)))
+
 (defn x9+
   [u c-hat net]
   (sigma (* 2 u)))
+
+(defn x10+
+  [u c-hat net]
+  (let [v (nn/dv [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0])]
+    ;             0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16
+    (sigma (nc/dot net v))))
+
+
+
 
 ;(defn x10+
 ;  [u c-hat net]
