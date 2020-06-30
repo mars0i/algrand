@@ -3,7 +3,7 @@
 (ns algrand.siegelmann
     (:require [clojure.math.numeric-tower :as math]
               [utils.convertbase :as base])
-    (:use [uncomplicate.neanderthal.core :only [dot]]
+    (:use [uncomplicate.neanderthal.core :only [dot xpy]]
           [uncomplicate.neanderthal.native :only [dv]]))
 
 ;; convenience abbreviations
@@ -55,38 +55,56 @@
 
 ;; In the statement of lemma 4.1.2 on p.63, HTS says you need a 16-node
 ;; net, but in the model on p.65, there are nodes 0 through 16, i.e.
-;; 17 nodes.  I add the input node u at the end (though that will have
-;; to change in the second step).
+;; 17 nodes.  I add the input node u at the end.  It will then be zeroed out.
 (def network (dv (conj (vec (repeat 17 0)) u)))
 
 ;; In the end I want to replace the vectors below with one big matrix,
 ;; and the constants s/b args to a generation function,
 ;; but it's easier to start by coding it all piecemeal.
 
-;(defn x0thru8
-;  [u net]
-;  (let [v (dv [0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
-;    ;          0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16
-;  (
+;; could use a macro I suppose
+(defn x0thru8-maker
+  "Given index i, returns a function to implment x0+ through x8+."
+  [i]
+  (fn [net]
+      (let [v  (dv [0 0 0 0 0 0 0 0 0 0  1      0  0  0  0  0  0  0])
+            iv (dv [0 0 0 0 0 0 0 0 0 0  (- i)  0  0  0  0  0  0  0])]
+        ;          0 1 2 3 4 5 6 7 8  9  10     11 12 13 14 15 16 u
+        (sigma
+          (xpy (dot net v) iv)))))
+
+(def x0+ (x0thru8-maker 0))
+(def x1+ (x0thru8-maker 1))
+(def x2+ (x0thru8-maker 2))
+(def x3+ (x0thru8-maker 3))
+(def x4+ (x0thru8-maker 4))
+(def x5+ (x0thru8-maker 5))
+(def x6+ (x0thru8-maker 6))
+(def x7+ (x0thru8-maker 7))
+(def x8+ (x0thru8-maker 8))
 
 (defn x9+
-  [u net]
-  (sigma (* 2 u)))
-
-(defn x10+
-  [u net]
-  (let [v (dv [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0])]
-    ;          0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16
+  [net]
+  (let [v (dv [0 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  2])]
+    ;          0 1 2 3 4 5 6 7 8  9 10 11 12 13 14 15 16 u
     (sigma (dot net v))))
 
+(defn x10+
+  [net]
+  (let [v (dv [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0  0])]
+    ;          0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16 u
+    (sigma (dot net v))))
 
+;; toadd: x11+
 
+(defn x12+
+  [net]
+  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  1  0  0  0  0  0  0])]
+    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
+    (sigma (dot net v))))
 
-;(defn x10+
-;  [u c-hat net]
-;  (sigma <inner product of network and
-;         [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0  0]>)
-;          (0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16 17)
-
-
-
+(defn x13+
+  [net]
+  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  0  0  0  1  1  0  1])]
+    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
+    (sigma (dot net v))))
