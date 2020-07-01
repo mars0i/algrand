@@ -3,8 +3,8 @@
 (ns algrand.siegelmann
     (:require [clojure.math.numeric-tower :as math]
               [utils.convertbase :as base])
-    (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy]]
-          [uncomplicate.neanderthal.native :only [dv]]))
+    (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy trans]]
+          [uncomplicate.neanderthal.native :only [dv dge]]))
 
 ;; convenience abbreviations
 (def n2s base/number-to-string)
@@ -85,6 +85,7 @@
 
 (def a (trans
          (dge [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x0
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x1
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x2
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x3
@@ -95,53 +96,62 @@
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x8
                [0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0] ; x9
                [1 -1  1 -1  1 -1  1 -1 1 c-hat 0 0  0  0  0  0  0] ; x10
-
-
+               [0 2/9 0 2/9 0 2/9 0 2/9 0  0  0  0 1/9 -2 0  0  0] ; x11
+               [0  0  0  0  0  0  0  0  0  0  0  1  0  0  0  0  0] ; x12
+               [0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  0] ; x13
+               [0  0  0  0  0  0  0  1  0  0  0  0  0  2  0  0  0] ; x14
+               [0  0  0  0  0  0  0 -1  0  0  0  0  0  1  0  0  0] ; x15
+               [0  0  0  0  0  0  0  1  0  0  0  0  1  0  0  0  0] ; x16
+              ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
          )))
 
+;; kludgey way to display contents:
+;(doseq [i (range 17)] (print "\n" i ": ") (doseq [j (range 17)] (print (a i j) " ")))
+
+
 ;; could use a macro I suppose
-(defn x0thru8-maker
-  "Given index i, returns a function to implment x0+ through x8+."
-  [i]
-  (fn [net]
-      (let [v  (dv [0 0 0 0 0 0 0 0 0 0  1      0  0  0  0  0  0  0])
-            iv (dv [0 0 0 0 0 0 0 0 0 0  (- i)  0  0  0  0  0  0  0])]
-        ;          0 1 2 3 4 5 6 7 8  9  10     11 12 13 14 15 16 u
-        (sigma
-          (xpy (dot net v) iv)))))
+;(defn x0thru8-maker
+;  "Given index i, returns a function to implment x0+ through x8+."
+;  [i]
+;  (fn [net]
+;      (let [v  (dv [0 0 0 0 0 0 0 0 0 0  1      0  0  0  0  0  0  0])
+;            iv (dv [0 0 0 0 0 0 0 0 0 0  (- i)  0  0  0  0  0  0  0])]
+;        ;          0 1 2 3 4 5 6 7 8  9  10     11 12 13 14 15 16 u
+;        (sigma
+;          (xpy (dot net v) iv)))))
 
-(def x0+ (x0thru8-maker 0))
-(def x1+ (x0thru8-maker 1))
-(def x2+ (x0thru8-maker 2))
-(def x3+ (x0thru8-maker 3))
-(def x4+ (x0thru8-maker 4))
-(def x5+ (x0thru8-maker 5))
-(def x6+ (x0thru8-maker 6))
-(def x7+ (x0thru8-maker 7))
-(def x8+ (x0thru8-maker 8))
-
-(defn x9+
-  [net]
-  (let [v (dv [0 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  2])]
-    ;          0 1 2 3 4 5 6 7 8  9 10 11 12 13 14 15 16 u
-    (sigma (dot net v))))
-
-(defn x10+
-  [net]
-  (let [v (dv [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0  0])]
-    ;          0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16 u
-    (sigma (dot net v))))
-
-;; toadd: x11+
-
-(defn x12+
-  [net]
-  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  1  0  0  0  0  0  0])]
-    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
-    (sigma (dot net v))))
-
-(defn x13+
-  [net]
-  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  0  0  0  1  1  0  1])]
-    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
-    (sigma (dot net v))))
+;(def x0+ (x0thru8-maker 0))
+;(def x1+ (x0thru8-maker 1))
+;(def x2+ (x0thru8-maker 2))
+;(def x3+ (x0thru8-maker 3))
+;(def x4+ (x0thru8-maker 4))
+;(def x5+ (x0thru8-maker 5))
+;(def x6+ (x0thru8-maker 6))
+;(def x7+ (x0thru8-maker 7))
+;(def x8+ (x0thru8-maker 8))
+;
+;(defn x9+
+;  [net]
+;  (let [v (dv [0 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  2])]
+;    ;          0 1 2 3 4 5 6 7 8  9 10 11 12 13 14 15 16 u
+;    (sigma (dot net v))))
+;
+;(defn x10+
+;  [net]
+;  (let [v (dv [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0  0])]
+;    ;          0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16 u
+;    (sigma (dot net v))))
+;
+;;; toadd: x11+
+;
+;(defn x12+
+;  [net]
+;  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  1  0  0  0  0  0  0])]
+;    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
+;    (sigma (dot net v))))
+;
+;(defn x13+
+;  [net]
+;  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  0  0  0  1  1  0  1])]
+;    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
+;    (sigma (dot net v))))
