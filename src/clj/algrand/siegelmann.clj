@@ -47,7 +47,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; defining the network
 ;; using Neanderthal
-;;
+
 ;; See Siegelman:
 ;;    Equation (2.2), p. 19
 ;;       Here there is a single, unweighted input line on which u appears 
@@ -76,6 +76,28 @@
 ;; sigma(2u) is the entire value of x9+, and u is added in x13+:
 (def b (dv [0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]))
 ;           0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+
+;; Note that Neanderthal vectors look like row vectors but behave as 
+;; column vectors, e.g. in the mv multiplication operator, the vector
+;;is the second arg.  That means the node indexes are column indexes
+;; in the weight matrix.  However, I'd rather see it the other way during
+;; when defining the matrix, so I'll just transpose what I input:
+
+(def a (trans
+         (dge [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x1
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x2
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x3
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x4
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x5
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x6
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x7
+               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x8
+               [0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0] ; x9
+               [1 -1  1 -1  1 -1  1 -1 1 c-hat 0 0  0  0  0  0  0] ; x10
+
+
+         )))
 
 ;; could use a macro I suppose
 (defn x0thru8-maker
