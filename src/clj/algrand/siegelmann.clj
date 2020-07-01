@@ -46,21 +46,36 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; defining the network
-;; with Neanderthal
+;; using Neanderthal
+;;
+;; See Siegelman:
+;;    Equation (2.2), p. 19
+;;       Here there is a single, unweighted input line on which u appears 
+;;       briefly, so M=1, and the b matrix is a vector.
+;;       N=17 apparently: In the statement of lemma 4.1.2 on p.63, HTS says
+;;       you need a 16-node net, but in the model on p.65, there are nodes 
+;;       0 through 16, i.e. 17 nodes.
+;;    Equation (2.5), p. 21
+;;    Text following lemma 4.1.2, p. 63 (the following is part of the proof)
+;;    Retrieval network equations on p. 65
 
-;; Encoding of single circuit (s/b many) from example 4.1.1 on p.62:
+;; Encoding of single circuit (s/b many) from example 4.1.1 on p.62.
+;; (This will become an element in the weight matrix.)
 (def c-hat (base/string-to-number "0.860424440444240222426044444" 9))
 
+;; p. 63: since I have only one circuit in c-hat, u has to contain a single 1.
 (def u (base/string-to-number "0.1" 2))
 
-;; In the statement of lemma 4.1.2 on p.63, HTS says you need a 16-node
-;; net, but in the model on p.65, there are nodes 0 through 16, i.e.
-;; 17 nodes.  I add the input node u at the end.  It will then be zeroed out.
-(def network (dv (conj (vec (repeat 17 0)) u)))
+;; Initial state of network: all zeros. (Where did HTS say this?  I forget.)
+(def network (dv 17))
 
-;; In the end I want to replace the vectors below with one big matrix,
-;; and the constants s/b args to a generation function,
-;; but it's easier to start by coding it all piecemeal.
+;; From eq 2.2 p19, and p65 - constant vector to be added on each iteration:
+(def c (dv (concat (range 0 -9 -1) [0 0  0  0  0  -2 0  -1])))
+;                      0-8          9 10 11 12 13 14 15 16
+
+;; sigma(2u) is the entire value of x9+, and u is added in x13+:
+(def b (dv [0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]))
+;           0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
 
 ;; could use a macro I suppose
 (defn x0thru8-maker
