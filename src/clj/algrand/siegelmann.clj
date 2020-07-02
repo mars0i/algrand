@@ -84,7 +84,7 @@
 ;; in the weight matrix.  However, I'd rather see it the other way during
 ;; when defining the matrix, so I'll just transpose what I input:
 
-(def a (trans
+(def a-tran 
          (dge [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x0
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x1
@@ -104,10 +104,9 @@
                [0  0  0  0  0  0  0 -1  0  0  0  0  0  1  0  0  0] ; x15
                [0  0  0  0  0  0  0  1  0  0  0  0  1  0  0  0  0] ; x16
               ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
-         )))
+         ))
 
-;; Is this really not defined in Neanderthal??
-;(defn dims [m] [(mrows m) (ncols m)])
+(def a (trans a-tran))
 
 (defn prmat
   "Prints all elements of matrix m to stdout with numeric precision prec."
@@ -115,19 +114,12 @@
   (let [fmtstr (str " % ." prec "f")]
     (doseq [i (range (mrows m))
             j (range (ncols m))]
-      (when (zero? j)
+      (when (and (zero? j) (pos? i))
         (println))
-      (print (format fmtstr (a i j)))))
+      (print (format fmtstr (m i j)))))
   (println))
 
 
-
-;; simple ways to display contents:
-;(doseq [i (range 17) j (range 17)]
-;   (when (zero? j)
-;     (println))
-;   (print (a i j) "  "))
-;
 
 ;; could use a macro I suppose
 ;(defn x0thru8-maker
