@@ -11,6 +11,20 @@
 (def n2s base/number-to-string)
 (def s2n base/string-to-number)
 
+;; my Neanderthal convenience function (should be moved elsewhere)
+(defn prmat
+  "Prints all elements of matrix m to stdout with precision prec."
+  [m prec]
+  (let [fmtstr (str " % ." prec "f")]
+    (doseq [i (range (mrows m))
+            j (range (ncols m))]
+      (when (and (zero? j) (pos? i)) ; (pos? i) test prevents initial newline
+        (println))
+      (print (format fmtstr (m i j)))))
+  (println))
+
+
+;; for all chapters
 (defn sigma
   "Linear sigma function: Returns x unless it's outside of [0,1], in
   which case 0 or 1--whichever is closest--is returned."
@@ -83,8 +97,7 @@
 ;;is the second arg.  That means the node indexes are column indexes
 ;; in the weight matrix.  However, I'd rather see it the other way during
 ;; when defining the matrix, so I'll just transpose what I input:
-
-(def a-tran 
+(def a (trans
          (dge [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x0
                [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x1
@@ -104,21 +117,7 @@
                [0  0  0  0  0  0  0 -1  0  0  0  0  0  1  0  0  0] ; x15
                [0  0  0  0  0  0  0  1  0  0  0  0  1  0  0  0  0] ; x16
               ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
-         ))
-
-(def a (trans a-tran))
-
-(defn prmat
-  "Prints all elements of matrix m to stdout with numeric precision prec."
-  [m prec]
-  (let [fmtstr (str " % ." prec "f")]
-    (doseq [i (range (mrows m))
-            j (range (ncols m))]
-      (when (and (zero? j) (pos? i))
-        (println))
-      (print (format fmtstr (m i j)))))
-  (println))
-
+         )))
 
 
 ;; could use a macro I suppose
