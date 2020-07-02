@@ -3,7 +3,8 @@
 (ns algrand.siegelmann
     (:require [clojure.math.numeric-tower :as math]
               [utils.convertbase :as base])
-    (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy trans]]
+    (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy trans
+                                                mrows ncols]]
           [uncomplicate.neanderthal.native :only [dv dge]]))
 
 ;; convenience abbreviations
@@ -105,9 +106,28 @@
               ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
          )))
 
-;; kludgey way to display contents:
-;(doseq [i (range 17)] (print "\n" i ": ") (doseq [j (range 17)] (print (a i j) " ")))
+;; Is this really not defined in Neanderthal??
+;(defn dims [m] [(mrows m) (ncols m)])
 
+(defn prmat
+  "Prints all elements of matrix m to stdout with numeric precision prec."
+  [m prec]
+  (let [fmtstr (str " % ." prec "f")]
+    (doseq [i (range (mrows m))
+            j (range (ncols m))]
+      (when (zero? j)
+        (println))
+      (print (format fmtstr (a i j)))))
+  (println))
+
+
+
+;; simple ways to display contents:
+;(doseq [i (range 17) j (range 17)]
+;   (when (zero? j)
+;     (println))
+;   (print (a i j) "  "))
+;
 
 ;; could use a macro I suppose
 ;(defn x0thru8-maker
