@@ -5,7 +5,8 @@
               [utils.convertbase :as base])
     (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy trans
                                                 mrows ncols]]
-          [uncomplicate.neanderthal.native :only [dv dge]]))
+          [uncomplicate.neanderthal.native :only [dv dge]]
+          [uncomplicate.fluokitten.core :only [fmap]]))
 
 ;; convenience abbreviations
 (def n2s base/number-to-string)
@@ -100,7 +101,7 @@
 ;; Note that Neanderthal vectors look like row vectors but behave as 
 ;; column vectors, e.g. in the mv multiplication operator, the vector
 ;; is the second arg.  That means the node indexes are column indexes
-;; in the weight matrix.  However, I'd rather see it the other way during
+;; in the weight matrix.  However, I'd rather see it the other way
 ;; when defining the matrix, so I'll just transpose what I input:
 (def a (trans
          (dge [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
@@ -132,55 +133,22 @@
   "See equation (2.2) p. 20.  Where a is the weight matrix for current 
   state vector x, b is the weight matrix for input vector u, and c is 
   a vector of constants, computes xa + ub + c and returns a new vector.
-  The state vector is the last argument so that you can use partial to
-  easily wrap the constant structures into a function.
   (Note vectors function as column vectors though displayed as rows.)"
-  [a b u c x]
+  [a x b u c]
   (xpy (mv a x) (mv b u) c))
 
-;; could use a macro I suppose
-;(defn x0thru8-maker
-;  "Given index i, returns a function to implment x0+ through x8+."
-;  [i]
-;  (fn [net]
-;      (let [v  (dv [0 0 0 0 0 0 0 0 0 0  1      0  0  0  0  0  0  0])
-;            iv (dv [0 0 0 0 0 0 0 0 0 0  (- i)  0  0  0  0  0  0  0])]
-;        ;          0 1 2 3 4 5 6 7 8  9  10     11 12 13 14 15 16 u
-;        (sigma
-;          (xpy (dot net v) iv)))))
+(defn next-state
+  "See equation (2.2) p. 20.  Computes next state by mapping sigma
+  over the result of next-state sum.  Where a is the weight matrix for 
+  current state vector x, b is the weight matrix for input vector u, and 
+  c is a vector of constants, computes sigma(xa + ub + c) and returns a 
+  new state vector x+.  (The previous state vector x is the last argument
+  so that you can use partial to easily wrap the constant structures 
+  into a function.  Note vectors function as column vectors though 
+  displayed as rows.)"
+  [a b u c x]
+  (fmap sigma
+        (next-state-sum a x b u c)))
 
-;(def x0+ (x0thru8-maker 0))
-;(def x1+ (x0thru8-maker 1))
-;(def x2+ (x0thru8-maker 2))
-;(def x3+ (x0thru8-maker 3))
-;(def x4+ (x0thru8-maker 4))
-;(def x5+ (x0thru8-maker 5))
-;(def x6+ (x0thru8-maker 6))
-;(def x7+ (x0thru8-maker 7))
-;(def x8+ (x0thru8-maker 8))
-;
-;(defn x9+
-;  [net]
-;  (let [v (dv [0 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  2])]
-;    ;          0 1 2 3 4 5 6 7 8  9 10 11 12 13 14 15 16 u
-;    (sigma (dot net v))))
-;
-;(defn x10+
-;  [net]
-;  (let [v (dv [1 -1  1 -1  1 -1  1 -1  1 c-hat 0  0  0  0  0  0  0  0])]
-;    ;          0  1  2  3  4  5  6  7  8   9   10 11 12 13 14 15 16 u
-;    (sigma (dot net v))))
-;
-;;; toadd: x11+
-;
-;(defn x12+
-;  [net]
-;  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  1  0  0  0  0  0  0])]
-;    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
-;    (sigma (dot net v))))
-;
-;(defn x13+
-;  [net]
-;  (let [v (dv [0 0 0 0 0 0 0 0 0 0 0  0  0  0  1  1  0  1])]
-;    ;          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 u
-;    (sigma (dot net v))))
+;; TODO DOESN'T u HAVE TO CHANGE AFTER FIRST TIMESTEP?
+(def states (iterate (partial next-state a b u c) initial-state))
