@@ -94,7 +94,7 @@
 
 ;; Note that Neanderthal vectors look like row vectors but behave as 
 ;; column vectors, e.g. in the mv multiplication operator, the vector
-;;is the second arg.  That means the node indexes are column indexes
+;; is the second arg.  That means the node indexes are column indexes
 ;; in the weight matrix.  However, I'd rather see it the other way during
 ;; when defining the matrix, so I'll just transpose what I input:
 (def a (trans
