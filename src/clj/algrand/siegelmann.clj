@@ -12,6 +12,9 @@
 (def s2n base/string-to-number)
 
 ;; my Neanderthal convenience function (should be moved elsewhere)
+;; You can also do e.g. this (per Dragan):
+;;   (uncomplicate.neanderthal.internal.printing/printer-settings! 
+;;     {:matrix-width 17 :matrix-height 17})
 (defn prmat
   "Prints all elements of matrix m to stdout with precision prec."
   [m prec]
@@ -79,18 +82,20 @@
 (def c-hat (base/string-to-number "0.860424440444240222426044444" 9))
 
 ;; p. 63: since I have only one circuit in c-hat, u has to contain a single 1.
-(def u (base/string-to-number "0.1" 2))
+(def u (dv [(base/string-to-number "0.1" 2)]))
+;; TODO DOESN'T THIS HAVE TO CHANGE AFTER FIRST TIMESTEP?
 
-;; Initial state of network: all zeros. (Where did HTS say this?  I forget.)
-(def network (dv 17))
+;; Initial state of network is all zeros. (Where did HTS say this? ch 3 ?)
+(def initial-state (dv 17))
 
 ;; From eq 2.2 p19, and p65 - constant vector to be added on each iteration:
 (def c (dv (concat (range 0 -9 -1) [0 0  0  0  0  -2 0  -1])))
 ;                      0-8          9 10 11 12 13 14 15 16
 
 ;; sigma(2u) is the entire value of x9+, and u is added in x13+:
-(def b (dv [0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]))
-;           0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+;; Note this is a 1-column matrix.
+(def b (dge 17 1 [0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]))
+;                0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
 
 ;; Note that Neanderthal vectors look like row vectors but behave as 
 ;; column vectors, e.g. in the mv multiplication operator, the vector
@@ -119,6 +124,19 @@
               ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
          )))
 
+;; Use in next-state-sum?
+;; TODO DOESN'T u HAVE TO CHANGE AFTER FIRST TIMESTEP?
+(def next-state-constants (xpy (mv b u) c))
+
+(defn next-state-sum
+  "See equation (2.2) p. 20.  Where a is the weight matrix for current 
+  state vector x, b is the weight matrix for input vector u, and c is 
+  a vector of constants, computes xa + ub + c and returns a new vector.
+  The state vector is the last argument so that you can use partial to
+  easily wrap the constant structures into a function.
+  (Note vectors function as column vectors though displayed as rows.)"
+  [a b u c x]
+  (xpy (mv a x) (mv b u) c))
 
 ;; could use a macro I suppose
 ;(defn x0thru8-maker
