@@ -162,7 +162,8 @@
 
 (defn nine-strings
   "Given e.g. a Neanderthal vector x, return a Clojure sequence of
-  strings that convert the entries in x into base 9 strings."
+  strings that convert the entries in x into base 9 strings with 
+  length len after the decimal point."
   [len x]
   (map (partial base/number-to-string 9 len)
        (into [] x))) ; convert Neanderthal vector to Clojure vector
