@@ -1,6 +1,7 @@
-;; Functions for experimenting with ideas in Hava Siegelmann's book
-;; *Neural Networks and Analog Computation: Beyond the Turing Limit*
-(ns algrand.siegelmann
+;; Functions for experimenting with ideas in chapter 4 of 
+;; Hava Siegelmann's book *Neural Networks and Analog Computation: Beyond 
+;; the Turing Limit*
+(ns algrand.siegelmann4
     (:require [clojure.math.numeric-tower :as math]
               [utils.convertbase :as base])
     (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy trans
