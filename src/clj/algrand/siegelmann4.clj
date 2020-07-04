@@ -13,21 +13,9 @@
 ;(def n2s base/number-to-string)
 ;(def s2n base/string-to-number)
 
-;; my Neanderthal convenience function (should be moved elsewhere)
-;; You can also do e.g. this (per Dragan):
-;;   (uncomplicate.neanderthal.internal.printing/printer-settings! 
-;;     {:matrix-width 17 :matrix-height 17})
-(defn prmat
-  "Prints all elements of matrix m to stdout with precision prec."
-  [m prec]
-  (let [fmtstr (str " % ." prec "f")]
-    (doseq [i (range (mrows m))
-            j (range (ncols m))]
-      (when (and (zero? j) (pos? i)) ; (pos? i) test prevents initial newline
-        (println))
-      (print (format fmtstr (m i j)))))
-  (println))
-
+;; TO PRINT MORE ELEMENTS BY DEFAULT:
+;(uncomplicate.neanderthal.internal.printing/printer-settings! 
+;  {:matrix-width 17 :matrix-height 17})
 
 ;; for all chapters
 (defn sigma
@@ -79,9 +67,17 @@
 ;;    Text following lemma 4.1.2, p. 63 (the following is part of the proof)
 ;;    Retrieval network equations on p. 65
 
-;; Encoding of single circuit (s/b many) from example 4.1.1 on p.62.
-;; (This will become an element in the weight matrix.)
-(def c-hat (base/string-to-number 9 "0.860424440444240222426044444"))
+;; Encoding of one or more circuits from example 4.1.1 on p.62.
+;; This will become an element in the weight matrix.
+;; NOTE (4.1), (4.2) p. 62: the circuit s/b encoded backwards here.
+(def c-hat 
+  (base/string-to-number
+    9 
+    (str "0.8" 
+         "44444062422204244404442406" ; Ex. 4.1.1: 60424440444240222426044444
+         "42206"                      ; a single NOT-gate
+         "44424062422204242404444406" ; like 4.1.1 but swapping ORs, ANDs
+    ))) 
 
 ;; p. 63: since I have only one circuit in c-hat, u has to contain a single 1.
 (def u (dv [(base/string-to-number 2 "0.1")]))
@@ -90,7 +86,8 @@
 ;; the front to show that nothing starts before u shows up.  
 ;; [concat should be as good as lazy-cat here, except maybe if you start
 ;; with a very long initial repeat sequence.]
-(def us (map (fn [y] (dv [y])) (lazy-cat (repeat 5 0) u (repeat 0))))
+(def us (map (fn [y] (dv [y]))
+             (lazy-cat [0] u (repeat 0))))
 
 ;; Initial state of network is all zeros. (Where did HTS say this? ch 3 ?)
 (def initial-state (dv 17))
@@ -168,3 +165,25 @@
   [len x]
   (map (partial base/number-to-string 9 len)
        (into [] x))) ; convert Neanderthal vector to Clojure vector
+
+(defn print9
+  "Given e.g. a Neanderthal vector x, print to stdout a Clojure sequence of
+  strings that convert the entries in x into base 9 strings with length len 
+  after the decimal point."
+  [len x]
+  (println (nine-strings len x)))
+
+;; my Neanderthal convenience function (should be moved elsewhere)
+;; You can also do e.g. this (per Dragan):
+;;   (uncomplicate.neanderthal.internal.printing/printer-settings! 
+;;     {:matrix-width 17 :matrix-height 17})
+(defn prmat
+  "Prints all elements of matrix m to stdout with precision prec."
+  [prec m]
+  (let [fmtstr (str " % ." prec "f")]
+    (doseq [i (range (mrows m))
+            j (range (ncols m))]
+      (when (and (zero? j) (pos? i)) ; (pos? i) test prevents initial newline
+        (println))
+      (print (format fmtstr (m i j)))))
+  (println))
