@@ -9,8 +9,8 @@
           [uncomplicate.fluokitten.core :only [fmap]]))
 
 ;; convenience abbreviations
-(def n2s base/number-to-string)
-(def s2n base/string-to-number)
+;(def n2s base/number-to-string)
+;(def s2n base/string-to-number)
 
 ;; my Neanderthal convenience function (should be moved elsewhere)
 ;; You can also do e.g. this (per Dragan):
@@ -80,11 +80,16 @@
 
 ;; Encoding of single circuit (s/b many) from example 4.1.1 on p.62.
 ;; (This will become an element in the weight matrix.)
-(def c-hat (base/string-to-number "0.860424440444240222426044444" 9))
+(def c-hat (base/string-to-number 9 "0.860424440444240222426044444"))
 
 ;; p. 63: since I have only one circuit in c-hat, u has to contain a single 1.
-(def u (dv [(base/string-to-number "0.1" 2)]))
-;; TODO DOESN'T THIS HAVE TO CHANGE AFTER FIRST TIMESTEP?
+(def u (dv [(base/string-to-number 2 "0.1")]))
+
+;; u should be on the input line for a single tick.  Add a few zeros on 
+;; the front to show that nothing starts before u shows up.  
+;; [concat should be as good as lazy-cat here, except maybe if you start
+;; with a very long initial repeat sequence.]
+(def us (map (fn [y] (dv [y])) (lazy-cat (repeat 5 0) u (repeat 0))))
 
 ;; Initial state of network is all zeros. (Where did HTS say this? ch 3 ?)
 (def initial-state (dv 17))
@@ -125,10 +130,6 @@
               ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
          )))
 
-;; Use in next-state-sum?
-;; TODO DOESN'T u HAVE TO CHANGE AFTER FIRST TIMESTEP?
-(def next-state-constants (xpy (mv b u) c))
-
 (defn next-state-sum
   "See equation (2.2) p. 20.  Where a is the weight matrix for current 
   state vector x, b is the weight matrix for input vector u, and c is 
@@ -146,9 +147,19 @@
   so that you can use partial to easily wrap the constant structures 
   into a function.  Note vectors function as column vectors though 
   displayed as rows.)"
-  [a b u c x]
+  [a b c u x]
   (fmap sigma
         (next-state-sum a x b u c)))
 
-;; TODO DOESN'T u HAVE TO CHANGE AFTER FIRST TIMESTEP?
-(def states (iterate (partial next-state a b u c) initial-state))
+(defn make-states
+  [a b c us x]
+  (lazy-seq
+    (let [x+ (next-state a b c (first us) x)]
+      (cons x+ (make-states a b c (rest us) x+)))))
+
+(defn nine-strings
+  "Given e.g. a Neanderthal vector x, return a Clojure sequence of
+  strings that convert the entries in x into base 9 strings."
+  [len x]
+  (map (partial base/number-to-string 9 len)
+       (into [] x))) ; convert Neanderthal vector to Clojure vector
