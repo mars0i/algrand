@@ -152,6 +152,9 @@
         (next-state-sum a x b u c)))
 
 (defn make-states
+  "Return a lazy sequence of states from us, a Clojure sequence of input
+  vectors, x, and initial state vector, a and b, weight matrices for x
+  and u, respectively, and constant vector c."
   [a b c us x]
   (lazy-seq
     (let [x+ (next-state a b c (first us) x)]
