@@ -70,12 +70,19 @@
 ;; Encoding of one or more circuits from example 4.1.1 on p.62.
 ;; This will become an element in the weight matrix.
 ;; NOTE (4.1), (4.2) p. 62: the circuit s/b encoded backwards here.
+;;
+;; FIXME?: This doesn't fully work with Neanderthal.  It converts my
+;; rationals to doubles, which means that float rounding screws up the
+;; digits before the end of the first circuit encoding.
+;; Maybe switch to core.matrix with ndarray or even persistent-vector.
 (def c-hat 
   (base/string-to-number
     9 
     (str "0.8" 
          "44444062422204244404442406" ; Ex. 4.1.1: 60424440444240222426044444
+         "8"
          "42206"                      ; a single NOT-gate
+         "8"
          "44424062422204242404444406" ; like 4.1.1 but swapping ORs, ANDs
     ))) 
 
@@ -188,3 +195,7 @@
         (print (format "\n%2d " i)))
       (print (format fmtstr j (m i j)))))
   (println))
+
+;; VERY kludgey:
+; (do (println "" (apply str (interpose "      " (range 17)))) (map (partial print9 4) (take 6 sts)))
+
