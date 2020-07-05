@@ -180,10 +180,11 @@
 (defn prmat
   "Prints all elements of matrix m to stdout with precision prec."
   [prec m]
-  (let [fmtstr (str " % ." prec "f")]
+  (print (format "%2d " 0))
+  (let [fmtstr (str " %d:% ." prec "f")]
     (doseq [i (range (mrows m))
             j (range (ncols m))]
       (when (and (zero? j) (pos? i)) ; (pos? i) test prevents initial newline
-        (println))
-      (print (format fmtstr (m i j)))))
+        (print (format "\n%2d " i)))
+      (print (format fmtstr j (m i j)))))
   (println))
