@@ -96,9 +96,11 @@
 (def c (mx/array (concat (range 0 -9 -1) [0 0  0  0  0  -2 0  -1])))
 ;                            0-8          9 10 11 12 13 14 15 16
 
+;; b is a column matrix to be multiplied by u
 ;; sigma(2u) is the entire value of x9+, and u is added in x13+:
-(def b (mx/array [0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]))
-;                 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+(def b (mx/transpose
+         (mx/matrix [[0  0  0  0  0  0  0  0  0  2  0  0  0  1  0   0 0]])))
+;                     0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
 
 (def a (mx/matrix [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
                    [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x0
@@ -150,6 +152,9 @@
   (lazy-seq
     (let [x+ (next-state a b c (first us) x)]
       (cons x+ (make-states a b c (rest us) x+)))))
+
+;; TODO code below currently broken, but note that this works:
+; (map println (map (fn [v] (map (partial number-to-string 9 6) v)) (take 20 sts)))
 
 (defn nine-strings
   "Given e.g. a Neanderthal vector x, return a Clojure sequence of
