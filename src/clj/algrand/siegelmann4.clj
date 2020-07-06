@@ -2,20 +2,13 @@
 ;; Hava Siegelmann's book *Neural Networks and Analog Computation: Beyond 
 ;; the Turing Limit*
 (ns algrand.siegelmann4
-    (:require [clojure.math.numeric-tower :as math]
-              [utils.convertbase :as base])
-    (:use [uncomplicate.neanderthal.core :only [dot mm mv xpy trans
-                                                mrows ncols]]
-          [uncomplicate.neanderthal.native :only [dv dge]]
-          [uncomplicate.fluokitten.core :only [fmap]]))
+    (:require [clojure.math.numeric-tower :as ma]
+              [clojure.core.matrix :as mx]
+              [utils.convertbase :as cb]))
 
-;; convenience abbreviations
-;(def n2s base/number-to-string)
-;(def s2n base/string-to-number)
+(mx/set-current-implementation :persistent-vector)
+;(mx/set-current-implementation :ndarray)
 
-;; TO PRINT MORE ELEMENTS BY DEFAULT:
-;(uncomplicate.neanderthal.internal.printing/printer-settings! 
-;  {:matrix-width 17 :matrix-height 17})
 
 ;; for all chapters
 (defn sigma
@@ -36,7 +29,7 @@
   (let [q9 (* q 9)]
     (reduce 
       (fn [sum j] (+ sum 
-                     (* (math/expt -1 j)
+                     (* (ma/expt -1 j)
                         (sigma (- q9 j)))))
       0 (range 9))))
 
@@ -76,7 +69,7 @@
 ;; digits before the end of the first circuit encoding.
 ;; Maybe switch to core.matrix with ndarray or even persistent-vector.
 (def c-hat 
-  (base/string-to-number
+  (cb/string-to-number
     9 
     (str "0.8" 
          "44444062422204244404442406" ; Ex. 4.1.1: 60424440444240222426044444
@@ -87,53 +80,46 @@
     ))) 
 
 ;; p. 63: since I have only one circuit in c-hat, u has to contain a single 1.
-(def u (dv [(base/string-to-number 2 "0.1")]))
+(def u (mx/array [(cb/string-to-number 2 "0.1")]))
 
 ;; u should be on the input line for a single tick.  Add a few zeros on 
 ;; the front to show that nothing starts before u shows up.  
 ;; [concat should be as good as lazy-cat here, except maybe if you start
 ;; with a very long initial repeat sequence.]
-(def us (map (fn [y] (dv [y]))
+(def us (map (fn [y] (mx/array [y]))
              (lazy-cat [0] u (repeat 0))))
 
 ;; Initial state of network is all zeros. (Where did HTS say this? ch 3 ?)
-(def initial-state (dv 17))
+(def initial-state (mx/array (repeat 17 0)))
 
 ;; From eq 2.2 p19, and p65 - constant vector to be added on each iteration:
-(def c (dv (concat (range 0 -9 -1) [0 0  0  0  0  -2 0  -1])))
-;                      0-8          9 10 11 12 13 14 15 16
+(def c (mx/array (concat (range 0 -9 -1) [0 0  0  0  0  -2 0  -1])))
+;                            0-8          9 10 11 12 13 14 15 16
 
 ;; sigma(2u) is the entire value of x9+, and u is added in x13+:
-;; Note this is a 1-column matrix.
-(def b (dge 17 1 [0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]))
-;                0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+(def b (mx/array [0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]))
+;                 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
 
-;; Note that Neanderthal vectors look like row vectors but behave as 
-;; column vectors, e.g. in the mv multiplication operator, the vector
-;; is the second arg.  That means the node indexes are column indexes
-;; in the weight matrix.  However, I'd rather see it the other way
-;; when defining the matrix, so I'll just transpose what I input:
-(def a (trans
-         (dge [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x0
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x1
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x2
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x3
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x4
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x5
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x6
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x7
-               [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x8
-               [0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0] ; x9
-               [1 -1  1 -1  1 -1  1 -1 1 c-hat 0 0  0  0  0  0  0] ; x10
-               [0 2/9 0 2/9 0 2/9 0 2/9 0  0  0  0 1/9 -2 0  0  0] ; x11
-               [0  0  0  0  0  0  0  0  0  0  0  1  0  0  0  0  0] ; x12
-               [0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  0] ; x13
-               [0  0  0  0  0  0  0  1  0  0  0  0  0  2  0  0  0] ; x14
-               [0  0  0  0  0  0  0 -1  0  0  0  0  0  1  0  0  0] ; x15
-               [0  0  0  0  0  0  0  1  0  0  0  0  1  0  0  0  0] ; x16
-              ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
-         )))
+(def a (mx/matrix [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x0
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x1
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x2
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x3
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x4
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x5
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x6
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x7
+                   [0  0  0  0  0  0  0  0  0  0  9  0  0  0  0  0  0] ; x8
+                   [0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0] ; x9
+                   [1 -1  1 -1  1 -1  1 -1 1 c-hat 0 0  0  0  0  0  0] ; x10
+                   [0 2/9 0 2/9 0 2/9 0 2/9 0  0  0  0 1/9 -2 0  0  0] ; x11
+                   [0  0  0  0  0  0  0  0  0  0  0  1  0  0  0  0  0] ; x12
+                   [0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  0] ; x13
+                   [0  0  0  0  0  0  0  1  0  0  0  0  0  2  0  0  0] ; x14
+                   [0  0  0  0  0  0  0 -1  0  0  0  0  0  1  0  0  0] ; x15
+                   [0  0  0  0  0  0  0  1  0  0  0  0  1  0  0  0  0] ; x16
+                  ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
+         ))
 
 (defn next-state-sum
   "See equation (2.2) p. 20.  Where a is the weight matrix for current 
@@ -141,7 +127,7 @@
   a vector of constants, computes xa + ub + c and returns a new vector.
   (Note vectors function as column vectors though displayed as rows.)"
   [a x b u c]
-  (xpy (mv a x) (mv b u) c))
+  (mx/add (mx/mmul a x) (mx/mmul b u) c))
 
 (defn next-state
   "See equation (2.2) p. 20.  Computes next state by mapping sigma
@@ -153,7 +139,7 @@
   into a function.  Note vectors function as column vectors though 
   displayed as rows.)"
   [a b c u x]
-  (fmap sigma
+  (mx/emap sigma
         (next-state-sum a x b u c)))
 
 (defn make-states
@@ -170,7 +156,7 @@
   strings that convert the entries in x into base 9 strings with 
   length len after the decimal point."
   [len x]
-  (map (partial base/number-to-string 9 len)
+  (map (partial cb/number-to-string 9 len)
        (into [] x))) ; convert Neanderthal vector to Clojure vector
 
 (defn print9
@@ -188,12 +174,13 @@
   "Prints all elements of matrix m to stdout with precision prec."
   [prec m]
   (print (format "%2d " 0))
-  (let [fmtstr (str " %d:% ." prec "f")]
-    (doseq [i (range (mrows m))
-            j (range (ncols m))]
+  (let [fmtstr (str " %d:% ." prec "f")
+        [nrows ncols] (mx/shape m)]
+    (doseq [i (range nrows)
+            j (range ncols)]
       (when (and (zero? j) (pos? i)) ; (pos? i) test prevents initial newline
         (print (format "\n%2d " i)))
-      (print (format fmtstr j (m i j)))))
+      (print (format fmtstr j (mx/mget m i j)))))
   (println))
 
 ;; VERY kludgey:
