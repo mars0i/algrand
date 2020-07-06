@@ -7,9 +7,7 @@
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [incanter/incanter "1.9.3"]
 		 [uncomplicate/neanderthal "0.32.0"]
-                 ;; https://groups.google.com/forum/#!topic/uncomplicate/fbXYkT4pEkc
-                 ;; Dragan wrote: "SLFJ is needed by the Java dependencies, where it is common that a library uses logging internally (for better, or for worse). You can silence it by configuring any no-op logging,
-                 ;; such as by adding timbre to your dependencies:"
+                 ;; Dragan wrote: "SLFJ is needed by the Java dependencies, where it is common that a library uses logging internally (for better, or for worse). You can silence it by configuring any no-op logging, such as by adding timbre to your dependencies" (from https://groups.google.com/forum/#!topic/uncomplicate/fbXYkT4pEkc)
                  [com.taoensso/timbre "4.10.0"]
                  [com.fzakaria/slf4j-timbre "0.3.19"]
                 ]
