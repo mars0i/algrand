@@ -99,7 +99,7 @@
 ;; b is a column matrix to be multiplied by u
 ;; sigma(2u) is the entire value of x9+, and u is added in x13+:
 (def b (mx/transpose
-         (mx/matrix [[0  0  0  0  0  0  0  0  0  2  0  0  0  1  0   0 0]])))
+         (mx/matrix [[0  0  0  0  0  0  0  0  0  2  0  0  0  1  0  0  0]])))
 ;                     0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
 
 (def a (mx/matrix [;0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
