@@ -47,7 +47,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; defining the network
-;; using Neanderthal
+;; using core.matrix
 
 ;; See Siegelman:
 ;;    Equation (2.2), p. 19
@@ -63,11 +63,6 @@
 ;; Encoding of one or more circuits from example 4.1.1 on p.62.
 ;; This will become an element in the weight matrix.
 ;; NOTE (4.1), (4.2) p. 62: the circuit s/b encoded backwards here.
-;;
-;; FIXME?: This doesn't fully work with Neanderthal.  It converts my
-;; rationals to doubles, which means that float rounding screws up the
-;; digits before the end of the first circuit encoding.
-;; Maybe switch to core.matrix with ndarray or even persistent-vector.
 (def c-hat 
   (cb/string-to-number
     9 
@@ -126,8 +121,7 @@
 (defn next-state-sum
   "See equation (2.2) p. 20.  Where a is the weight matrix for current 
   state vector x, b is the weight matrix for input vector u, and c is 
-  a vector of constants, computes xa + ub + c and returns a new vector.
-  (Note vectors function as column vectors though displayed as rows.)"
+  a vector of constants, computes xa + ub + c and returns a new vector."
   [a x b u c]
   (mx/add (mx/mmul a x) (mx/mmul b u) c))
 
@@ -138,8 +132,7 @@
   c is a vector of constants, computes sigma(xa + ub + c) and returns a 
   new state vector x+.  (The previous state vector x is the last argument
   so that you can use partial to easily wrap the constant structures 
-  into a function.  Note vectors function as column vectors though 
-  displayed as rows.)"
+  into a function.)"
   [a b c u x]
   (mx/emap sigma
         (next-state-sum a x b u c)))
@@ -153,28 +146,22 @@
     (let [x+ (next-state a b c (first us) x)]
       (cons x+ (make-states a b c (rest us) x+)))))
 
-;; TODO code below currently broken, but note that this works:
-; (map println (map (fn [v] (map (partial number-to-string 9 6) v)) (take 20 sts)))
-
 (defn nine-strings
-  "Given e.g. a Neanderthal vector x, return a Clojure sequence of
+  "Given e.g. a core.matrix array x, return a Clojure sequence of
   strings that convert the entries in x into base 9 strings with 
   length len after the decimal point."
   [len x]
   (map (partial cb/number-to-string 9 len)
-       (into [] x))) ; convert Neanderthal vector to Clojure vector
+       (into [] x))) ; convert core.matrix array to Clojure vector
 
 (defn print9
-  "Given e.g. a Neanderthal vector x, print to stdout a Clojure sequence of
+  "Given e.g. a core.matrix array x, print to stdout a Clojure sequence of
   strings that convert the entries in x into base 9 strings with length len 
   after the decimal point."
   [len x]
   (println (nine-strings len x)))
 
-;; my Neanderthal convenience function (should be moved elsewhere)
-;; You can also do e.g. this (per Dragan):
-;;   (uncomplicate.neanderthal.internal.printing/printer-settings! 
-;;     {:matrix-width 17 :matrix-height 17})
+;; Convenience function (should be moved elsewhere?)
 (defn prmat
   "Prints all elements of matrix m to stdout with precision prec."
   [prec m]
