@@ -151,15 +151,17 @@
   strings that convert the entries in x into base 9 strings with 
   length len after the decimal point."
   [len x]
-  (map (partial cb/number-to-string 9 len)
-       (into [] x))) ; convert core.matrix array to Clojure vector
+  (mx/emap (partial cb/number-to-string 9 len) x))
 
 (defn print9
-  "Given e.g. a core.matrix array x, print to stdout a Clojure sequence of
-  strings that convert the entries in x into base 9 strings with length len 
-  after the decimal point."
-  [len x]
-  (println (nine-strings len x)))
+  "Given e.g. a sequence xs of core.matrix arrays, print to stdout a Clojure 
+  sequence of strings that convert the entries in x into base 9 strings with 
+  length len after the decimal point."
+  [len xs]
+  (let [fmtone (str "%" (+ 3 len) "d")
+        fmtstr (apply str "   %d" (repeat 16 fmtone))]
+    (println (apply format fmtstr (range 17)))
+    (map (fn [x] (println (nine-strings len x))) xs)))
 
 ;; Convenience function (should be moved elsewhere?)
 (defn prmat
