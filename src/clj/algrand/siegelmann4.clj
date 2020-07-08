@@ -6,8 +6,8 @@
               [clojure.core.matrix :as mx]
               [utils.convertbase :as cb]))
 
-;(mx/set-current-implementation :persistent-vector)
-(mx/set-current-implementation :ndarray)
+(mx/set-current-implementation :persistent-vector)
+;(mx/set-current-implementation :ndarray)
 
 
 ;; for all chapters
@@ -72,12 +72,13 @@
          "42206"                      ; a single NOT-gate
          "8"
          "44424062422204242404444406" ; like 4.1.1 but swapping ORs, ANDs
-    ))) 
+         "8"                          ; 8 is a required circuit end delimiter,
+    )))                               ;   not just a circuit start delimiter.
 
-;; p. 63: since I have only one circuit in c-hat, u has to contain a single 1.
-(def u (mx/array [(cb/string-to-number 2 "0.1")]))
+;; p. 63:
+(def u (mx/array [(cb/string-to-number 2 "0.11")]))
 
-;; u should be on the input line for a single tick.  Add a few zeros on 
+;; u should be on the input line for a single tick.  Add a one more zeros on 
 ;; the front to show that nothing starts before u shows up.  
 ;; [concat should be as good as lazy-cat here, except maybe if you start
 ;; with a very long initial repeat sequence.]
@@ -123,7 +124,11 @@
   state vector x, b is the weight matrix for input vector u, and c is 
   a vector of constants, computes xa + ub + c and returns a new vector."
   [a x b u c]
-  (mx/add (mx/mmul a x) (mx/mmul b u) c))
+  (mx/add (mx/inner-product a x) (mx/inner-product b u) c))
+  ;(mx/add (mx/mmul a x) (mx/mmul b u) c))
+  ; Logically we need mmul, not inner-product, but the result is the same,
+  ; and mmul but not inner-product has a bug that turns everything
+  ; into doubles, rather than preserving Ratio types.
 
 (defn next-state
   "See equation (2.2) p. 20.  Computes next state by mapping sigma
