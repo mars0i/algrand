@@ -76,14 +76,18 @@
     )))                               ;   not just a circuit start delimiter.
 
 ;; p. 63:
-(def u (mx/array [(cb/string-to-number 2 "0.11")]))
+(def u (cb/string-to-number 2 "0.111"))
 
 ;; u should be on the input line for a single tick.  Add a one more zeros on 
 ;; the front to show that nothing starts before u shows up.  
 ;; [concat should be as good as lazy-cat here, except maybe if you start
 ;; with a very long initial repeat sequence.]
-(def us (map (fn [y] (mx/array [y]))
-             (lazy-cat [0] u (repeat 0))))
+(defn make-inputs
+  [u]
+  (map (fn [y] (mx/array [y]))
+       (lazy-cat [0] [u] (repeat 0))))
+
+(def inputs (make-inputs u))
 
 ;; Initial state of network is all zeros. (Where did HTS say this? ch 3 ?)
 (def initial-state (mx/array (repeat 17 0)))
@@ -146,29 +150,31 @@
   "Return a lazy sequence of states from us, a Clojure sequence of input
   vectors, x, and initial state vector, a and b, weight matrices for x
   and u, respectively, and constant vector c."
-  [a b c us x]
+  [a b c inputs x]
   (lazy-seq
-    (let [x+ (next-state a b c (first us) x)]
-      (cons x+ (make-states a b c (rest us) x+)))))
+    (let [x+ (next-state a b c (first inputs) x)]
+      (cons x+ (make-states a b c (rest inputs) x+)))))
 
-(defn nine-strings
-  "Given e.g. a core.matrix array x, return a Clojure sequence of
-  strings that convert the entries in x into base 9 strings with 
-  length len after the decimal point."
-  [len x]
-  (mx/emap (partial cb/number-to-string 9 len) x))
-
-(defn print9
-  "Given e.g. a sequence xs of core.matrix arrays, print to stdout a Clojure 
-  sequence of strings that convert the entries in x into base 9 strings with 
-  length len after the decimal point."
+(defn print-states
+  "Given e.g. a sequence xs of core.matrix arrays representing states, print 
+  to stdout a Clojure sequence of strings that convert the entries in x into 
+  base 9 or base 2 strings (depending on the node) with length len after the
+  decimal point.  Nodes x13, x14, and x15 are binary; the rest are base 9."
   [len xs]
-  (let [fmtone (str "%" (+ 3 len) "d")
-        fmtstr (apply str "       %s" (repeat 16 fmtone))]
-    (println (apply format fmtstr (range 17)))
-    (map (fn [x i] (println (format "%3d" i) (nine-strings len x))) xs (range))))
+  (let [fmtone (str "%" (+ 3 len) "s")
+        fmtstr (apply str "%s " (repeat 16 fmtone))
+        header-fmtstr (str "  " fmtstr)
+        m9 (fn [y i] (cb/number-to-string 9 len (mx/mget y i)))
+        m2 (fn [y i] (cb/number-to-string 2 len (mx/mget y i)))]
+    (println (apply format header-fmtstr (range 17))) ; header: column/node numbers
+    (run! ; for each state vector in the list
+      (fn [x] (println (apply format fmtstr 
+                              (concat ; convert to base 9 except x13 thru x15
+                                (map (partial m9 x) (range 13))
+                                [(m2 x 13) (m2 x 14) (m2 x 15) (m9 x 16)]))))
+      xs)))
 
-;; Convenience function (should be moved elsewhere?)
+;; Convenience function (should be moved elsewhere?). Obsolete?
 (defn prmat
   "Prints all elements of matrix m to stdout with precision prec."
   [prec m]
