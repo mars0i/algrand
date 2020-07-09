@@ -72,6 +72,8 @@
          "44444062422204244404442406" ; Ex. 4.1.1: 60424440444240222426044444
          "8"
          "44424062422204242404444406" ; like 4.1.1 but swapping ORs, ANDs
+         "8"
+         "4220644444062422204244404442406" ; Negation of Ex. 4.1.1
          "8"                          ; 8 is a required circuit end delimiter,
     )))                               ;   not just a circuit start delimiter.
 
