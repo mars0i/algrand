@@ -67,25 +67,37 @@
   (cb/string-to-number
     9 
     (str "0.8" 
-         "44444062422204244404442406" ; Ex. 4.1.1: 60424440444240222426044444
-         "8"
          "42206"                      ; a single NOT-gate
+         "8"
+         "44444062422204244404442406" ; Ex. 4.1.1: 60424440444240222426044444
          "8"
          "44424062422204242404444406" ; like 4.1.1 but swapping ORs, ANDs
          "8"                          ; 8 is a required circuit end delimiter,
     )))                               ;   not just a circuit start delimiter.
 
 ;; p. 63:
-(def u (cb/string-to-number 2 "0.111"))
+(def u (cb/string-to-number 2 "0.1"))
 
-;; u should be on the input line for a single tick.  Add a one more zeros on 
-;; the front to show that nothing starts before u shows up.  
+;; u should be on the input line for a single tick.  One may want to
+;; add one or more zeros on the front to show that nothing starts before 
+;; u shows up.  
 ;; [concat should be as good as lazy-cat here, except maybe if you start
 ;; with a very long initial repeat sequence.]
 (defn make-inputs
-  [u]
-  (map (fn [y] (mx/array [y]))
-       (lazy-cat [0] [u] (repeat 0))))
+  "Generate a lazy sequence of input values for the circuit retrieval 
+  network defined in section 4.1.2.  The sequence consists of
+  initial-zs zeros, if initial-zs, or none if not, followed by a single 
+  circuit selection value, followed by an infinite number of zeros.  
+  The circuit selecton value is a factional binary number consisting of
+  finite number of 1's after the decimal point, which constitute a unary
+  index to the circuit retrieve from C-hat.  That is, number of 1's is the
+  one-based number of the circuit to retrieve.  (Note that this means
+  that 1/2 selects the first circuit, 3/4 selects the second, 7/8 the
+  third, and so on.)"
+  ([u] (make-inputs u []))
+  ([u initial-zeros]
+   (map (fn [y] (mx/array [y]))
+        (lazy-cat initial-zeros [u] (repeat 0)))))
 
 (def inputs (make-inputs u))
 
@@ -162,17 +174,21 @@
   decimal point.  Nodes x13, x14, and x15 are binary; the rest are base 9."
   [len xs]
   (let [fmtone (str "%" (+ 3 len) "s")
-        fmtstr (apply str "%s " (repeat 16 fmtone))
-        header-fmtstr (str "  " fmtstr)
+        data-fmtstr (apply str "%s " (repeat 16 fmtone))
+        row-fmtstr (str "%3d  " data-fmtstr)
+        header-fmtstr (str "      " data-fmtstr)
         m9 (fn [y i] (cb/number-to-string 9 len (mx/mget y i)))
         m2 (fn [y i] (cb/number-to-string 2 len (mx/mget y i)))]
     (println (apply format header-fmtstr (range 17))) ; header: column/node numbers
     (run! ; for each state vector in the list
-      (fn [x] (println (apply format fmtstr 
-                              (concat ; convert to base 9 except x13 thru x15
-                                (map (partial m9 x) (range 13))
-                                [(m2 x 13) (m2 x 14) (m2 x 15) (m9 x 16)]))))
-      xs)))
+      (fn [[x rownum]] 
+          (println
+            (apply format row-fmtstr 
+                   rownum
+                   (concat ; convert to base 9 except x13 thru x15
+                           (map (partial m9 x) (range 13))
+                           [(m2 x 13) (m2 x 14) (m2 x 15) (m9 x 16)]))))
+      (map vector xs (range))))) ; run! is less flexible than map
 
 ;; Convenience function (should be moved elsewhere?). Obsolete?
 (defn prmat
