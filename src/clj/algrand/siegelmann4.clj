@@ -209,7 +209,7 @@
                    (concat ; convert to base 9 except x13 thru x15
                            (map (partial m9 x) (range 13))
                            [(m2 x 13) (m2 x 14) (m2 x 15) (m9 x 16)]))))
-      (map vector xs (range))))) ; run! is less flexible than map
+      (map vector xs (map inc (range)))))) ; run! is less flexible than map
 
 ;; Convenience function (should be moved elsewhere?). Obsolete?
 (defn prmat
