@@ -1,4 +1,11 @@
 ;;;; Functions to convert bases
+;;;; 
+;;;; Note that Clojure allows integer literals in many bases with e.g.
+;;;; 2r101, 9r1234578, 26rabcdefghijklmnop, as well as
+;;;; 0x1a for hex and 0123457 for octal.
+;;;; However, none of these allow digits after a decimal point.
+;;;; The same thing goes for Integer/toString and integer/parseInt.
+
 (ns utils.convertbase
     (:require [clojure.math.numeric-tower :as math]
               [clojure.string :as string]))
