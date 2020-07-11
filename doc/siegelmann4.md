@@ -42,7 +42,7 @@ terms of Equation (2.2), p. 19.
 c-hat is the col 9 to row 10 weight.
 
 $u$ is added only on the first tick.  Not before, not after.  It's
-replaced with zero after tick 1.
+replaced with zero after the first tick.
 
 
 1. So $x_9$ is nonzero only on the first tick.  That causes c-hat to be
@@ -81,22 +81,54 @@ the front of $x_{11}$:
 	registers, you're guaranteed to miss it.  Since there is always
 	an even number of 1's below the piece of c-hat, doubling the odd
 	nodes gives you the same count as if you counted all of the 1's.
-	(And the registers in $x_0$--$x_8$ above the c-hat float are zero.)
-	So 2($x_1+x_3+x_5+x_7$) gives you the digit that was just shifted off.
+	(And the registers in $x_0$--$x_8$ above the c-hat float are
+	zero.) So 2($x_1+x_3+x_5+x_7$) gives you the digit that was just
+	shifted off.
 
-	- 2($x_1+x_3+x_5+x_7$) is an integer, so we need to right-shift it; 1/9
-	times 2($x_1+x_3+x_5+x_7$) right-shifts the integer into the first
-	decimal place.  $x_{12}$ had the old version of the partially
-	constructed circuit encoding, which we right-shift by (1/9)$x_{12}$
-	to make space for the newly reconstructed digit.
+	- 2($x_1+x_3+x_5+x_7$) is an integer, so we need to right-shift
+	it; 1/9 times 2($x_1+x_3+x_5+x_7$) right-shifts the integer into
+	the first decimal place.  $x_{12}$ had the old version of the
+	partially constructed circuit encoding, which we right-shift by
+	(1/9)$x_{12}$ to make space for the newly reconstructed digit.
 
 	(This is why the encoding in c-hat has to be backwards: you're
 	pulling digits off the stack that came from c-hat, and then
-	pushing them onto the stack in $x_{12}$ and $x_{11}$, so the order gets
-	reversed.)
+	pushing them onto the stack in $x_{12}$ and $x_{11}$, so the
+	order gets reversed.)
 
-3. 8's
+4.  Counting through the circuits:
 
-4. counting by shifting u
+	- $u$ is also placed in $x_{13}$ on tick 1.  (At that point
+	$x_{14}$ and $x_{15}$ are zero, so contribute nothing.)  Again,
+	$u$ as a value coming from the input stream will never appear
+	again after this tick.
+
+	- This value is then copied to $x_{14}$ or $x_{15}$, but not
+	  both.  
+
+	- If $x_7=0$ (i.e. the last digit shifted off the c-hat string
+	  is not 8), $x_{13}$ is simply copied to $x_{15}$, which is
+	  then copied back to $x_{13}$, and so on.  Vamping to
+	  maintain storage of this value.
+
+	- Meanwhile, $x_{14}$ stays zero, since 2 is greater than a
+	  left-shifted $u$-string.
+
+	- But when $x_7$ is 1 (i.e. when the last digit shifted off of
+	  the c-hat string is 8), $x_15$ become zero, and now $x_{14}$
+	  is in effect $\sigma(2x_{13}-1)$.  There the 1 simply strips
+	  off the 1 newly shifted into the integer position.
+	  (Remember, $u$ consists of a series of 1's indicating how
+	  many circuits to count until.)
+
+	- The resulting value will then be copied back to $x_{13}$.
+	  So this is how we increment the counter by stripping a digit
+	  from the $u$ string, when an 8 is encountered in c-hat.
+
+	- The preceding assumed that 1's remained from $u$.  When all
+	  that's left are zeros, $x_{14}$ and $x_{15}4, and hence
+	  $x_{13}$, will be forced to zero.
+
+4. blah blah $x_{13}$ in $x_{11}$.
 
 5. putting the output on $x_{16}$
