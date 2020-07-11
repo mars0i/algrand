@@ -86,13 +86,13 @@
   (cb/string-to-number
     9 
     (str "0.8" 
-         "42206"                      ; a single NOT-gate
+         "42206"                      ; l=5. a single NOT-gate
          "8"
-         "44444062422204244404442406" ; Ex. 4.1.1: 60424440444240222426044444
+         "44444062422204244404442406" ; l=26. Ex4.1.1: 60424440444240222426044444
          "8"
-         "44424062422204242404444406" ; like 4.1.1 but swapping ORs, ANDs
+         "44424062422204242404444406" ; l=26. Like 4.1.1 but swapping ORs, ANDs
          "8"
-         "4220644444062422204244404442406" ; Negation of Ex. 4.1.1
+         "4220644444062422204244404442406" ; l=31. Negation of Ex. 4.1.1
          "8"                          ; 8 is a required circuit end delimiter,
     )))                               ;   not just a circuit start delimiter.
 
