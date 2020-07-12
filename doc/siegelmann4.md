@@ -45,12 +45,12 @@ c-hat is the col 9 to row 10 weight.
 
 ##### How the algorithm works:
 
-1. $u$ is added only on the first tick.  Not before, not after.  That is,
+1. **$u$ is added only on the first tick.**  Not before, not after.  That is,
 you can have zeros as inputs before that point, but when $u$ shows up,
 it does so only for one tick.  It's replaced with zero after the first tick.
 Nothing happens until $u$ shows up.
 
-2. So $x_9$ is nonzero only on the first tick.  That causes c-hat to
+2. So **$x_9$ is nonzero only on the first tick.**  That causes c-hat to
 be placed into $x_{10}$ on the second tick (since $x_0$ through $x_8$
 are still zero).  This is the *only* time that c-hat as a weight is
 used directly (since it's the only time that $x_9$ is nonzero).  After
@@ -59,8 +59,8 @@ $x_8$ nodes, and $x_{10}$.  (Pieces of c-hat get into $x_{10}$ not
 because of the c-hat weight on $x_9$, but because $x_{10}$ is a linear
 combination of $x_0$ through $x_8$.)
 
-3. $x_{10}$ and $x_0$ through $x_8$ implement the lambda-tilde shift operator,
-but they do a bit more than that in the network.  At each subsequent
+3. **$x_{10}$ and $x_0$ through $x_8$ implement the lambda-tilde shift operator,
+but they do a bit more** than that in the network.  At each subsequent
 step, $x_0$ through $x_8$ will contain either:
 
 	a. A number that contains the left-shift of the decimal part of
@@ -76,7 +76,7 @@ step, $x_0$ through $x_8$ will contain either:
 
 	c. 0 in $x_i$ for $i > j$.
 
-4.  $x_{11}$ is used to build the possible output circuit encoding.  It
+4.  **$x_{11}$ is used to build the possible output circuit encoding.**  It
 reconstructs digits from c-hat using the 1's in $x_0$--$x_7$, and places
 them on the front of $x_{11}$:
 
@@ -113,8 +113,8 @@ them on the front of $x_{11}$:
 	pushing them onto the stack in $x_{12}$ and $x_{11}$, so the
 	order gets reversed.)
 
-4.  Counting to find the desired circuit that's indicated by the
-number of 1's in $u$:
+4.  **Counting to find the desired circuit that's indicated by the
+number of 1's in $u$:**
 
 	- We mentioned above that $u$ is placed in $x_9$ to start the
 	  process, copying c-hat to $x_10$.  $u$ is also placed in
@@ -145,12 +145,33 @@ number of 1's in $u$:
 		- The resulting value will then be copied back to
 		$x_{13}$.  This is how we increment the counter by
 		stripping a digit from the $u$ string when an 8 is
-		encountered in c-hat.
+		encountered in c-hat.  [Note that at the beginning,
+		c-hat is copied to $x_{10}$ in tick 2, is stripped in
+		$x_8$ in tick 3, so it's in tick 4 that the first 1 is
+		stripped from $u$, placing the new version $x_{14}$.]
 
 	- The preceding assumed that some 1's remaine from $u$.  When
-	all that's left are zeros, $x_{14}$ and $x_{15}, and hence
+	all that's left are zeros, $x_{14}$ and $x_{15}$, and hence
 	  $x_{13}$, will be forced to zero.
 
-4. blah blah $x_{13}$ in $x_{11}$.
+6. **The relationship between counting through the 1's in $u$, and
+output encoding string construction:**
+
+Although the $x_{11}$ code always tries to go through the process of
+constructing an encoding string, shuttling partially constructed
+versions back and forth betweebn $x_{11}$ and $x_{12}$, *this doesn't
+happen while there are still 1's left from $u$.*
+
+That's because $2x_{13}$ is subtracted in the $x_{11}$ formula.  As long
+as there is at least a single 1 left from $u$, in $x_{13}$, $2x_{13}$
+left-shifts that 1 into the integer place.  Since the partially
+constructed output would always be $<1$ (because of the $1/9$'s), 
+$x_{11}$ remains zero until all of the 1's are gone.
+
+Note that it's the 8 *before* the encoding string that causes a 1 to
+be shifted.  So if $u=0.111$, the final 1 will be shifted off just as
+the network is starting to look at the third encoding.  Since $x_{13}$
+will remain zero now, the encoding can now be copied, piece by piece
+and in reverse, into $x_{11}$ and $x_{12}$.
 
 5. putting the output on $x_{16}$
