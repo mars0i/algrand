@@ -174,4 +174,15 @@ the network is starting to look at the third encoding.  Since $x_{13}$
 will remain zero now, the encoding can now be copied, piece by piece
 and in reverse, into $x_{11}$ and $x_{12}$.
 
-5. putting the output on $x_{16}$
+5. **Putting the output on $x_{16}$:** Finally, all along, if there was
+a partially constructed output in $x_{12}$, it was copied to the
+formulat for $x_{16}$.  However, since that formula contains $-1$, the
+output string, which is always $<1$, is turned into zero by $sigma$.
+It's only when, now that a nonzero output string is in $x_{12}$, *and
+then* $x_7$ contains 1 because another 8 was found in the c-hat remains,
+that the $-1$ in the $x_{16}$ formula is counteracted, and the now fully
+reconstructed encoding string will appear in $x_16$.
+
+TODO:
+
+Why is it zeros after that?
