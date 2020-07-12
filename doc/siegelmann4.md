@@ -124,29 +124,31 @@ number of 1's in $u$:
 	again after this tick.
 
 	- This value is then copied to $x_{14}$ or $x_{15}$, but not
-	  both.  
+	  both:
 
-	- If $x_7=0$ (i.e. the last digit shifted off the c-hat string
-	  is not 8), $x_{13}$ is simply copied to $x_{15}$, which is
-	  then copied back to $x_{13}$, and so on.  (Like vamping in
-	  music.)
+		- If $x_7=0$ (i.e. the last digit shifted off the c-hat
+		string is not 8), $x_{13}$ is simply copied to $x_{15}$,
+		which is then copied back to $x_{13}$, and so on.  (Like
+		vamping in music.)
+		Meanwhile, $x_{14}$ stays zero, since 2 is greater
+		than a left-shifted $u$-string.
 
-	- Meanwhile, $x_{14}$ stays zero, since 2 is greater than a
-	  left-shifted $u$-string.
+		- But when $x_7$ is 1 (i.e. when the last digit shifted
+		off of the c-hat string is 8), $x_{15}$ becomes zero
+		(since $u$ or any part of it is always $<1$), and now
+		$x_{14}$ is in effect $\sigma(2x_{13}-1)$.  There the 1
+		simply strips off the 1 that is newly shifted into the
+		integer position by $2\times$.  (Remember, $u$ consists
+		of a series of 1's indicating how many circuits to
+		count.)
 
-	- But when $x_7$ is 1 (i.e. when the last digit shifted off of
-	  the c-hat string is 8), $x_15$ become zero, and now $x_{14}$
-	  is in effect $\sigma(2x_{13}-1)$.  There the 1 simply strips
-	  off the 1 newly shifted into the integer position.
-	  (Remember, $u$ consists of a series of 1's indicating how
-	  many circuits to count until.)
+		- The resulting value will then be copied back to
+		$x_{13}$.  This is how we increment the counter by
+		stripping a digit from the $u$ string when an 8 is
+		encountered in c-hat.
 
-	- The resulting value will then be copied back to $x_{13}$.
-	  So this is how we increment the counter by stripping a digit
-	  from the $u$ string, when an 8 is encountered in c-hat.
-
-	- The preceding assumed that 1's remained from $u$.  When all
-	  that's left are zeros, $x_{14}$ and $x_{15}4, and hence
+	- The preceding assumed that some 1's remaine from $u$.  When
+	all that's left are zeros, $x_{14}$ and $x_{15}, and hence
 	  $x_{13}$, will be forced to zero.
 
 4. blah blah $x_{13}$ in $x_{11}$.
