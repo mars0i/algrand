@@ -1,8 +1,10 @@
 siegelmann4.md
 ===
 
-Notes on code based on chapter 4 of Sieglemann's *Neural Netowrks and
-Analog Computation*.  
+Notes on code on chapter 4 of Sieglemann's *Neural Networks and
+Analog Computation*.
+
+See algrand/siegelmann4.clj.
 
 -----------
 
