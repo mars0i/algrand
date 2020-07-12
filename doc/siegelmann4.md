@@ -39,7 +39,7 @@ All elements of the state vector (of length 17) start as zero.
 I formulate the state update algorithm using matrices and vectors, in
 terms of Equation (2.2), p. 19.
 
-c-hat is the col 9 to row 10 weight.
+c-hat, i.e. $\hat{C}$, is the col 9 to row 10 weight.
 
 $u$ is added only on the first tick.  Not before, not after.  It's
 replaced with zero after the first tick.
