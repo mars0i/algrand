@@ -1,14 +1,14 @@
-siegelmann4.md
+
+Notes on chapter 4 of Sieglemann's *Neural Networks and Analog Computation*.
 ===
 
-Notes on code based on chapter 4 of Sieglemann's *Neural Netowrks and
-Analog Computation*.  
+Marshall Abrams &#169; 2020
 
 -----------
 
-#### Lemma 4.1.2, stated on page 63
+## Lemma 4.1.2, stated on page 63
 
-The statement about the value of $x_r$ is misleading.  It suggests that
+- The statement about the value of $x_r$ is misleading.  It suggests that
 there is a node value that will consist of a bunch of zeros, followed by
 the encoding string, followed by more zeros, but that's not what the
 algorithm in the proof provides.  Rather, what you get is that node
@@ -27,23 +27,54 @@ Note two off-by-one-ish errors in Lemma 4.1.2:
   to 3.  (This becomes clear when you run the algorithm.  Yes, I'm
   taking into account that the step numbering is 1-based.)
 
-#### Circuit retrieval algorithm on page 65, implemented in file siegelmann4.clj
+So the actual number of ticks at which zero appears in $x_{16}$ before
+the circuit encoding appears is
 
-##### Miscellaneous preliminary notes:
+$$2(n-1) + \sum_{i=1}^n l(C_i) + 5$$
+
+or 
+
+$$2n + \sum_{i=1}^n l(C_i) + 3$$
+
+where $n$ is the number of 1's in $u$, and $l(C_i)$ is the length of
+the $i$ th encoding (not including the preceding or following 8).  So
+the desired circuit encoding appears at step
+
+$$2n + \sum_{i=1}^n l(C_i) + 4$$
+
+## Circuit-retrieval algorithm
+
+From page 65.  Implemented in file siegelmann4.clj.
+
+### Miscellaneous preliminary notes:
 
 This is the core of the proof of Lemma 4.1.2.
 
-I'll refer to the step in which u appears as tick 1 or step 1.  So steps
+I'll refer to the step in which $u$ appears as tick 1 or step 1.  So steps
 are 1-based, while matrix and vector indexes will be 0-based.
 
 All elements of the state vector (of length 17) start as zero.
 
 I formulate the state update algorithm using matrices and vectors, in
-terms of Equation (2.2), p. 19.
+terms of Equation (2.2), p. 19:
 
-c-hat is the col 9 to row 10 weight.
+$$x_i(t+1) = \sigma \left( \sum_{j=1}^N a_{ij}x_j(t) + 
+\sum_{j=1}^N b_{ij}u_j(t) + c \right)$$
 
-##### How the algorithm works:
+where $x_i(t)$ is the $i$ th element of state vector $x$ at time $t$.
+Or using matrices and vectors:
+
+$$x(t+1) = \sigma (ax + bu + c)$$
+
+where $a$ is a 17x17 matrix, $x$, $b$, and $c$ are  column vectors of
+length 17, and $u$ is a column vector of length 1.  The preceding
+equation is implemented by `next-state`.
+
+c-hat ("C" with a hat over it in the text), which encodes a series of
+Boolean circuits (pp. 61-62), is the col-9-to-row-10
+weight.
+
+### How the algorithm works:
 
 1. **$u$ is added only on the first tick.**  Not before, not after.  That is,
 you can have zeros as inputs before that point, but when $u$ shows up,
@@ -81,8 +112,8 @@ reconstructs digits from c-hat using the 1's in $x_0$--$x_7$, and places
 them on the front of $x_{11}$:
 
 	- 2 times the 4-part sum in $x_{11}$ is the digit that was just
-	stripped off in calculating $x_j$ (see 3a above).  This is not
-	obvious, but the count of 1's below the newly shifted float
+	stripped off in calculating $x_j$ (see 3a above).  This might
+	not be obvious: the count of 1's below the newly shifted float
 	(derived from c-hat) is equal to the digit that was shifted off.
 	[You might think you could instead just sum all of the 1's.  But
 	you have to choose input nodes that will work every time, and
@@ -91,13 +122,13 @@ them on the front of $x_{11}$:
 	fact that the new piece of c-hat is always in an even-numbered
 	node, so if you only use odd-numbered nodes, you're guaranteed
 	to miss that node containing the shifted c-hat.  Since there is
-	always an even number of 1's below the shifted c-hat node, doubling
-	the odd nodes gives you the same count as if you counted all of
-	the 1's.  (And the registers in $x_0$--$x_8$ above the c-hat
-	float are zero.) So $2(x_1+x_3+x_5+x_7$) gives you the digit
-	that was just shifted off.]
+	always an even number of 1's below the shifted c-hat node,
+	doubling the odd nodes gives you the same count as if you
+	counted all of the 1's.  (And the registers in $x_0$--$x_8$
+	above the c-hat float are zero.) So $2(x_1+x_3+x_5+x_7$) gives
+	you the digit that was just shifted off.]
 
-	- $x_11$ is used to build an output encoding string.  We will
+	- $x_{11}$ is used to build an output encoding string.  We will
 	  place a new digit on the front of a right-shifted
 	$x_{12}$.  This has the old version of the partially constructed
 	circuit encoding. We right-shift using $(1/9)x_{12}$ in order to
@@ -106,7 +137,7 @@ them on the front of $x_{11}$:
 	[see preceding item]. This is an integer, so we need to
 	right-shift it to put it into the output string: 1/9 times
 	2($x_1+x_3+x_5+x_7$) right-shifts the integer into the first
-	decimal place, after which it canb e added to $(1/9)x_12$.
+	decimal place, after which it canb e added to $(1/9)x_{12}$.
 
 	(This is why the encoding in c-hat has to be backwards: you're
 	pulling digits off the stack that came from c-hat, and then
@@ -157,32 +188,51 @@ number of 1's in $u$:**
 6. **The relationship between counting through the 1's in $u$, and
 output encoding string construction:**
 
-Although the $x_{11}$ code always tries to go through the process of
-constructing an encoding string, shuttling partially constructed
-versions back and forth betweebn $x_{11}$ and $x_{12}$, *this doesn't
-happen while there are still 1's left from $u$.*
+	Although the $x_{11}$ code always tries to go through the process of
+	constructing an encoding string, shuttling partially constructed
+	versions back and forth betweebn $x_{11}$ and $x_{12}$, *this doesn't
+	happen while there are still 1's left from $u$.*
 
-That's because $2x_{13}$ is subtracted in the $x_{11}$ formula.  As long
-as there is at least a single 1 left from $u$, in $x_{13}$, $2x_{13}$
-left-shifts that 1 into the integer place.  Since the partially
-constructed output would always be $<1$ (because of the $1/9$'s), 
-$x_{11}$ remains zero until all of the 1's are gone.
+	That's because $2x_{13}$ is subtracted in the $x_{11}$ formula.  As long
+	as there is at least a single 1 left from $u$, in $x_{13}$, $2x_{13}$
+	left-shifts that 1 into the integer place.  Since the partially
+	constructed output would always be $<1$ (because of the $1/9$'s), 
+	$x_{11}$ remains zero until all of the 1's are gone.
 
-Note that it's the 8 *before* the encoding string that causes a 1 to
-be shifted.  So if $u=0.111$, the final 1 will be shifted off just as
-the network is starting to look at the third encoding.  Since $x_{13}$
-will remain zero now, the encoding can now be copied, piece by piece
-and in reverse, into $x_{11}$ and $x_{12}$.
+	Note that it's the 8 *before* the encoding string that causes a 1 to
+	be shifted.  So if $u=0.111$, the final 1 will be shifted off just as
+	the network is starting to look at the third encoding.  Since $x_{13}$
+	will remain zero now, the encoding can now be copied, piece by piece
+	and in reverse, into $x_{11}$ and $x_{12}$.
 
-5. **Putting the output on $x_{16}$:** Finally, all along, if there was
-a partially constructed output in $x_{12}$, it was copied to the
-formulat for $x_{16}$.  However, since that formula contains $-1$, the
-output string, which is always $<1$, is turned into zero by $sigma$.
-It's only when, now that a nonzero output string is in $x_{12}$, *and
-then* $x_7$ contains 1 because another 8 was found in the c-hat remains,
-that the $-1$ in the $x_{16}$ formula is counteracted, and the now fully
-reconstructed encoding string will appear in $x_16$.
+7. **Putting the output on $x_{16}$:** 
 
-TODO:
+	Finally, all along, if there was a partially constructed output
+	in $x_{12}$, it was copied to the formulat for $x_{16}$.
+	However, since that formula contains $-1$, the output string,
+	which is always $<1$, is turned into zero by $sigma$.  It's only
+	when, now that a nonzero output string is in $x_{12}$, *and
+	then* $x_7$ contains 1 because another 8 was found in the c-hat
+	remains, that the $-1$ in the $x_{16}$ formula is counteracted,
+	and the now fully reconstructed encoding string will appear in
+	$x_{16}$.
 
-Why is it zeros after that?
+8. **Coda:**
+
+	After the answer has been placed in $x_{16}$ at step
+	$2n + \sum_{i=1}^n l(C_i) + 4$, $x_{16}$ goes back to zero
+	because now $x_7$ is not 1, since the most recently removed
+	digit is not 8.
+
+	However, *the process continues*.  As written, the algorithm
+	doesn't stop.  And since there are no more 1's left from $u$,
+	new circuit encodings will periodically appear in $x_{16}$.  Or
+	rather, what happens is that new circuit encodings are
+	concatenated onto the ones already seen so far, separated by
+	8's.  It's pretty useless.  (If you run the algorithm, you'll
+	eventually get to states that are all zeros, but that's
+	apparently just because you only included a finite number of
+	circuits in c-hat, and they've run out.)
+
+	Of course, it would be easy to stop the process after the
+	first encoding is reported.  This isn't a flaw in the proof.
