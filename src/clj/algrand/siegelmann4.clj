@@ -108,11 +108,11 @@
 (defn make-inputs
   "Generate a lazy sequence of input values for the circuit retrieval 
   network defined in section 4.1.2.  The sequence consists of
-  initial-zs zeros, if initial-zs, or none if not, followed by a single 
-  circuit selection value, followed by an infinite number of zeros.  
-  The circuit selecton value is a factional binary number consisting of
+  initial-zeros zeros, if initial-zeros is given, or none if not, followed 
+  by a single circuit selection value, followed by an infinite number of zeros.
+  The circuit selecton value is a fractional binary number consisting of
   finite number of 1's after the decimal point, which constitute a unary
-  index to the circuit retrieve from C-hat.  That is, number of 1's is the
+  index to the circuit to retrieve from C-hat.  That is, number of 1's is the
   one-based number of the circuit to retrieve.  (Note that this means
   that 1/2 selects the first circuit, 3/4 selects the second, 7/8 the
   third, and so on.)"
@@ -157,6 +157,7 @@
                   ];0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 
          ))
 
+;; Useful to separate this out from next-state for testing.
 (defn next-state-sum
   "See equation (2.2) p. 20.  Where a is the weight matrix for current 
   state vector x, b is the weight matrix for input vector u, and c is 
