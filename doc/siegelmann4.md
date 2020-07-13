@@ -43,6 +43,8 @@ the desired circuit encoding appears at step
 
 $$2n + \sum_{i=1}^n l(C_i) + 4$$
 
+----
+
 ## Circuit-retrieval algorithm
 
 From page 65.  Implemented in file siegelmann4.clj.
