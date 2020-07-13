@@ -1,8 +1,9 @@
-
 Notes on chapter 4 of Sieglemann's *Neural Networks and Analog Computation*.
 ===
 
 Marshall Abrams &#169; 2020
+
+See algrand/siegelmann4.clj.
 
 -----------
 
