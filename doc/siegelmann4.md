@@ -62,16 +62,16 @@ I formulate the state update algorithm using matrices and vectors, in
 terms of Equation (2.2), p. 19:
 
 $$x_i(t+1) = \sigma \left( \sum_{j=1}^N a_{ij}x_j(t) + 
-\sum_{j=1}^N b_{ij}u_j(t) + c \right)$$
+\sum_{j=1}^M b_{ij}u_j(t) + c \right)$$
 
 where $x_i(t)$ is the $i$ th element of state vector $x$ at time $t$.
 Or using matrices and vectors:
 
 $$x(t+1) = \sigma (ax + bu + c)$$
 
-where $a$ is a 17x17 matrix, $x$, $b$, and $c$ are  column vectors of
-length 17, and $u$ is a column vector of length 1.  The preceding
-equation is implemented by `next-state`.
+where $a$ is a 17x17 matrix, $x$, $b$, and $c$ are column vectors of
+length $N=17$, and $u$ is a column vector of length $M=1$.  The preceding
+equation is implemented by `next-state` in siegelmann4.clj.
 
 c-hat ("C" with a hat over it in the text), which encodes a series of
 Boolean circuits (pp. 61-62), is the col-9-to-row-10
