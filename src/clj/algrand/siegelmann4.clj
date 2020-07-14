@@ -1,6 +1,8 @@
 ;; Functions for experimenting with ideas in chapter 4 of 
 ;; Hava Siegelmann's book *Neural Networks and Analog Computation: Beyond 
-;; the Turing Limit*
+;; the Turing Limit*.  (This code is in the algrand repo even though
+;; it's not about algorithmic randomness because my interested in it
+;; has to do with algorithmic randomness and related things.)
 (ns algrand.siegelmann4
     (:require [clojure.math.numeric-tower :as ma]
               [clojure.core.matrix :as mx]
