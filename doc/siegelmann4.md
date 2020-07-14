@@ -6,7 +6,7 @@ Marshall Abrams &#169; 2020
 See algrand/siegelmann4.clj.
 
 (This material is in the algrand repo even though it's not about
-algorithmic randomness because my interested in it has to do with
+algorithmic randomness because my interest in it has to do with
 algorithmic randomness and related things.)
 
 -----------
