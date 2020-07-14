@@ -1,10 +1,10 @@
 Notes on chapter 4 of Sieglemann's *Neural Networks and Analog Computation*.
 ===
 
-Marshall Abrams &#169; 2020
-
-See algrand/siegelmann4.clj.
-
+Marshall Abrams &#169; 2020     
+See algrand/siegelmann4.clj.    
+(If you're reading siegelmann4.md in github, switch to the PDF, which
+displays math symbols correctly.)    
 (This material is in the algrand repo even though it's not about
 algorithmic randomness because my interest in it has to do with
 algorithmic randomness and related things.)
@@ -77,9 +77,8 @@ where $a$ is a 17x17 matrix, $x$, $b$, and $c$ are column vectors of
 length $N=17$, and $u$ is a column vector of length $M=1$.  The preceding
 equation is implemented by `next-state` in siegelmann4.clj.
 
-c-hat ("C" with a hat over it in the text), which encodes a series of
-Boolean circuits (pp. 61-62), is the col-9-to-row-10
-weight.
+c-hat ("C" with a carat/circumflex over it in the text), which encodes a
+series of Boolean circuits (pp. 61-62), is the col-9-to-row-10 weight.
 
 ### How the algorithm works:
 
