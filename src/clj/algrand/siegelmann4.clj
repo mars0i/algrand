@@ -82,6 +82,8 @@
 ;;    Retrieval network equations on p. 65
 
 ;; Encoding of one or more circuits from example 4.1.1 on p.62.
+;; (Supposed to be a circuit family, i.e. with input sizes from 1 on up,
+;; in order, but this doesn't affect the algorithm.)
 ;; This will become an element in the weight matrix.
 ;; NOTE (4.1), (4.2) p. 62: the circuit s/b encoded backwards here.
 (def c-hat 
