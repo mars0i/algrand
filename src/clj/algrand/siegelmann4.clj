@@ -6,29 +6,18 @@
 (ns algrand.siegelmann4
     (:require [clojure.math.numeric-tower :as ma]
               [clojure.core.matrix :as mx]
-              [utils.convertbase :as cb]))
+              [utils.convertbase :as cb]
+              ;[denisovan.core] ; for Neanderthal experiments
+    ))
 
-;; TEMPORARY NOTES
-;; About use of registers/nodes x0-x8, x10, x11, x12:
-;; 
-;; c-hat enters x10 in the second tick and never appears as such after.
-;; after that, you get shifted versions of x10, pulled from x0-x8.  One
-;; of them contains the shifted version, which is then copied into
-;; x10 (since the 1's below it are even in number).
-;; 
-;; x11 reconstructs digits from the 1's in x0-x7, and places them on
-;; the front of x11:
-;; 2x the 4-part sum in x11 is the digit that was just stripped off.  then
-;; 1/9 right shifts.  x12 had the old version, which is right-shifted to
-;; make space for new digit.  The float is always in an even register, so
-;; if you only use odd registers, you skip that, and since there is always
-;; an even number of 1's below the float, doubling the odd ones gives you
-;; the same count.
-;; This is why the encoding in c-hat is backwards; it gets reconstructed
-;; via pushing onto a stack in x11 and x12.
 
 (mx/set-current-implementation :persistent-vector)
 ;(mx/set-current-implementation :ndarray)
+
+;; EXPERIMENT
+;; Don't use this, normally.  Neanderthal only supports doubles, and this code 
+;; requires Ratio to work.  Both persistent-vector and ndarray support Ratio.
+;(mx/set-current-implementation :neanderthal)
 
 
 ;; for all chapters
