@@ -80,19 +80,45 @@
   [base s]
   (double (string-to-number base s)))
 
-;; TODO very broken: always returns 5/4.
+(defn cantor-code-digit
+  [cantor-base natural-digit]
+  (inc (* 2 natural-digit)))
+
+(defn cantor-code-digits
+  "Given a number x (preferably a Ratio) return a lazy sequence that
+  extracts digits from it in base natural-base, and then encodes them a
+  sequence of digits in cantor-base, using only alternating cantor-base
+  digits (0->1, 1->3, 2->5, etc.).  cantor-base must be at least twice
+  natural-base, and x should be non-negative."
+  [natural-base cantor-base x]
+  (map (partial cantor-code-digit cantor-base)
+       (convert-fract-seq natural-base x)))
+
+;; TODO NEED TO SUM THE DIGITS!
 (defn cantor-code
-  "Given a number x (preferably a Ratio) extract digits from it in
-  base natural-base, and encode them in a Ratio in cantor-base, using
-  only alternating cantor-base digits, up to num-digits.  cantor-base 
-  must be at least twice natural-base.  x should be non-negative."
+  "Given a number x (preferably a Ratio) return a Ratio based on
+  extracting digits from x in base natural-base, encoding them as a
+  sequence of digits in cantor-base using only alternating cantor-base
+  digits (0->1, 1->3, 2->5, etc.), and combining them into a Ratio using
+  no more than num-digits.  cantor-base must be at least twice
+  natural-base, and x should be non-negative."
   [natural-base cantor-base num-digits x]
-  (loop [n-digs num-digits
-         y (bigint x)
-         acc 0]
-        (if (or (zero? n-digs) (zero? y))
-          acc
-          (let [n (quot y natural-base)
-                r (rem y natural-base)
-                cantor-digit (/ (inc (* 2 n)) cantor-base)] ; 0->1, 1->3, 2->5, etc.
-            (recur (dec n-digs) r (+ cantor-digit acc))))))
+  (take num-digits 
+        (cantor-code-digits natural-base cantor-base x)))
+
+;; OLD
+;(defn cantor-code
+;  "Given a number x (preferably a Ratio) extract digits from it in
+;  base natural-base, and encode them in a Ratio in cantor-base, using
+;  only alternating cantor-base digits, up to num-digits.  cantor-base 
+;  must be at least twice natural-base.  x should be non-negative."
+;  [natural-base cantor-base num-digits x]
+;  (loop [n-digs num-digits
+;         y (bigint x)
+;         acc 0]
+;        (if (or (zero? n-digs) (zero? y))
+;          acc
+;          (let [n (quot y natural-base)
+;                r (rem y natural-base)
+;                cantor-digit (/ (inc (* 2 n)) cantor-base)] ; 0->1, 1->3, 2->5, etc.
+;            (recur (dec n-digs) r (+ cantor-digit acc))))))
