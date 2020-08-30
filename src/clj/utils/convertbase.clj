@@ -30,7 +30,7 @@
   representation of the number in the given base with the specified number of
   digits after the decimal point.  Uses lowercase alphabetic characters for
   digits greater than 9 in bases between 10 and 36."
-  [base digits x]
+  [base num-digits x]
   (let [int-part (bigint x) ; int, bigint round toward zero
         fract-part (- x int-part)]
     (apply str 
@@ -38,7 +38,7 @@
              (Integer/toString int-part base)
              ["."]
              (map (fn [n] (Integer/toString n base))
-                  (take digits
+                  (take num-digits
                         (convert-fract-seq base fract-part)))))))
 
 ;; TODO Handle negative numbers
@@ -79,3 +79,20 @@
   "Like string-to-number, but returns a double rather than a Ratio."
   [base s]
   (double (string-to-number base s)))
+
+;; TODO very broken: always returns 5/4.
+(defn cantor-code
+  "Given a number x (preferably a Ratio) extract digits from it in
+  base natural-base, and encode them in a Ratio in cantor-base, using
+  only alternating cantor-base digits, up to num-digits.  cantor-base 
+  must be at least twice natural-base.  x should be non-negative."
+  [natural-base cantor-base num-digits x]
+  (loop [n-digs num-digits
+         y (bigint x)
+         acc 0]
+        (if (or (zero? n-digs) (zero? y))
+          acc
+          (let [n (quot y natural-base)
+                r (rem y natural-base)
+                cantor-digit (/ (inc (* 2 n)) cantor-base)] ; 0->1, 1->3, 2->5, etc.
+            (recur (dec n-digs) r (+ cantor-digit acc))))))
