@@ -17,7 +17,7 @@
   [base x]
   (lazy-seq 
     (let [shifted-x (* x base)
-          int-part (bigint shifted-x) ; int, bigint :ound toward zero
+          int-part (bigint shifted-x) ; int, bigint round toward zero
           fract-part (- shifted-x int-part)]
       (cons int-part
             (convert-fract-seq base fract-part)))))
@@ -81,23 +81,27 @@
   (double (string-to-number base s)))
 
 (defn cantor-code-digit
+  "Given natural-digit, a number that can be represented as a digit in 
+  some base (e.g. 16 is the 17th digit in base 27), return a
+  \"cantorized\" digit that one more than twice the original digit
+  (0->1, 1->3, 2->5, etc.)."
   [cantor-base natural-digit]
   (inc (* 2 natural-digit)))
 
 (defn cantor-code-digits
-  "Given a number x (preferably a Ratio) return a lazy sequence that
-  extracts digits from it in base natural-base, and then encodes them a
-  sequence of digits in cantor-base, using only alternating cantor-base
-  digits (0->1, 1->3, 2->5, etc.).  cantor-base must be at least twice
-  natural-base, and x should be non-negative."
+  "Given a number x (preferably a Ratio) that is less than 1, return a lazy 
+  sequence that extracts digits from it in base natural-base, and then 
+  encodes them as a sequence of digits in cantor-base, using only alternating 
+  cantor-base digits (0->1, 1->3, 2->5, etc.).  cantor-base must be at least 
+  twice natural-base, and x should be non-negative."
   [natural-base cantor-base x]
   (map (partial cantor-code-digit cantor-base)
        (convert-fract-seq natural-base x)))
 
 ;; TODO NEED TO SUM THE DIGITS!
 (defn cantor-code
-  "Given a number x (preferably a Ratio) return a Ratio based on
-  extracting digits from x in base natural-base, encoding them as a
+  "Given a number x (preferably a Ratio) that is less than 1, return a Ratio 
+  based on extracting digits from x in base natural-base, encoding them as a
   sequence of digits in cantor-base using only alternating cantor-base
   digits (0->1, 1->3, 2->5, etc.), and combining them into a Ratio using
   no more than num-digits.  cantor-base must be at least twice
