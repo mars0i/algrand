@@ -10,6 +10,14 @@
     (:require [clojure.math.numeric-tower :as math]
               [clojure.string :as string]))
 
+;; TODO more testing, maybe avoid the hardcore recursion.  Bigintify.
+(defn convert-int-seq
+  [base x]
+  (if (pos? x)
+    (conj (convert-int-seq base (quot x base))
+          (mod x base))
+    []))
+
 (defn convert-fract-seq
   "Given a number x in [0,1), generates a lazy sequence of digits (or 
   two-digit numbers, for bases greater than 10) that would appear after
