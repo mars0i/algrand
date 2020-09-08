@@ -10,15 +10,25 @@
     (:require [clojure.math.numeric-tower :as math]
               [clojure.string :as string]))
 
-;; TODO more testing, maybe avoid the hardcore recursion.  Bigintify.
-(defn convert-int-seq
+(defn convert-int-to-seq
+  "Given an integer, returns a sequence of digits (or two-digit numbers, 
+  for bases greater than 10) representing the number in the given base."
   [base x]
-  (if (pos? x)
-    (conj (convert-int-seq base (quot x base))
-          (mod x base))
-    []))
+  (loop [y (bigint x), digits nil]
+     (if (zero? y)
+       digits
+       (recur (quot y base)
+              (cons (mod y base) digits)))))
 
-(defn convert-fract-seq
+;; old non-tail-recursive version:
+;(defn convert-int-to-seq
+;  [base x]
+;  (if (pos? x)
+;    (conj (convert-int-to-seq base (quot x base))
+;          (mod x base))
+;    []))
+
+(defn convert-fract-to-seq
   "Given a number x in [0,1), generates a lazy sequence of digits (or 
   two-digit numbers, for bases greater than 10) that would appear after
   the decimal point in a representation in the given base."  
@@ -28,7 +38,7 @@
           int-part (bigint shifted-x) ; int, bigint round toward zero
           fract-part (- shifted-x int-part)]
       (cons int-part
-            (convert-fract-seq base fract-part)))))
+            (convert-fract-to-seq base fract-part)))))
 
 ;; TODO Handle negative numbers
 ;; Output is float or integer style.  Returning a ratio would have little
@@ -47,7 +57,7 @@
              ["."]
              (map (fn [n] (Integer/toString n base))
                   (take num-digits
-                        (convert-fract-seq base fract-part)))))))
+                        (convert-fract-to-seq base fract-part)))))))
 
 ;; TODO Handle negative numbers
 ;; Code has a lot of setup but the actual calculation doesn't need
@@ -117,6 +127,20 @@
   [natural-base cantor-base num-digits x]
   (take num-digits 
         (cantor-code-digits natural-base cantor-base x)))
+
+;; TODO an experiment:
+;; I think I need something like this to sum the digits (which needn't
+;; only be for cantor-coding):
+;; TEST ME!
+(defn sum-digits
+  [base integer-digits fractional-digits]
+  (let [intlen (count integer-digits) ; what exponent do they start at?
+        digits (concat integer-digits fractional-digits)
+        [_ x] (reduce (fn [[m sum] digit] [(/ m base) (+ sum (* m digit))])  ; m records the current exponent, but we don't need it when we're done
+                      [(math/expt base intlen) 0] ; start at exponent of first integer digit
+                      digits)]
+    x))
+
 
 ;; OLD
 ;(defn cantor-code
