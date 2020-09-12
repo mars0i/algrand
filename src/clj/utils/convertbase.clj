@@ -39,29 +39,6 @@
        (recur (quot y base)
               (cons (mod y base) digits)))))
 
-(defn conv1
-  [base x]
-  (if (pos? x)
-    (conj (conv1 base (quot x base))
-          (mod x base))
-    []))
-
-(defn conv2
-  [base x]
-  (letfn [(build-it [y]
-            (lazy-seq
-              (conj (build-it (quot y base))
-                    (mod y base))))]
-    (build-it x)))
-
-(defn conv
-  [base x]
-  (letfn [(build-it [y]
-            (cons (mod y base)
-                  (lazy-seq
-                    (build-it (quot y base)))))]
-    (build-it x)))
-
 (defn convert-fract-to-seq
   "Given a number x in [0,1), generates a lazy sequence of digits (or 
   two-digit numbers, for bases greater than 10) that would appear after
