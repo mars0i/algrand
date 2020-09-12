@@ -34,14 +34,6 @@
        (recur (quot y base)
               (cons (mod y base) digits)))))
 
-;; old non-tail-recursive version:
-;(defn convert-int-to-seq
-;  [base x]
-;  (if (pos? x)
-;    (conj (convert-int-to-seq base (quot x base))
-;          (mod x base))
-;    []))
-
 (defn convert-fract-to-seq
   "Given a number x in [0,1), generates a lazy sequence of digits (or 
   two-digit numbers, for bases greater than 10) that would appear after
