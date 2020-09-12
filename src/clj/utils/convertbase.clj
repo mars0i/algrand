@@ -10,6 +10,20 @@
     (:require [clojure.math.numeric-tower :as math]
               [clojure.string :as string]))
 
+;(defn overflowing-convert-to-seq
+;  "Given a number, returns a sequence of digits (or two-digit numbers, 
+;  for bases greater than 10) representing the number in the given base."
+;  [base x]
+;  (letfn [(convert [y]
+;              (conj (lazy-seq (convert (quot y base)))
+;                    (mod y base)))]
+;    (convert (bigint x))))
+
+;; Note:
+;; It's useful to distinguish between the integer part and the
+;; fractional part of a number, because converting the fractional side
+;; can go on forever, but the integer side has a finite number of digits.
+
 (defn convert-int-to-seq
   "Given an integer, returns a sequence of digits (or two-digit numbers, 
   for bases greater than 10) representing the number in the given base."
@@ -114,7 +128,7 @@
   twice natural-base, and x should be non-negative."
   [natural-base cantor-base x]
   (map (partial cantor-code-digit cantor-base)
-       (convert-fract-seq natural-base x)))
+       (convert-fract-to-seq natural-base x)))
 
 ;; TODO NEED TO SUM THE DIGITS!
 (defn cantor-code
