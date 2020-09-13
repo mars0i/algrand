@@ -127,19 +127,6 @@
   [cantor-base xs]
   (map (partial cantor-code-digit cantor-base) xs))
 
-;; TODO NEED TO SUM THE DIGITS!
-(defn cantor-code-fract
-  "Given a number x (preferably a Ratio) that is less than 1, return a Ratio 
-  based on extracting digits from x in base natural-base, encoding them as a
-  sequence of digits in cantor-base using only alternating cantor-base
-  digits (0->1, 1->3, 2->5, etc.), and combining them into a Ratio using
-  no more than num-digits.  cantor-base must be at least twice
-  natural-base, and x should be non-negative."
-  [natural-base cantor-base num-digits x]
-  (take num-digits  
-        (cantor-code-digits cantor-base
-                            (convert-fract-to-seq natural-base x))))
-
 ;; FIXME revise docstring
 (defn cantor-code-int
   "Given a number x (preferably a Bigint) that is greater than or equal
@@ -152,6 +139,19 @@
   [natural-base cantor-base x]
   (cantor-code-digits cantor-base
                       (convert-int-to-seq natural-base x)))
+
+;; TODO NEED TO SUM THE DIGITS!
+(defn cantor-code-fract
+  "Given a number x (preferably a Ratio) that is less than 1, return a Ratio 
+  based on extracting digits from x in base natural-base, encoding them as a
+  sequence of digits in cantor-base using only alternating cantor-base
+  digits (0->1, 1->3, 2->5, etc.), and combining them into a Ratio using
+  no more than num-digits.  cantor-base must be at least twice
+  natural-base, and x should be non-negative."
+  [natural-base cantor-base num-digits x]
+  (take num-digits  
+        (cantor-code-digits cantor-base
+                            (convert-fract-to-seq natural-base x))))
 
 
 
@@ -167,6 +167,14 @@
                       [(math/expt base intlen) 0] ; start at exponent of first integer digit
                       digits)]
     x))
+
+;; TODO consider inserting the code from cantor-code-int and
+;; cantor-code-fract literally into this function, and deleting those.
+(defn cantor-code
+  [natural-base cantor-base num-fract-digits x]
+  (sum-digits cantor-base 
+              (cantor-code-int natural-base cantor-base x)
+              (cantor-code-fract natural-base cantor-base num-fract-digits x)))
 
 
 ;; OLD
