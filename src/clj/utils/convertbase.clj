@@ -122,14 +122,6 @@
                       digits)]
     x))
 
-(defn cantor-code-digit
-  "Given natural-digit, a number that can be represented as a digit in 
-  some base (e.g. 16 is the 17th digit in base 27), return a
-  \"cantorized\" digit that one more than twice the original digit
-  (0->1, 1->3, 2->5, etc.)."
-  [cantor-base natural-digit]
-  (inc (* 2 natural-digit)))
-
 ;; FIXME revise docstring
 (defn cantor-code-digits
   "Given a number x (preferably a Ratio) that is less than 1, return a lazy 
@@ -138,7 +130,7 @@
   cantor-base digits (0->1, 1->3, 2->5, etc.).  cantor-base must be at least 
   twice natural-base, and x should be non-negative."
   [cantor-base xs]
-  (map (partial cantor-code-digit cantor-base) xs))
+  (map (fn [digit] (inc (* 2 digit))) xs))
 
 ;; TODO revise docstring
 (defn cantor-code-int
