@@ -34,7 +34,7 @@
 ;; FIXME
 ;; user=> (def plcg (posix-lcg 324))
 ;; #'user/plcg
-;; user=> (def clcg (cantor-posix-lcg (cantor-code 10 20 0 324)))
+;; user=> (def clcg (cantor-posix-lcg (cantor-code 10 20 0 324N)))
 ;; #'user/clcg
 ;; user=> (number-to-string 10 0 (plcg))
 ;; "601072127."
