@@ -122,24 +122,6 @@
                       digits)]
     x))
 
-(defn cantor-code-digits
-  "Given a sequence of natural-digits that can be represented as digits in 
-  some base (e.g. 16 is the 17th digit in base 27), return a sequence of
-  \"cantorized\" digits that are one more than twice the original digit
-  (0->1, 1->3, 2->5, etc.)."
-  [xs]
-  (map (fn [digit] (inc (* 2 digit)))
-       xs))
-
-(defn cantor-decode-digits
-  "Given a sequence of natural-digits that can be represented as digits in 
-  some base (e.g. 16 is the 17th digit in base 27), return a sequence of
-  \"cantorized\" digits that are one more than twice the original digit
-  (0->1, 1->3, 2->5, etc.)."
-  [xs]
-  (map (fn [digit] (/ (dec digit) 2))
-       xs))
-
 (defn cantor-code-digit
   "Cantor-code a single digit, i.e. multiply by 2 and add 1."
   [digit]
@@ -150,31 +132,36 @@
   "Cantor-decode a single digit, i.e. subtract 1 and divide by 2."
   (/ (dec digit) 2))
 
+(defn cantor-convert 
+  "Convert a number x, considered to be in base from-base, to a cantor-coded
+  or decoded analog of the original number in base to-base, restricted to 
+  num-fract-digits.  Whether this performs cantor-coding or decoding
+  depends on the function digit-converter that's passed in.  Note that the 
+  number returned is *not*, in general, equal to the original number x.  It
+  is a new number that is the analogous representation of the old number in 
+  the new base."
+  [digit-converter from-base to-base num-fract-digits x]
+  (let [[int-part fract-part] (split-int-fract x)]
+    (sum-digits to-base 
+                (map digit-converter
+                     (convert-int-to-seq from-base int-part))
+                (take num-fract-digits  
+                      (map digit-converter
+                           (convert-fract-to-seq from-base fract-part))))))
+
 (defn cantor-code
   "Convert a number x, considered to be in base natural-base, to a 
   antor-coded analog of the original number in base cantor-base, restricted
-  to num-fract-digits .  Note that the number returned is *not*, in general,
-  equal to the original number x.  It is a new number that is such that, if
-  you convert it to a base cantor-base representation of the original base
-  natural-base number (e.g. using number-to-string), the result will
-  be the cantor-coded representation of the original base natural-base
-  representation."
+  to num-fract-digits.  See cantor-convert for more info."
   [natural-base cantor-base num-fract-digits x]
-  (let [[int-part fract-part] (split-int-fract x)]
-    (sum-digits cantor-base 
-                (cantor-code-digits
-                  (convert-int-to-seq natural-base int-part))
-                (take num-fract-digits  
-                      (cantor-code-digits
-                        (convert-fract-to-seq natural-base fract-part))))))
-
+  (cantor-convert cantor-code-digit natural-base cantor-base
+                  num-fract-digits x))
 
 (defn cantor-decode
-  [natural-base cantor-base num-fract-digits x]
-  (let [[int-part fract-part] (split-int-fract x)]
-    (sum-digits cantor-base 
-                (cantor-decode-digits
-                  (convert-int-to-seq natural-base int-part))
-                (take num-fract-digits  
-                      (cantor-decode-digits
-                        (convert-fract-to-seq natural-base fract-part))))))
+  "Convert a number x, considered to be in base cantor-base, to a 
+  decoded analog of the original number in base natural-base, restricted
+  to num-fract-digits.  See cantor-convert for more info."
+  [cantor-base natural-base num-fract-digits x]
+  (cantor-convert cantor-decode-digit cantor-base natural-base
+                  num-fract-digits x))
+
