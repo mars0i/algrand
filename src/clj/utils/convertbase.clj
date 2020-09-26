@@ -130,18 +130,6 @@
   [xs]
   (map (fn [digit] (inc (* 2 digit))) xs))
 
-(defn cantor-code-int
-  "Given an integer, return a sequence of cantor-coded digits representing it."
-  [natural-base x]
-  (cantor-code-digits (convert-int-to-seq natural-base x)))
-
-(defn cantor-code-fract
-  "Given a fractional-number, return sequence of length num-digits of 
-  cantor-coded digits representing the number."
-  [natural-base num-digits x]
-  (take num-digits  
-        (cantor-code-digits (convert-fract-to-seq natural-base x))))
-
 (defn cantor-code
   "Convert a number to a cantor-coded analog of the number.  Note that
   the number returned is *not*, in general, equal to the original
@@ -153,20 +141,35 @@
   [natural-base cantor-base num-fract-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
     (sum-digits cantor-base 
-                (cantor-code-int natural-base int-part)
-                (cantor-code-fract natural-base num-fract-digits fract-part))))
+                (cantor-code-digits
+                  (convert-int-to-seq natural-base int-part))
+                (take num-fract-digits  
+                      (cantor-code-digits
+                        (convert-fract-to-seq natural-base fract-part))))))
 
-;; cantor-code with inlined cantor-code-int, cantor-code-fract
-;; avoids defining them, but the non-inlined code is clearer.
-;(defn cantor-code
-;  "ADD DOCSTRING"
-;  [natural-base cantor-base num-fract-digits x]
-;  (let [[int-part fract-part] (split-int-fract x)]
-;    (sum-digits cantor-base 
-;                (cantor-code-digits cantor-base
-;                                    (convert-int-to-seq natural-base
-;                                                        int-part))
-;                (take num-fract-digits  
-;                      (cantor-code-digits cantor-base
-;                                          (convert-fract-to-seq
-;                                            natural-base fract-part))))))
+
+; (defn cantor-code-int
+;   "Given an integer, return a sequence of cantor-coded digits representing it."
+;   [natural-base x]
+;   (cantor-code-digits (convert-int-to-seq natural-base x)))
+; 
+; (defn cantor-code-fract
+;   "Given a fractional-number, return sequence of length num-digits of 
+;   cantor-coded digits representing the number."
+;   [natural-base num-digits x]
+;   (take num-digits  
+;         (cantor-code-digits (convert-fract-to-seq natural-base x))))
+; 
+; (defn old-cantor-code
+;   "Convert a number to a cantor-coded analog of the number.  Note that
+;   the number returned is *not*, in general, equal to the original
+;   number x.  It is a new number that is such that, if you convert it
+;   to a base cantor-base representation of the original base
+;   natural-base number (e.g. using number-to-string), the result will
+;   be the cantor-coded representation of the original base natural-base
+;   representation."
+;   [natural-base cantor-base num-fract-digits x]
+;   (let [[int-part fract-part] (split-int-fract x)]
+;     (sum-digits cantor-base 
+;                 (cantor-code-int natural-base int-part)
+;                 (cantor-code-fract natural-base num-fract-digits fract-part))))
