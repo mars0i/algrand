@@ -106,14 +106,14 @@
   [base s]
   (double (string-to-number base s)))
 
-;; TODO revise docstring
-;;
 ;; Note first-exponent is one less than number of integer digits because
 ;; We multiply each digit by base to an exponent, one less each time,
 ;; where the last digit isn't multiplied at all, or rather it's multiplied
 ;; by (expt base 0).
 (defn sum-digits
-  "ADD DOCSTRING"
+  "Given a sequence of digits representing an integer a the given base, and 
+  a sequence of digits representing a fractional part of a number in
+  the same base, return the represented number."
   [base integer-digits fractional-digits]
   (let [first-exponent (dec (count integer-digits)) ; what exponent do they start at?
         digits (concat integer-digits fractional-digits)
