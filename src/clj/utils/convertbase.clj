@@ -128,7 +128,17 @@
   \"cantorized\" digits that are one more than twice the original digit
   (0->1, 1->3, 2->5, etc.)."
   [xs]
-  (map (fn [digit] (inc (* 2 digit))) xs))
+  (map (fn [digit] (inc (* 2 digit)))
+       xs))
+
+(defn cantor-decode-digits
+  "Given a sequence of natural-digits that can be represented as digits in 
+  some base (e.g. 16 is the 17th digit in base 27), return a sequence of
+  \"cantorized\" digits that are one more than twice the original digit
+  (0->1, 1->3, 2->5, etc.)."
+  [xs]
+  (map (fn [digit] (/ (dec digit) 2))
+       xs))
 
 (defn cantor-code
   "Convert a number x, considered to be in base natural-base, to a 
