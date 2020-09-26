@@ -122,40 +122,25 @@
                       digits)]
     x))
 
-;; FIXME revise docstring
 (defn cantor-code-digits
-  "Given a number x (preferably a Ratio) that is less than 1, return a lazy 
-  sequence that extracts digits from it in base natural-base, and then 
-  encodes them as a sequence of digits in cantor-base, using only alternating 
-  cantor-base digits (0->1, 1->3, 2->5, etc.).  cantor-base must be at least 
-  twice natural-base, and x should be non-negative."
-  [cantor-base xs]
+  "Given a sequence of natural-digits that can be represented as digits in 
+  some base (e.g. 16 is the 17th digit in base 27), return a sequence of
+  \"cantorized\" digits that are one more than twice the original digit
+  (0->1, 1->3, 2->5, etc.)."
+  [xs]
   (map (fn [digit] (inc (* 2 digit))) xs))
 
-;; TODO revise docstring
 (defn cantor-code-int
-  "Given a number x (preferably a Bigint) that is greater than or equal
-  to 1, return a FIXME
-  based on extracting digits from x in base natural-base, encoding them as a
-  sequence of digits in cantor-base using only alternating cantor-base
-  digits (0->1, 1->3, 2->5, etc.), and combining them into a Ratio using
-  no more than num-digits.  cantor-base must be at least twice
-  natural-base, and x should be non-negative."
-  [natural-base cantor-base x]
-  (cantor-code-digits cantor-base
-                      (convert-int-to-seq natural-base x)))
+  "Given an integer, return a sequence of cantor-coded digits representing it."
+  [natural-base x]
+  (cantor-code-digits (convert-int-to-seq natural-base x)))
 
 (defn cantor-code-fract
-  "Given a number x (preferably a Ratio) that is less than 1, return a Ratio 
-  based on extracting digits from x in base natural-base, encoding them as a
-  sequence of digits in cantor-base using only alternating cantor-base
-  digits (0->1, 1->3, 2->5, etc.), and combining them into a Ratio using
-  no more than num-digits.  cantor-base must be at least twice
-  natural-base, and x should be non-negative."
-  [natural-base cantor-base num-digits x]
+  "Given a fractional-number, return sequence of length num-digits of 
+  cantor-coded digits representing the number."
+  [natural-base num-digits x]
   (take num-digits  
-        (cantor-code-digits cantor-base
-                            (convert-fract-to-seq natural-base x))))
+        (cantor-code-digits (convert-fract-to-seq natural-base x))))
 
 ;; TODO revise docstring
 (defn cantor-code
@@ -163,9 +148,8 @@
   [natural-base cantor-base num-fract-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
     (sum-digits cantor-base 
-                (cantor-code-int natural-base cantor-base int-part)
-                (cantor-code-fract natural-base cantor-base
-                                   num-fract-digits fract-part))))
+                (cantor-code-int natural-base int-part)
+                (cantor-code-fract natural-base num-fract-digits fract-part))))
 
 ;; cantor-code with inlined cantor-code-int, cantor-code-fract
 ;; avoids defining them, but the non-inlined code is clearer.
