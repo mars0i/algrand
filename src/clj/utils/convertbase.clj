@@ -115,6 +115,22 @@
   [base s]
   (double (string-to-number base s)))
 
+;; TODO revise docstring
+;;
+;; Note first-exponent is one less than number of integer digits because
+;; We multiply each digit by base to an exponent, one less each time,
+;; where the last digit isn't multiplied at all, or rather it's multiplied
+;; by (expt base 0).
+(defn sum-digits
+  "ADD DOCSTRING"
+  [base integer-digits fractional-digits]
+  (let [first-exponent (dec (count integer-digits)) ; what exponent do they start at?
+        digits (concat integer-digits fractional-digits)
+        [_ x] (reduce (fn [[m sum] digit] [(/ m base) (+ sum (* m digit))])  ; m records the current exponent, but we don't need it when we're done
+                      [(math/expt base first-exponent) 0] ; start at exponent of first integer digit
+                      digits)]
+    x))
+
 (defn cantor-code-digit
   "Given natural-digit, a number that can be represented as a digit in 
   some base (e.g. 16 is the 17th digit in base 27), return a
@@ -158,28 +174,7 @@
         (cantor-code-digits cantor-base
                             (convert-fract-to-seq natural-base x))))
 
-
-
 ;; TODO revise docstring
-;;
-;; Note first-exponent is one less than number of integer digits because
-;; We multiply each digit by base to an exponent, one less each time,
-;; where the last digit isn't multiplied at all, or rather it's multiplied
-;; by (expt base 0).
-(defn sum-digits
-  "ADD DOCSTRING"
-  [base integer-digits fractional-digits]
-  (let [first-exponent (dec (count integer-digits)) ; what exponent do they start at?
-        digits (concat integer-digits fractional-digits)
-        [_ x] (reduce (fn [[m sum] digit] [(/ m base) (+ sum (* m digit))])  ; m records the current exponent, but we don't need it when we're done
-                      [(math/expt base first-exponent) 0] ; start at exponent of first integer digit
-                      digits)]
-    x))
-
-;; TODO revise docstring
-;;
-;; TODO consider inserting the code from cantor-code-int and
-;; cantor-code-fract literally into this function, and deleting those.
 (defn cantor-code
   "ADD DOCSTRING"
   [natural-base cantor-base num-fract-digits x]
@@ -188,3 +183,18 @@
                 (cantor-code-int natural-base cantor-base int-part)
                 (cantor-code-fract natural-base cantor-base
                                    num-fract-digits fract-part))))
+
+;; cantor-code with inlined cantor-code-int, cantor-code-fract
+;; avoids defining them, but the non-inlined code is clearer.
+;(defn cantor-code
+;  "ADD DOCSTRING"
+;  [natural-base cantor-base num-fract-digits x]
+;  (let [[int-part fract-part] (split-int-fract x)]
+;    (sum-digits cantor-base 
+;                (cantor-code-digits cantor-base
+;                                    (convert-int-to-seq natural-base
+;                                                        int-part))
+;                (take num-fract-digits  
+;                      (cantor-code-digits cantor-base
+;                                          (convert-fract-to-seq
+;                                            natural-base fract-part))))))
