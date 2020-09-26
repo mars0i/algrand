@@ -34,17 +34,13 @@
 ;; FIXME
 ;; user=> (def plcg (posix-lcg 324))
 ;; #'user/plcg
-;; user=> (def lcg (cantor-posix-lcg 324))
-;; #'user/lcg
-;; user=> (plcg)
-;; 601072127N
-;; user=> (lcg)
-;; 3013462395495N
-;; user=> (number-to-string 10 0 601072127N)
+;; user=> (def clcg (cantor-posix-lcg (cantor-code 10 20 0 324)))
+;; #'user/clcg
+;; user=> (number-to-string 10 0 (plcg))
 ;; "601072127."
-;; user=> (number-to-string 20 0 3013462395495N)
+;; user=> (number-to-string 20 0 (clcg))
 ;; Execution error (IllegalArgumentException) at utils.convertbase/number-to-string (convertbase.clj:63).
-;; Value out of range for int: 3013462395495
+;; Value out of range for int: 4485583582273
 (def cantor-posix-lcg 
   "Given a seed considered to be cantor-coded in base 20, returns an integer 
   LCG function using cantor-coded Posix parameters."
