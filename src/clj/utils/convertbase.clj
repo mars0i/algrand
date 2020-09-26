@@ -133,7 +133,7 @@
   [cantor-base xs]
   (map (partial cantor-code-digit cantor-base) xs))
 
-;; FIXME revise docstring
+;; TODO revise docstring
 (defn cantor-code-int
   "Given a number x (preferably a Bigint) that is greater than or equal
   to 1, return a FIXME
@@ -160,11 +160,14 @@
 
 
 
+;; TODO revise docstring
+;;
 ;; Note first-exponent is one less than number of integer digits because
 ;; We multiply each digit by base to an exponent, one less each time,
 ;; where the last digit isn't multiplied at all, or rather it's multiplied
 ;; by (expt base 0).
 (defn sum-digits
+  "ADD DOCSTRING"
   [base integer-digits fractional-digits]
   (let [first-exponent (dec (count integer-digits)) ; what exponent do they start at?
         digits (concat integer-digits fractional-digits)
@@ -173,9 +176,12 @@
                       digits)]
     x))
 
+;; TODO revise docstring
+;;
 ;; TODO consider inserting the code from cantor-code-int and
 ;; cantor-code-fract literally into this function, and deleting those.
 (defn cantor-code
+  "ADD DOCSTRING"
   [natural-base cantor-base num-fract-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
     (sum-digits cantor-base 
