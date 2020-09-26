@@ -188,24 +188,8 @@
 ;; cantor-code-fract literally into this function, and deleting those.
 (defn cantor-code
   [natural-base cantor-base num-fract-digits x]
-  (sum-digits cantor-base 
-              (cantor-code-int natural-base cantor-base x)
-              (cantor-code-fract natural-base cantor-base num-fract-digits x)))
-
-
-;; OLD
-;(defn cantor-code
-;  "Given a number x (preferably a Ratio) extract digits from it in
-;  base natural-base, and encode them in a Ratio in cantor-base, using
-;  only alternating cantor-base digits, up to num-digits.  cantor-base 
-;  must be at least twice natural-base.  x should be non-negative."
-;  [natural-base cantor-base num-digits x]
-;  (loop [n-digs num-digits
-;         y (bigint x)
-;         acc 0]
-;        (if (or (zero? n-digs) (zero? y))
-;          acc
-;          (let [n (quot y natural-base)
-;                r (rem y natural-base)
-;                cantor-digit (/ (inc (* 2 n)) cantor-base)] ; 0->1, 1->3, 2->5, etc.
-;            (recur (dec n-digs) r (+ cantor-digit acc))))))
+  (let [[int-part fract-part] (split-int-fract x)]
+    (sum-digits cantor-base 
+                (cantor-code-int natural-base cantor-base int-part)
+                (cantor-code-fract natural-base cantor-base
+                                   num-fract-digits fract-part))))
