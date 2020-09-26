@@ -132,6 +132,7 @@
   "Cantor-decode a single digit, i.e. subtract 1 and divide by 2."
   (/ (dec digit) 2))
 
+;; contains common code for cantor-code and cantor-decode
 (defn cantor-convert 
   "Convert a number x, considered to be in base from-base, to a cantor-coded
   or decoded analog of the original number in base to-base, restricted to 
@@ -149,6 +150,7 @@
                       (map digit-converter
                            (convert-fract-to-seq from-base fract-part))))))
 
+;; wrapper for cantor-convert
 (defn cantor-code
   "Convert a number x, considered to be in base natural-base, to a 
   antor-coded analog of the original number in base cantor-base, restricted
@@ -157,6 +159,7 @@
   (cantor-convert cantor-code-digit natural-base cantor-base
                   num-fract-digits x))
 
+;; wrapper for cantor-convert
 (defn cantor-decode
   "Convert a number x, considered to be in base cantor-base, to a 
   decoded analog of the original number in base natural-base, restricted
