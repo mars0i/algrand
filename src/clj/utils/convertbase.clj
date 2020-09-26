@@ -10,24 +10,15 @@
     (:require [clojure.math.numeric-tower :as math]
               [clojure.string :as string]))
 
-;(defn overflowing-convert-to-seq
-;  "Given a number, returns a sequence of digits (or two-digit numbers, 
-;  for bases greater than 10) representing the number in the given base."
-;  [base x]
-;  (letfn [(convert [y]
-;              (conj (lazy-seq (convert (quot y base)))
-;                    (mod y base)))]
-;    (convert (bigint x))))
+(defn log
+  "Returns the logarithm of x in base (as a double)."
+  [base x]
+  (/ (Math/log x) (Math/log base)))
 
 ;; Note:
 ;; It's useful to distinguish between the integer part and the
 ;; fractional part of a number, because converting the fractional side
 ;; can go on forever, but the integer side has a finite number of digits.
-
-(defn log
-  "Returns the logarithm of x in base (as a double)."
-  [base x]
-  (/ (Math/log x) (Math/log base)))
 
 (defn split-int-fract
   "Return a pair consisting of the integer part (as a bigint) and fractional 
