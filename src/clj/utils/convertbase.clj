@@ -29,6 +29,14 @@
   [base x]
   (/ (Math/log x) (Math/log base)))
 
+(defn split-int-fract
+  "Return a pair consisting of the integer part (as a bigint) and fractional 
+  part of x."
+  [x]
+  (let [int-part (bigint x)
+        fract-part (- x int-part)]
+    [int-part fract-part]))
+  
 (defn convert-int-to-seq
   "Given an integer, returns a sequence of digits (or two-digit numbers, 
   for bases greater than 10) representing the number in the given base."
@@ -46,8 +54,7 @@
   [base x]
   (lazy-seq 
     (let [shifted-x (* x base)
-          int-part (bigint shifted-x) ; int, bigint round toward zero
-          fract-part (- shifted-x int-part)]
+          [int-part fract-part] (split-int-fract shifted-x)]
       (cons int-part
             (convert-fract-to-seq base fract-part)))))
 
@@ -60,8 +67,7 @@
   digits after the decimal point.  Uses lowercase alphabetic characters for
   digits greater than 9 in bases between 10 and 36."
   [base num-digits x]
-  (let [int-part (bigint x) ; int, bigint round toward zero
-        fract-part (- x int-part)]
+  (let [[int-part fract-part] (split-int-fract x)]
     (apply str 
            (concat
              (Integer/toString int-part base)
@@ -80,9 +86,9 @@
   [base s]
   (let [nodot (string/replace s "." "") ; parse float or integer
         nodot-len (count nodot)
-        int-part-len (or (string/index-of s ".") ; if nil dot loc, it's an 
-                         nodot-len)              ; integer string, use length
-        fract-part-len (- nodot-len int-part-len) 
+        [int-part-len fract-part-len] (split-int-fract
+                                        (or (string/index-of s ".") ; if nil dot loc, it's an 
+                                            nodot-len))             ; integer string, use length
         nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
                   (string/split nodot #""))
         exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
@@ -140,7 +146,6 @@
   (cantor-code-digits cantor-base
                       (convert-int-to-seq natural-base x)))
 
-;; TODO NEED TO SUM THE DIGITS!
 (defn cantor-code-fract
   "Given a number x (preferably a Ratio) that is less than 1, return a Ratio 
   based on extracting digits from x in base natural-base, encoding them as a
