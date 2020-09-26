@@ -160,27 +160,16 @@
 
 
 
-;; TODO an experiment:
-;; I think I need something like this to sum the digits (which needn't
-;; only be for cantor-coding):
-;; TEST ME!
-;; TODO 9/25 changed intlen to (dec intlen) in reduce expression.
-;; This fixed off by one left-shift, but WHY?  Figure out why this
-;; makes sense, and do additional experiments.
-;; Here is a bad result:
-;; user=> (number-to-string 2 10 n)
-;; "110.0110101000"
-;; user=> (def nc (cantor-code 2 4 10 n))
-;; #'user/nc
-;; user=> (number-to-string 4 10 nc)
-;; "1003.1331313111"
-;; user=>
+;; Note first-exponent is one less than number of integer digits because
+;; We multiply each digit by base to an exponent, one less each time,
+;; where the last digit isn't multiplied at all, or rather it's multiplied
+;; by (expt base 0).
 (defn sum-digits
   [base integer-digits fractional-digits]
-  (let [intlen (count integer-digits) ; what exponent do they start at?
+  (let [first-exponent (dec (count integer-digits)) ; what exponent do they start at?
         digits (concat integer-digits fractional-digits)
         [_ x] (reduce (fn [[m sum] digit] [(/ m base) (+ sum (* m digit))])  ; m records the current exponent, but we don't need it when we're done
-                      [(math/expt base (dec intlen)) 0] ; start at exponent of first integer digit
+                      [(math/expt base first-exponent) 0] ; start at exponent of first integer digit
                       digits)]
     x))
 
