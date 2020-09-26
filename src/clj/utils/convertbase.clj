@@ -142,9 +142,14 @@
   (take num-digits  
         (cantor-code-digits (convert-fract-to-seq natural-base x))))
 
-;; TODO revise docstring
 (defn cantor-code
-  "ADD DOCSTRING"
+  "Convert a number to a cantor-coded analog of the number.  Note that
+  the number returned is *not*, in general, equal to the original
+  number x.  It is a new number that is such that, if you convert it
+  to a base cantor-base representation of the original base
+  natural-base number (e.g. using number-to-string), the result will
+  be the cantor-coded representation of the original base natural-base
+  representation."
   [natural-base cantor-base num-fract-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
     (sum-digits cantor-base 
