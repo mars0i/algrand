@@ -131,10 +131,11 @@
   (map (fn [digit] (inc (* 2 digit))) xs))
 
 (defn cantor-code
-  "Convert a number to a cantor-coded analog of the number.  Note that
-  the number returned is *not*, in general, equal to the original
-  number x.  It is a new number that is such that, if you convert it
-  to a base cantor-base representation of the original base
+  "Convert a number x, considered to be in base natural-base, to a 
+  antor-coded analog of the original number in base cantor-base, restricted
+  to num-fract-digits .  Note that the number returned is *not*, in general,
+  equal to the original number x.  It is a new number that is such that, if
+  you convert it to a base cantor-base representation of the original base
   natural-base number (e.g. using number-to-string), the result will
   be the cantor-coded representation of the original base natural-base
   representation."
