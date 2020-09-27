@@ -32,15 +32,8 @@
 (def cantor-posix-increment (cb/cantor-code 10 20 0 posix-increment))
 
 ;; FIXME
-;; user=> (def plcg (posix-lcg 324))
-;; #'user/plcg
-;; user=> (def clcg (cantor-posix-lcg (cantor-code 10 20 0 324N)))
-;; #'user/clcg
-;; user=> (number-to-string 10 0 (plcg))
-;; "601072127."
-;; user=> (number-to-string 20 0 (clcg))
-;; Execution error (IllegalArgumentException) at utils.convertbase/number-to-string (convertbase.clj:63).
-;; Value out of range for int: 4485583582273
+;; The values returned aren't correct analogus of what posix-lcg returns.
+;; Note don't forget to cantor-code the seed.  But still.
 (def cantor-posix-lcg 
   "Given a seed considered to be cantor-coded in base 20, returns an integer 
   LCG function using cantor-coded Posix parameters."
