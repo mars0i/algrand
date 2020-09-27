@@ -2,9 +2,11 @@ Notes on chapter 4 of Sieglemann's *Neural Networks and Analog Computation*.
 ===
 
 Marshall Abrams &#169; 2020     
-See algrand/siegelmann4.clj.    
-(If you're reading siegelmann4.md in github, switch to the PDF, which
-displays math symbols correctly.)    
+Also see algrand/siegelmann4.clj.    
+
+If you're reading siegelmann4.md in github, switch to the PDF, which
+displays math symbols correctly.
+
 (This material is in the algrand repo even though it's not about
 algorithmic randomness because my interest in it has to do with
 algorithmic randomness and related things.)
@@ -51,7 +53,8 @@ $$2n + \sum_{i=1}^n l(C_i) + 4$$
 
 ## Circuit-retrieval algorithm
 
-From page 65.  Implemented in file siegelmann4.clj.
+From page 65 of Siegelmann's book.  I implement the algorithm in file
+siegelmann4.clj. The notes below concern both.
 
 ### Miscellaneous preliminary notes:
 
@@ -59,6 +62,10 @@ This is the core of the proof of Lemma 4.1.2.
 
 I'll refer to the step in which $u$ appears as tick 1 or step 1.  So steps
 are 1-based, while matrix and vector indexes will be 0-based.
+
+Weights and activation values should be understood to be Cantor-coded
+values in base 9.  That is, there are five possible values, encoded as
+digits 0, 2, 4, 6, 8.
 
 All elements of the state vector (of length 17) start as zero.
 
