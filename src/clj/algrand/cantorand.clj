@@ -11,7 +11,7 @@
       (let [newval$ (atom seed)]
         (fn []
             (swap! newval$ 
-                   (fn [oldval] (mod (+ (* oldval multiplier) increment)
+                   (fn [oldval] (mod (+ increment (* oldval multiplier))
                                      modulus)))))))
 
 (def posix-modulus (ma/expt 2N 32N))
@@ -27,9 +27,9 @@
              posix-multiplier
              posix-increment))
 
-(def cantor-posix-modulus (cb/cantor-code 10 20 0 (ma/expt 2N 32N)))
-(def cantor-posix-multiplier (cb/cantor-code 10 20 0 25214903917N))
-(def cantor-posix-increment (cb/cantor-code 10 20 0 11N))
+(def cantor-posix-modulus (cb/cantor-code 10 20 0 posix-modulus))
+(def cantor-posix-multiplier (cb/cantor-code 10 20 0 posix-multiplier))
+(def cantor-posix-increment (cb/cantor-code 10 20 0 posix-increment))
 
 ;; FIXME
 ;; user=> (def plcg (posix-lcg 324))
