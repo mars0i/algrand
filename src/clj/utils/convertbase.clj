@@ -61,7 +61,7 @@
   (let [[int-part fract-part] (split-int-fract x)]
     (apply str 
            (concat
-             (Integer/toString int-part base)
+             (Integer/toString int-part base) ;; FIXME barfs on large bigints that can be produced by cantor-coding
              ["."]
              (map (fn [n] (Integer/toString n base))
                   (take num-digits
