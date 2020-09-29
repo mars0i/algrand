@@ -127,18 +127,19 @@
                       digits)]
     x))
 
-;; Note the following is what Siegelmann uses e.g. for base 4 in chapter 3, 
-;; but in chapter 4, her base 9 representation does not add the 1, i.e. the
-;; digits are 0, 2, 4, 6, 8.
-(defn cantor-code-digit
-  "Cantor-code a single digit, i.e. multiply by 2 and add 1."
-  [digit]
-  (inc (* 2 digit)))
+(defn cantor-code-digit-fn
+  "Return a function that cantor-codes a single digit, multiplying by 2 and 
+  adding offset."
+  [offset]
+  (fn [digit]
+      (+ offset (* 2 digit))))
 
-(defn cantor-decode-digit
-  [digit]
-  "Cantor-decode a single digit, i.e. subtract 1 and divide by 2."
-  (/ (dec digit) 2))
+(defn cantor-decode-digit-fn
+  [offset]
+  "Return a function that cantor-decodes a single digit, subtracting offset
+  and dividing by 2."
+  (fn [digit]
+      (/ (- digit offset) 2)))
 
 ;; contains common code for cantor-code and cantor-decode
 (defn cantor-convert 
@@ -158,21 +159,40 @@
                       (map digit-converter
                            (convert-fract-to-seq from-base fract-part))))))
 
-;; wrapper for cantor-convert
-(defn cantor-code
+;; Wrappers for cantor-convert:
+
+(defn cantor-code-0
   "Convert a number x, considered to be in base natural-base, to a 
-  antor-coded analog of the original number in base cantor-base, restricted
-  to num-fract-digits.  See cantor-convert for more info."
+  antor-coded analog 2x of the original number in base cantor-base, 
+  restricted to num-fract-digits.  See cantor-convert for more info."
   [natural-base cantor-base num-fract-digits x]
-  (cantor-convert cantor-code-digit natural-base cantor-base
+  (cantor-convert (cantor-code-digit-fn 0) natural-base cantor-base
                   num-fract-digits x))
 
 ;; wrapper for cantor-convert
-(defn cantor-decode
+(defn cantor-decode-0
   "Convert a number x, considered to be in base cantor-base, to a 
-  decoded analog of the original number in base natural-base, restricted
-  to num-fract-digits.  See cantor-convert for more info."
+  decoded analog x/2 of the original number in base natural-base, 
+  restricted to num-fract-digits.  See cantor-convert for more info."
   [cantor-base natural-base num-fract-digits x]
-  (cantor-convert cantor-decode-digit cantor-base natural-base
+  (cantor-convert (cantor-decode-digit-fn 0) cantor-base natural-base
+                  num-fract-digits x))
+
+
+(defn cantor-code-1
+  "Convert a number x, considered to be in base natural-base, to a 
+  antor-coded analog 2x+1 of the original number in base cantor-base, 
+  restricted to num-fract-digits.  See cantor-convert for more info."
+  [natural-base cantor-base num-fract-digits x]
+  (cantor-convert (cantor-code-digit-fn 1) natural-base cantor-base
+                  num-fract-digits x))
+
+;; wrapper for cantor-convert
+(defn cantor-decode-1
+  "Convert a number x, considered to be in base cantor-base, to a 
+  decoded analog (x-1)/2 of the original number in base natural-base, 
+  restricted to num-fract-digits.  See cantor-convert for more info."
+  [cantor-base natural-base num-fract-digits x]
+  (cantor-convert (cantor-decode-digit-fn 1) cantor-base natural-base
                   num-fract-digits x))
 
