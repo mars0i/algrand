@@ -61,11 +61,16 @@
   (let [[int-part fract-part] (split-int-fract x)]
     (apply str 
            (concat
-             (Integer/toString int-part base) ;; FIXME barfs on large bigints that can be produced by cantor-coding
+             (map (fn [n] (Integer/toString n base)) ; don't apply to int-part directly, so bigints are handled too
+                  (convert-int-to-seq base int-part))
              ["."]
              (map (fn [n] (Integer/toString n base))
                   (take num-digits
                         (convert-fract-to-seq base fract-part)))))))
+
+;; Convenience abbreviations:
+(def base2 (partial number-to-string 2))
+(def base4 (partial number-to-string 4))
 
 ;; TODO Handle negative numbers
 ;; Code has a lot of setup but the actual calculation doesn't need
@@ -122,6 +127,9 @@
                       digits)]
     x))
 
+;; Note the following is what Siegelmann uses e.g. for base 4 in chapter 3, 
+;; but in chapter 4, her base 9 representation does not add the 1, i.e. the
+;; digits are 0, 2, 4, 6, 8.
 (defn cantor-code-digit
   "Cantor-code a single digit, i.e. multiply by 2 and add 1."
   [digit]
