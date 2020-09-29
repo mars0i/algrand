@@ -27,17 +27,14 @@
              posix-multiplier
              posix-increment))
 
-(def cantor-posix-modulus (cb/cantor-code 10 20 0 posix-modulus))
-(def cantor-posix-multiplier (cb/cantor-code 10 20 0 posix-multiplier))
-(def cantor-posix-increment (cb/cantor-code 10 20 0 posix-increment))
+(def cantor-posix-modulus (cb/cantor-code-0 10 20 0 posix-modulus))
+(def cantor-posix-multiplier (cb/cantor-code-0 10 20 0 posix-multiplier))
+(def cantor-posix-increment (cb/cantor-code-0 10 20 0 posix-increment))
 
-;; FIXME
-;; The values returned aren't correct analogus of what posix-lcg returns.
-;; Note don't forget to cantor-code the seed.  But still.
-(def cantor-posix-lcg 
+;; This doesn't work.  cantorcoding.md explains why.
+(def bad-cantor-posix-lcg 
   "Given a seed considered to be cantor-coded in base 20, returns an integer 
   LCG function using cantor-coded Posix parameters."
   (lcg-maker cantor-posix-modulus 
              cantor-posix-multiplier 
              cantor-posix-increment))
-
