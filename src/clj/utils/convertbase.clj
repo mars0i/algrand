@@ -53,10 +53,10 @@
 ;; Output is float or integer style.  Returning a ratio would have little
 ;; use, and I have no idea at present of a good way to implment it.
 (defn number-to-string
-  "Given an integer, ratio, or floating-point number x, returns a float string
-  representation of the number in the given base with the specified number of
-  digits after the decimal point.  Uses lowercase alphabetic characters for
-  digits greater than 9 in bases between 10 and 36."
+  "Given an (big)integer, ratio, or floating-point number x, returns a float 
+  string representation of the number in the given base with the specified 
+  number of digits after the decimal point.  Uses lowercase alphabetic 
+  characters for digits greater than 9 in bases between 10 and 36."
   [base num-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
     (apply str 
