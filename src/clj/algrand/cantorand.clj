@@ -27,14 +27,44 @@
              posix-multiplier
              posix-increment))
 
+
+
 (def cantor-posix-modulus (cb/cantor-code-0 10 20 0 posix-modulus))
 (def cantor-posix-multiplier (cb/cantor-code-0 10 20 0 posix-multiplier))
 (def cantor-posix-increment (cb/cantor-code-0 10 20 0 posix-increment))
 
-;; This doesn't work.  cantorcoding.md explains why.
+;; This doesn't work.  It's not going to work. cantorcoding.md explains why.
 (def bad-cantor-posix-lcg 
   "Given a seed considered to be cantor-coded in base 20, returns an integer 
   LCG function using cantor-coded Posix parameters."
   (lcg-maker cantor-posix-modulus 
              cantor-posix-multiplier 
              cantor-posix-increment))
+
+;;;;;;;;;;;;;;;;;;
+
+;; assumes zero-based Cantor coding
+;; doesn't handle fractional
+;; FIXME bug: not summing correctly! result is wrong.
+(defn cantor-+
+  [base x y]
+  (let [x-seq' (cb/convert-int-to-seq base x)
+        y-seq' (cb/convert-int-to-seq base y)
+        x-len (count x-seq')
+        y-len (count y-seq')
+        xy-diff (- x-len y-len)
+        ; normalize lengths:
+        [x-seq y-seq] (cond (zero? xy-diff) [x-seq' y-seq']
+                            (pos?  xy-diff) [x-seq' (concat (repeat xy-diff 0) y-seq')]
+                            :else           [(concat (repeat (- xy-diff) 0) x-seq') y-seq'])
+        _ (println (count x-seq) (count y-seq))
+        xy-seq (map vector x-seq y-seq)
+        [sum-seq _] (reduce (fn [[sums carry] [x' y']]
+                                (let [tot (+ x' y' carry)]
+                                  [(conj sums (* 2 (quot tot base)))  ; TODO IS THIS RIGHT?
+                                   (mod tot base)]))           ; TODO IS THIS RIGHT?
+                            [[] 0] xy-seq)]
+  (cb/sum-digits base sum-seq [])))
+
+
+
