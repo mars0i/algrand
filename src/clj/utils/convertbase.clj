@@ -59,14 +59,14 @@
   characters for digits greater than 9 in bases between 10 and 36."
   [base num-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
-    (apply str 
-           (concat
-             (map (fn [n] (Integer/toString n base)) ; don't apply to int-part directly, so bigints are handled too
-                  (convert-int-to-seq base int-part))
-             ["."]
-             (map (fn [n] (Integer/toString n base))
-                  (take num-digits
-                        (convert-fract-to-seq base fract-part)))))))
+    (string/join
+      (concat
+        (map (fn [n] (Integer/toString n base)) ; don't apply to int-part directly, so bigints are handled too
+             (convert-int-to-seq base int-part))
+        ["."]
+        (map (fn [n] (Integer/toString n base))
+             (take num-digits
+                   (convert-fract-to-seq base fract-part)))))))
 
 ;; Convenience abbreviations:
 (def base2 (partial number-to-string 2))
