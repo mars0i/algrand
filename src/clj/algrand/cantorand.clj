@@ -62,18 +62,23 @@
   the intended use is for zero-based Cantor coding.)"
   [base]
   (fn [[sums carry] [x y]]
-      (let [tot (+ x y carry)]
-        [(conj sums (mod tot base))
-         (* 2 (quot tot base))]))) ; doubled carry for Cantor coding
+      (let [tot (+ x y carry)
+            newdigit (mod tot base)
+            newcarry (* 2 (quot tot base))] ; doubled carry for Cantor coding
+        [(conj sums newdigit) newcarry])))
+
 
 ;; assumes zero-based Cantor coding
 ;; doesn't handle fractional
+;; NOTE make sure second digit is in the correct base e.g. Cantor-coded
+;; base 4 "20" is the actual number 8.
 (defn cantor-+
   [base x y]
   (let [xs (reverse (cb/convert-int-to-seq base x)) ; reverse to start from less
         ys (reverse (cb/convert-int-to-seq base y)) ;  significant so carry works
         xys (padded-pairs xs ys)
-        [sums _] (reduce (sum-digits-with-carry-fn base)  [[] 0]  xys)]
+        ;; TODO BUG?: What happens if it carries off the end, i.e. if _ != 0 ?
+        [sums _] (reduce (sum-digits-with-carry-fn base)  [[] 0N]  xys)]
     (cb/sum-digits base (reverse sums) [])))
 
 ;i want 
