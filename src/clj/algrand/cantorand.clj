@@ -53,6 +53,19 @@
                     [(concat xs (repeat 0)) ys])]
     (map vector xs' ys')))
 
+(defn sum-digits-with-carry-fn
+  "Given numeric base, returns a function for use with reduce, that accepts a pair
+  containing a sequence of sums so far, and the current carry value, and a pair 
+  containing two digits to be summed.  The function returns a pair containing 
+  the new sum (mod base) conj'ed onto the end of the sequence of sums, and a new
+  doubled carry.  (The returned carry is double what it would be naturally because
+  the intended use is for zero-based Cantor coding.)"
+  [base]
+  (fn [[sums carry] [x y]]
+      (let [tot (+ x y carry)]
+        [(conj sums (mod tot base))
+         (* 2 (quot tot base))]))) ; doubled carry for Cantor coding
+
 ;; assumes zero-based Cantor coding
 ;; doesn't handle fractional
 (defn cantor-+
@@ -60,12 +73,18 @@
   (let [xs (reverse (cb/convert-int-to-seq base x)) ; reverse to start from less
         ys (reverse (cb/convert-int-to-seq base y)) ;  significant so carry works
         xys (padded-pairs xs ys)
-        [sums _] (reduce (fn [[sumz carry] [x' y']]
-                             (let [tot (+ x' y' carry)]
-                               [(conj sumz (quot tot base))
-                                (* 2 (mod tot base))]))
-                         [[] 0] xys)]
-    (cb/sum-digits base sums [])))
+        [sums _] (reduce (sum-digits-with-carry-fn base)  [[] 0]  xys)]
+    (cb/sum-digits base (reverse sums) [])))
+
+;i want 
+;  2 + 0 = 2, 0
+;
+;1+1 = 10, i.e. 0, carry 1
+;  2 + 2 = 2 0, i.e. 0, carry 2
+;
+;ie curr digit is mod x y
+;carry is quot x y , * 2 because we're mapping a single carry digit to 
+;its double, since it's Cantor-coding
 
 
 
