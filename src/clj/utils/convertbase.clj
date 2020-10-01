@@ -116,9 +116,9 @@
 ;; where the last digit isn't multiplied at all, or rather it's multiplied
 ;; by (expt base 0).
 (defn sum-digits
-  "Given a sequence of digits representing an integer a the given base, and 
-  a sequence of digits representing a fractional part of a number in
-  the same base, return the represented number."
+  "Given a sequence of digits representing an integer in the given base, and 
+  a sequence of digits representing a fractional part of a number in the same
+  base, return the represented number."
   [base integer-digits fractional-digits]
   (let [first-exponent (dec (count integer-digits)) ; what exponent do they start at?
         digits (concat integer-digits fractional-digits)
