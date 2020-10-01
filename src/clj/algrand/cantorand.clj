@@ -43,10 +43,33 @@
 
 ;;;;;;;;;;;;;;;;;;
 
+(defn padded-pairs
+  "Given two finite sequences of elements, returns a sequence of pairs of
+  their elements after the shorter sequence is padded with zeros to make their
+  lengths equal."
+  [xs ys]
+  (let [[xs' ys'] (if (> (count xs) (count ys)) ; pad shorter seq with 0's
+                    [xs (concat ys (repeat 0))]
+                    [(concat xs (repeat 0)) ys])]
+    (map vector xs' ys')))
+
 ;; assumes zero-based Cantor coding
 ;; doesn't handle fractional
-;; FIXME bug: not summing correctly! result is wrong.
 (defn cantor-+
+  [base x y]
+  (let [xs (reverse (cb/convert-int-to-seq base x)) ; reverse to start from less
+        ys (reverse (cb/convert-int-to-seq base y)) ;  significant so carry works
+        xys (padded-pairs xs ys)
+        [sums _] (reduce (fn [[sumz carry] [x' y']]
+                             (let [tot (+ x' y' carry)]
+                               [(conj sumz (quot tot base))
+                                (* 2 (mod tot base))]))
+                         [[] 0] xys)]
+    (cb/sum-digits base sums [])))
+
+
+
+(defn OLD-cantor-+
   [base x y]
   (let [x-seq' (cb/convert-int-to-seq base x)
         y-seq' (cb/convert-int-to-seq base y)
