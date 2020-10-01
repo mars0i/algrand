@@ -39,3 +39,31 @@ result into the Cantor-coded representation, but that's uninteresting
 cheating--although it really is the same, in the sense that the Cantor
 arithmetic operators are in effect simply performing the translation
 within the arithmetic function.)
+
+## exploratory notes:
+
+Suppose you're c-coding base 2 in base 4.  What if you used only
+multipliers such that their effect was to perform a base-4 shift that
+preserved the c-code.  And your modulus is such that that you're just
+shifting digits off the left end of the number.
+
+Now you also need an increment addition; otherwise you're going to end
+up with a bunch of zeros on the right. And the increment addition has
+to be such that it also preserves the c-code.  
+
+Is this possible?
+
+```clojure
+(def ns4 (partial number-to-string 4 0))
+(def n 4r2022002020)
+(def mul (expt 4 4))
+(def m (expt 4 6))
+(ns4 (mod n m)) ;=> "2020."
+```
+
+The increment is the tough part.  Because we're assuming it iself is
+c-coded, but then you will have carries in some cases that escape the
+c-code.
+
+So maybe just implement a special addition function?
+experiment: `algrand/cantor-+`
