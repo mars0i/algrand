@@ -259,6 +259,6 @@
 (defn cantor*
   [base x y]
   (apply cantor+ base
-         (map (fn [x-digit e] (* (math/expt x-digit e) y))
+         (map (fn [x-digit e] (* (math/expt x-digit e) y)) ; each product is just a shift, i.e. adding zero to end
               (reverse (convert-int-to-seq base x)) ; reverse to match (range)
               (range))))
