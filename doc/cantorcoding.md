@@ -40,7 +40,44 @@ cheating--although it really is the same, in the sense that the Cantor
 arithmetic operators are in effect simply performing the translation
 within the arithmetic function.)
 
-## exploratory notes:
+## addition
+
+The tricky part is addition, because carrying works differently in
+Cantor coding.  e.g. in a zero-based, base-6 representation of base-3,
+`2+2=11` in base 3 is represented as `4+4=22`.  I've now implemented
+addition for zero-based Cantor coded numbers (currently `cantor+` in
+convertbase.clj).
+
+One-based addition is trickier, and not worth doing unless there's a
+good reason to use one-based Cantor-coding for other reasons.  Here 
+are some rules that it would have to be satisfied e.g.for a base-6
+representation of base 3:
+```
+1 + anything = anything  (since 1 means zero)
+3 + 3 = 5                (since 3 means 1, and 5 means 2)
+5 + 3 = 30               (i.e. 2 + 1 = 10 in base 3)
+5 + 5 = 33               (i.e. 2 + 2 = 11 in base 3)
+```
+You can do that, but it's tricky.  The easiest way to do this would
+simply be to subtract from each digit on input, use zero-based
+addition, and then add one to each digit on output.
+
+## multiplication
+
+Multiplication also involves carrying.  If the multiplier is a power
+of the Cantor base, then the multiplication is simply a shift, i.e.
+you add zero to the end of the numeric representation (like
+multiplying by 10 in base 10).
+
+Instead of trying to implement an entire multiplication function with
+carrying fromn scratch, you can use the fact that every number is a
+linear combination of powers of the base, so $xy = (x_n + \cdots +
+x_m)y$, where the $x_i$ are the powers of the base that sum to $x$.
+So multiplication in general can be implemented by adding together a
+bunch of shifts (i.e. tacking on zeros).
+
+
+## old exploratory notes:
 
 Suppose you're c-coding base 2 in base 4.  What if you used only
 multipliers such that their effect was to perform a base-4 shift that
