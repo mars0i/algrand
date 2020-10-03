@@ -217,11 +217,11 @@
   containing the new sum (mod base) conj'ed onto the end of the sequence of
   sums, and a new doubled carry.  (The returned carry is double what it would
   be naturally because the intended use is for zero-based Cantor coding.)"
-  [base]
+  [offset base]
   (fn [[sums carry] [x y]]
       (let [tot (+ x y carry)
             newdigit (mod tot base)
-            newcarry (* 2 (quot tot base))] ; doubled carry for Cantor coding
+            newcarry (+ offset (* 2 (quot tot base)))]
         [(conj sums newdigit) newcarry])))
 
 
@@ -234,7 +234,7 @@
    (let [xs (reverse (convert-int-to-seq base x)) ; reverse to start from less
          ys (reverse (convert-int-to-seq base y)) ;  significant so carry works
          xys (padded-pairs xs ys)
-         [sums final-carry] (reduce (sum-digits-with-carry-fn base) [[] 0N] xys)
+         [sums final-carry] (reduce (sum-digits-with-carry-fn 0 base) [[] 0N] xys)
          sums (if (pos? final-carry)
                 (conj sums final-carry) ; final-carry is first digit of result
                 sums)]                  ; unless it's zero
