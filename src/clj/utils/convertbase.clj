@@ -178,7 +178,6 @@
   (cantor-convert (cantor-decode-digit-fn 0) cantor-base natural-base
                   num-fract-digits x))
 
-
 (defn cantor-code-1
   "Convert a number x, considered to be in base natural-base, to a 
   antor-coded analog 2x+1 of the original number in base cantor-base, 
@@ -196,20 +195,50 @@
   (cantor-convert (cantor-decode-digit-fn 1) cantor-base natural-base
                   num-fract-digits x))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Cantor-code arithmetic
+
+;; Helper function for Cantor addition functions
+(defn padded-pairs
+  "Given two finite sequences of elements, returns a sequence of pairs of
+  their elements after the shorter sequence is padded with zeros to make their
+  lengths equal."
+  [xs ys]
+  (let [[xs' ys'] (if (> (count xs) (count ys)) ; pad shorter seq with 0's
+                    [xs (concat ys (repeat 0))]
+                    [(concat xs (repeat 0)) ys])]
+    (map vector xs' ys')))
+
+;; Helper function for Cantor addition functions
+(defn sum-digits-with-carry-fn
+  "Given numeric base, returns a function for use with reduce, that accepts 
+  a pair containing a sequence of sums so far, and the current carry value, 
+  and a pair containing two digits to be summed.  The function returns a pair
+  containing the new sum (mod base) conj'ed onto the end of the sequence of
+  sums, and a new doubled carry.  (The returned carry is double what it would
+  be naturally because the intended use is for zero-based Cantor coding.)"
+  [base]
+  (fn [[sums carry] [x y]]
+      (let [tot (+ x y carry)
+            newdigit (mod tot base)
+            newcarry (* 2 (quot tot base))] ; doubled carry for Cantor coding
+        [(conj sums newdigit) newcarry])))
+
+
 ;; Doesn't handle fractional
 (defn cantor0+
   "Given zero-based Cantor-coded numbers in the specified base, returns a
   number that's the Cantor-coded representation of the sum of the original 
   numbers that had been transformed by Cantor-coding."
   ([base x y]
-   (let [xs (reverse (cb/convert-int-to-seq base x)) ; reverse to start from less
-         ys (reverse (cb/convert-int-to-seq base y)) ;  significant so carry works
+   (let [xs (reverse (convert-int-to-seq base x)) ; reverse to start from less
+         ys (reverse (convert-int-to-seq base y)) ;  significant so carry works
          xys (padded-pairs xs ys)
          [sums final-carry] (reduce (sum-digits-with-carry-fn base) [[] 0N] xys)
          sums (if (pos? final-carry)
                 (conj sums final-carry) ; final-carry is first digit of result
                 sums)]                  ; unless it's zero
-     (cb/sum-digits base (reverse sums) [])))
-  ([base x y & zs] (reduce (partial cantor-+ base)
-                           (cantor-+ base x y)
+     (sum-digits base (reverse sums) [])))
+  ([base x y & zs] (reduce (partial cantor0+ base)
+                           (cantor0+ base x y)
                            zs)))

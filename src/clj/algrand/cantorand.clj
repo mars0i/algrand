@@ -42,28 +42,3 @@
              cantor-posix-increment))
 
 ;;;;;;;;;;;;;;;;;;
-
-(defn padded-pairs
-  "Given two finite sequences of elements, returns a sequence of pairs of
-  their elements after the shorter sequence is padded with zeros to make their
-  lengths equal."
-  [xs ys]
-  (let [[xs' ys'] (if (> (count xs) (count ys)) ; pad shorter seq with 0's
-                    [xs (concat ys (repeat 0))]
-                    [(concat xs (repeat 0)) ys])]
-    (map vector xs' ys')))
-
-(defn sum-digits-with-carry-fn
-  "Given numeric base, returns a function for use with reduce, that accepts 
-  a pair containing a sequence of sums so far, and the current carry value, 
-  and a pair containing two digits to be summed.  The function returns a pair
-  containing the new sum (mod base) conj'ed onto the end of the sequence of
-  sums, and a new doubled carry.  (The returned carry is double what it would
-  be naturally because the intended use is for zero-based Cantor coding.)"
-  [base]
-  (fn [[sums carry] [x y]]
-      (let [tot (+ x y carry)
-            newdigit (mod tot base)
-            newcarry (* 2 (quot tot base))] ; doubled carry for Cantor coding
-        [(conj sums newdigit) newcarry])))
-
