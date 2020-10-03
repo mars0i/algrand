@@ -128,7 +128,7 @@
     x))
 
 (defn cantor-code-digit-fn
-  "Return a function that Cantor-codes a single digit, multiplying by 2 and 
+  "Return a function that cantor-codes a single digit, multiplying by 2 and 
   adding offset."
   [offset]
   (fn [digit]
@@ -136,20 +136,20 @@
 
 (defn cantor-decode-digit-fn
   [offset]
-  "Return a function that Cantor-decodes a single digit, subtracting offset
+  "Return a function that cantor-decodes a single digit, subtracting offset
   and dividing by 2."
   (fn [digit]
       (/ (- digit offset) 2)))
 
 ;; contains common code for cantor-code and cantor-decode
 (defn cantor-convert 
-  "Convert a number x, considered to be in base from-base, to a Cantor-coded
+  "Convert a number x, considered to be in base from-base, to a cantor-coded
   or decoded analog of the original number in base to-base, restricted to 
-  num-fract-digits.  Whether this performs Cantor-coding or decoding, and
-  whether it uses zero-based or one-based Cantor coding, depends on the 
-  function digit-converter that's passed in.  Note that the number returned
-  is *not*, in general, equal to the original number x.  It is a new number 
-  that is the analogous representation of the old number in the new base."
+  num-fract-digits.  Whether this performs cantor-coding or decoding
+  depends on the function digit-converter that's passed in.  Note that the 
+  number returned is *not*, in general, equal to the original number x.  It
+  is a new number that is the analogous representation of the old number in 
+  the new base."
   [digit-converter from-base to-base num-fract-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
     (sum-digits to-base 
@@ -217,51 +217,28 @@
   containing the new sum (mod base) conj'ed onto the end of the sequence of
   sums, and a new doubled carry.  (The returned carry is double what it would
   be naturally because the intended use is for zero-based Cantor coding.)"
-  [offset base]
+  [base]
   (fn [[sums carry] [x y]]
       (let [tot (+ x y carry)
             newdigit (mod tot base)
-            newcarry (+ offset (* 2 (quot tot base)))] ;; TODO ?: wrong for one-based?
+            newcarry (* 2 (quot tot base))] ; doubled carry for Cantor coding
         [(conj sums newdigit) newcarry])))
 
 
 ;; Doesn't handle fractional
-(defn cantor+
-  "Given Cantor-coded numbers in the specified base, returns a number that's 
-  the Cantor-coded representation of the sum of the original numbers that had 
-  been transformed by Cantor-coding using 2x+offset."
-  [offset base x y]
+(defn cantor0+
+  "Given zero-based Cantor-coded numbers in the specified base, returns a
+  number that's the Cantor-coded representation of the sum of the original 
+  numbers that had been transformed by Cantor-coding."
+  ([base x y]
    (let [xs (reverse (convert-int-to-seq base x)) ; reverse to start from less
          ys (reverse (convert-int-to-seq base y)) ;  significant so carry works
          xys (padded-pairs xs ys)
-         [sums final-carry] (reduce (sum-digits-with-carry-fn offset base)
-                                    [[] 0N] ;; TODO s/b offset??
-                                    xys)
-         sums (if (pos? final-carry)  ;; TODO different for one-based?
+         [sums final-carry] (reduce (sum-digits-with-carry-fn base) [[] 0N] xys)
+         sums (if (pos? final-carry)
                 (conj sums final-carry) ; final-carry is first digit of result
                 sums)]                  ; unless it's zero
      (sum-digits base (reverse sums) [])))
-
-;; Eliding traditional dashes in name because two much trouble to type -0-+
-(defn cantor0+
-  "Given zero-based Cantor-coded numbers in the specified base (i.e. coded
-  with 2x), returns a number that's the Cantor-coded representation of the
-  sum of the original numbers that had been transformed by Cantor-coding."
-  ([base x] x)
-  ([base x y] (cantor+ 0 base x y))
-  ([base x y & zs] (reduce (partial cantor+ 0 base)
-                           (cantor+ 0 base x y)
+  ([base x y & zs] (reduce (partial cantor0+ base)
+                           (cantor0+ base x y)
                            zs)))
-
-;; FIXME doesn't work right
-(defn cantor1+
-  "Given one-based Cantor-coded numbers in the specified base (i.e. coded
-  with 2x+1), returns a number that's the Cantor-coded representation of the
-  sum of the original numbers that had been transformed by Cantor-coding."
-  ([base x] x)
-  ([base x y] (cantor+ 1 base x y))
-  ([base x y & zs] (reduce (partial cantor+ 1 base)
-                           (cantor+ 1 base x y)
-                           zs)))
-
-
