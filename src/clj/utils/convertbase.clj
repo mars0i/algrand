@@ -84,6 +84,7 @@
         nodot-len (count nodot)
         [int-part-len fract-part-len] (split-int-fract
                                         (or (string/index-of s ".") ; if nil dot loc, it's an         nodot-len))             ; integer string, use length
+                                            nodot-len))             ; integer string, use length
         nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
                   (string/split nodot #""))
         exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
@@ -257,7 +258,7 @@
 ;; bunch of shifts (i.e. tacking on zeros).
 (defn cantor*
   [base x y]
-  (apply convert+ base
+  (apply cantor+ base
          (map (fn [x-digit e] (* (math/expt x-digit e) y))
               (reverse (convert-int-to-seq base x)) ; reverse to match (range)
               (range))))
