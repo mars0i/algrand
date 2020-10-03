@@ -83,8 +83,7 @@
   (let [nodot (string/replace s "." "") ; parse float or integer
         nodot-len (count nodot)
         [int-part-len fract-part-len] (split-int-fract
-                                        (or (string/index-of s ".") ; if nil dot loc, it's an 
-                                            nodot-len))             ; integer string, use length
+                                        (or (string/index-of s ".") ; if nil dot loc, it's an         nodot-len))             ; integer string, use length
         nums (map (fn [n] (bigint (Integer/parseInt n base))) ; w/base: letters
                   (string/split nodot #""))
         exponents (range (dec int-part-len)       ; dec: 1's place has expt 0
@@ -225,8 +224,8 @@
         [(conj sums newdigit) newcarry])))
 
 
-;; Doesn't handle fractional
-;; Calling this "cantor+" and not "cantor-+" since the latter is hard to type.
+;; Doesn't handle fractional or negative
+;; I'm calling this "cantor+" and not "cantor-+" since the latter is hard to type.
 ;; Note I'm calling this "cantor+" rather than something to indicate that it's
 ;; for zero-based Cantor coding, because addition with one-based Cantor coding
 ;; is tricky and not really worth pursuing unless there's an important reason.
@@ -246,6 +245,6 @@
                 (conj sums final-carry) ; final-carry is first digit of result
                 sums)]                  ; unless it's zero
      (sum-digits base (reverse sums) [])))
-  ([base x y & zs] (reduce (partial cantor0+ base)
-                           (cantor0+ base x y)
+  ([base x y & zs] (reduce (partial cantor+ base)
+                           (cantor+ base x y)
                            zs)))
