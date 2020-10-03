@@ -248,3 +248,16 @@
   ([base x y & zs] (reduce (partial cantor+ base)
                            (cantor+ base x y)
                            zs)))
+
+;; Instead of trying to implement an entire multiplication function with
+;; carrying fromn scratch, use the fact that every number is a
+;; linear combination of powers of the base, so $xy = (x_n + \cdots +
+;; x_m)y$, where the $x_i$ are the powers of the base that sum to $x$.
+;; So multiplication in general can be implemented by adding together a
+;; bunch of shifts (i.e. tacking on zeros).
+(defn cantor*
+  [base x y]
+  (apply convert+ base
+         (map (fn [x-digit e] (* (math/expt x-digit e) y))
+              (reverse (convert-int-to-seq base x)) ; reverse to match (range)
+              (range))))
