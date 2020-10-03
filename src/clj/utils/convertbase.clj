@@ -143,13 +143,13 @@
 
 ;; contains common code for cantor-code and cantor-decode
 (defn cantor-convert 
-  "Convert a number x, considered to be in base from-base, to a cantor-coded
+  "Convert a number x, considered to be in base from-base, to a Cantor-coded
   or decoded analog of the original number in base to-base, restricted to 
-  num-fract-digits.  Whether this performs cantor-coding or decoding
-  depends on the function digit-converter that's passed in.  Note that the 
-  number returned is *not*, in general, equal to the original number x.  It
-  is a new number that is the analogous representation of the old number in 
-  the new base."
+  num-fract-digits.  Whether this performs cantor-coding or decoding, and
+  whether it uses zero-based or one-based Cantor coding, depends on the 
+  function digit-converter that's passed in.  Note that the number returned
+  is *not*, in general, equal to the original number x.  It is a new number 
+  that is the analogous representation of the old number in the new base."
   [digit-converter from-base to-base num-fract-digits x]
   (let [[int-part fract-part] (split-int-fract x)]
     (sum-digits to-base 
@@ -226,11 +226,11 @@
 
 
 ;; Doesn't handle fractional
-(defn cantor0+
-  "Given zero-based Cantor-coded numbers in the specified base, returns a
-  number that's the Cantor-coded representation of the sum of the original 
-  numbers that had been transformed by Cantor-coding."
-  ([base x y]
+(defn cantor+
+  "Given Cantor-coded numbers in the specified base, returns a number that's 
+  the Cantor-coded representation of the sum of the original numbers that had 
+  been transformed by Cantor-coding using 2x+offset."
+  [offset base x y]
    (let [xs (reverse (convert-int-to-seq base x)) ; reverse to start from less
          ys (reverse (convert-int-to-seq base y)) ;  significant so carry works
          xys (padded-pairs xs ys)
@@ -239,6 +239,13 @@
                 (conj sums final-carry) ; final-carry is first digit of result
                 sums)]                  ; unless it's zero
      (sum-digits base (reverse sums) [])))
-  ([base x y & zs] (reduce (partial cantor0+ base)
-                           (cantor0+ base x y)
+
+(defn cantor0+
+  "Given zero-based Cantor-coded numbers in the specified base (i.e. coded
+  with 2x), returns a number that's the Cantor-coded representation of the
+  sum of the original numbers that had been transformed by Cantor-coding."
+  ([base x] x)
+  ([base x y] (cantor+ 0 base x y))
+  ([base x y & zs] (reduce (partial cantor+ 0 base)
+                           (cantor+ 0 base x y)
                            zs)))
