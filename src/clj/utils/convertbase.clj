@@ -196,3 +196,20 @@
   (cantor-convert (cantor-decode-digit-fn 1) cantor-base natural-base
                   num-fract-digits x))
 
+;; Doesn't handle fractional
+(defn cantor0+
+  "Given zero-based Cantor-coded numbers in the specified base, returns a
+  number that's the Cantor-coded representation of the sum of the original 
+  numbers that had been transformed by Cantor-coding."
+  ([base x y]
+   (let [xs (reverse (cb/convert-int-to-seq base x)) ; reverse to start from less
+         ys (reverse (cb/convert-int-to-seq base y)) ;  significant so carry works
+         xys (padded-pairs xs ys)
+         [sums final-carry] (reduce (sum-digits-with-carry-fn base) [[] 0N] xys)
+         sums (if (pos? final-carry)
+                (conj sums final-carry) ; final-carry is first digit of result
+                sums)]                  ; unless it's zero
+     (cb/sum-digits base (reverse sums) [])))
+  ([base x y & zs] (reduce (partial cantor-+ base)
+                           (cantor-+ base x y)
+                           zs)))
