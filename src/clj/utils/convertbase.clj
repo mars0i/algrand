@@ -226,7 +226,14 @@
 
 
 ;; Doesn't handle fractional
-(defn cantor0+
+;; Calling this "cantor+" and not "cantor-+" since the latter is hard to type.
+;; Note I'm calling this "cantor+" rather than something to indicate that it's
+;; for zero-based Cantor coding, because addition with one-based Cantor coding
+;; is tricky and not really worth pursuing unless there's an important reason.
+;; (The easiest way to implement one-based addition would be to conver the
+;; Cantor-coded number to zero-based by subtracting 1 from each digit, and then
+;; converting it back at the end.)
+(defn cantor+
   "Given zero-based Cantor-coded numbers in the specified base, returns a
   number that's the Cantor-coded representation of the sum of the original 
   numbers that had been transformed by Cantor-coding."
