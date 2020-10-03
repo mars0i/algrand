@@ -54,12 +54,12 @@
     (map vector xs' ys')))
 
 (defn sum-digits-with-carry-fn
-  "Given numeric base, returns a function for use with reduce, that accepts a pair
-  containing a sequence of sums so far, and the current carry value, and a pair 
-  containing two digits to be summed.  The function returns a pair containing 
-  the new sum (mod base) conj'ed onto the end of the sequence of sums, and a new
-  doubled carry.  (The returned carry is double what it would be naturally because
-  the intended use is for zero-based Cantor coding.)"
+  "Given numeric base, returns a function for use with reduce, that accepts 
+  a pair containing a sequence of sums so far, and the current carry value, 
+  and a pair containing two digits to be summed.  The function returns a pair
+  containing the new sum (mod base) conj'ed onto the end of the sequence of
+  sums, and a new doubled carry.  (The returned carry is double what it would
+  be naturally because the intended use is for zero-based Cantor coding.)"
   [base]
   (fn [[sums carry] [x y]]
       (let [tot (+ x y carry)
@@ -70,15 +70,15 @@
 
 ;; assumes zero-based Cantor coding
 ;; doesn't handle fractional
-;; NOTE make sure second digit is in the correct base e.g. Cantor-coded
+;; NOTE make sure args are in the correct base e.g. Cantor-coded
 ;; base 4 "20" is the actual number 8.
 (defn cantor-+
   [base x y]
   (let [xs (reverse (cb/convert-int-to-seq base x)) ; reverse to start from less
         ys (reverse (cb/convert-int-to-seq base y)) ;  significant so carry works
         xys (padded-pairs xs ys)
-        ;; TODO BUG?: What happens if it carries off the end, i.e. if _ != 0 ?
-        [sums _] (reduce (sum-digits-with-carry-fn base)  [[] 0N]  xys)]
+        [sums final-carry] (reduce (sum-digits-with-carry-fn base) [[] 0N] xys)
+        sums (if (zero? final-carry) sums (conj sums final-carry))] ; final-carry digit digit will be at front, but not if it's zero
     (cb/sum-digits base (reverse sums) [])))
 
 ;i want 
