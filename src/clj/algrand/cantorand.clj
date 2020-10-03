@@ -72,13 +72,18 @@
 ;; doesn't handle fractional
 ;; NOTE make sure args are in the correct base e.g. Cantor-coded
 ;; base 4 "20" is the actual number 8.
-(defn cantor-+
+(defn cantor0+
+  "Given zero-based Cantor-coded numbers in the specified base, returns a
+  number that's the Cantor-coded representation of the sum of the original 
+  numbers that had been transformed by Cantor-coding."
   ([base x y]
    (let [xs (reverse (cb/convert-int-to-seq base x)) ; reverse to start from less
          ys (reverse (cb/convert-int-to-seq base y)) ;  significant so carry works
          xys (padded-pairs xs ys)
          [sums final-carry] (reduce (sum-digits-with-carry-fn base) [[] 0N] xys)
-         sums (if (zero? final-carry) sums (conj sums final-carry))] ; final-carry digit digit will be at front, but not if it's zero
+         sums (if (pos? final-carry)
+                (conj sums final-carry) ; final-carry is first digit of result
+                sums)]                  ; unless it's zero
      (cb/sum-digits base (reverse sums) [])))
   ([base x y & zs] (reduce (partial cantor-+ base)
                            (cantor-+ base x y)
