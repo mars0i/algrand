@@ -237,6 +237,7 @@
   "Given zero-based Cantor-coded numbers in the specified base, returns a
   number that's the Cantor-coded representation of the sum of the original 
   numbers that had been transformed by Cantor-coding."
+  ([base x] x)
   ([base x y]
    (let [xs (reverse (convert-int-to-seq base x)) ; reverse to start from less
          ys (reverse (convert-int-to-seq base y)) ;  significant so carry works
@@ -256,8 +257,14 @@
 ;; x_m)y$, where the $x_i$ are the powers of the base that sum to $x$.
 ;; So multiplication in general can be implemented by adding together a
 ;; bunch of shifts (i.e. tacking on zeros).
+;; FIXME not right
 (defn cantor*
   [base x y]
+  ;; DEBUG:
+  (println (map (partial number-to-string 6 0)
+                (map (fn [x-digit e] (* (math/expt x-digit e) y)) ; each product is just a shift, i.e. adding zero to end
+                     (reverse (convert-int-to-seq base x)) ; reverse to match (range)
+                     (range))))
   (apply cantor+ base
          (map (fn [x-digit e] (* (math/expt x-digit e) y)) ; each product is just a shift, i.e. adding zero to end
               (reverse (convert-int-to-seq base x)) ; reverse to match (range)
