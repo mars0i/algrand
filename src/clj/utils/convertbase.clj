@@ -261,10 +261,13 @@
 (defn cantor*
   [base x y]
   ;; DEBUG:
-  (println (map (partial number-to-string 6 0)
-                (map (fn [x-digit e] (* (math/expt x-digit e) y)) ; each product is just a shift, i.e. adding zero to end
-                     (reverse (convert-int-to-seq base x)) ; reverse to match (range)
-                     (range))))
+  (println (convert-int-to-seq base x))
+  (doall (map (fn [x-digit e] 
+                  (println x-digit "|" (number-to-string base 0 x-digit) "|"
+                           e "|" (math/expt x-digit e)))
+              (reverse (convert-int-to-seq base x)) ; reverse to match (range)
+              (range)))
+  ;; WORKING CODE:
   (apply cantor+ base
          (map (fn [x-digit e] (* (math/expt x-digit e) y)) ; each product is just a shift, i.e. adding zero to end
               (reverse (convert-int-to-seq base x)) ; reverse to match (range)
