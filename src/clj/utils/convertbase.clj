@@ -269,6 +269,8 @@
               (range)))
   ;; WORKING CODE:
   (apply cantor+ base
-         (map (fn [x-digit e] (* (math/expt x-digit e) y)) ; each product is just a shift, i.e. adding zero to end
+         (map (fn [x-digit e] (* x-digit (math/expt base e) y)) ; each product is just a shift, i.e. adding zero to end
               (reverse (convert-int-to-seq base x)) ; reverse to match (range)
               (range))))
+
+;; no it should be multiply x-digit times base^e
