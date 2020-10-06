@@ -71,10 +71,18 @@ multiplying by 10 in base 10).
 
 Instead of trying to implement an entire multiplication function with
 carrying fromn scratch, you can use the fact that every number is a
-linear combination of powers of the base, so $xy = (x_n + \cdots +
-x_m)y$, where the $x_i$ are the powers of the base that sum to $x$.
-So multiplication in general can be implemented by adding together a
-bunch of shifts (i.e. tacking on zeros).
+linear combination of powers of the base $b$, so  $xy =  x(y_n b^n +
+y_{n-1} b^{n-1} 
+\cdots + y_2 b^2 + y_1 b + y_0)$,  where the $y_i \in
+\{0,\ldots,b-1\}$ are digits in the base-$b$ representation of $y$.
+Then multiplication can be implemented by Cantor-adding together a
+bunch of shifts on $x$ (i.e. tacking on zeros).
+
+$$xy = x \sum_{i=0}^n y_i b^i = \sum_{i=0}^n y_i x b^i
+= \sum_{i=0}^n (x +_b \cdots +_b x) b^i$$
+
+where $n$ is the number of digits in $y$ in base $b$, $+_b$ is
+Cantor addition in base $b$, and that Cantor sum adds $y_i$ copies of $x$.
 
 
 ## old exploratory notes:
