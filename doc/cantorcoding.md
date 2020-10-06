@@ -83,6 +83,7 @@ $$xy = x \sum_{i=0}^n y_i b^i = \sum_{i=0}^n y_i x b^i
 
 where $n$ is the number of digits in $y$ in base $b$, $+_b$ is
 Cantor addition in base $b$, and that Cantor sum adds $y_i$ copies of $x$.
+The summation symbols have to implement Cantor addition as well.
 
 
 ## old exploratory notes:
