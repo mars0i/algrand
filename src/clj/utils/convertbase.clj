@@ -68,9 +68,15 @@
              (take num-digits
                    (convert-fract-to-seq base fract-part)))))))
 
-;; Convenience abbreviations:
-(def base2 (partial number-to-string 2))
-(def base4 (partial number-to-string 4))
+;; Convenience abbreviations for integer conversion:
+(def ns2 (partial number-to-string 2 0))
+(def ns3 (partial number-to-string 3 0))
+(def ns4 (partial number-to-string 4 0))
+(def ns5 (partial number-to-string 5 0))
+(def ns6 (partial number-to-string 6 0))
+(def ns7 (partial number-to-string 7 0))
+(def ns8 (partial number-to-string 8 0))
+(def ns9 (partial number-to-string 9 0))
 
 ;; TODO Handle negative numbers
 ;; Code has a lot of setup but the actual calculation doesn't need
@@ -237,6 +243,7 @@
   "Given zero-based Cantor-coded numbers in the specified base, returns a
   number that's the Cantor-coded representation of the sum of the original 
   numbers that had been transformed by Cantor-coding."
+  ([base] 0)
   ([base x] x)
   ([base x y]
    (let [xs (reverse (convert-int-to-seq base x)) ; reverse to start from less
@@ -251,14 +258,26 @@
                            (cantor+ base x y)
                            zs)))
 
-;; Instead of trying to implement an entire multiplication function with
-;; carrying fromn scratch, use the fact that every number is a
-;; linear combination of powers of the base, so $xy = (x_n + \cdots +
-;; x_m)y$, where the $x_i$ are the powers of the base that sum to $x$.
-;; So multiplication in general can be implemented by adding together a
-;; bunch of shifts (i.e. tacking on zeros).
+;; See doc/cantorcoding.md for explanation of algorithm.
 ;; FIXME not right
 (defn cantor*
+  [base x y]
+  (let [y-digits (reverse (convert-int-to-seq base y)) ; reverse to match (range)
+        y-len (count y-digits)
+        ;_ (println y-len y-digits) ; DEBUG
+        x-copies (map (fn [i] (repeat i x)) y-digits)
+        ;_ (println "x-copies:" x-copies) ; DEBUG
+        x-sums (map (fn [xs] (apply cantor+ base xs))  x-copies)
+        ;_ (println "x-sums:" x-sums) ; DEBUG
+        base-powers (map (partial math/expt base) (range y-len))
+        ;_ (println "base-powers:" base-powers) ; DEBUG
+        xy-components (map * x-sums base-powers)]
+    ;(println xy-components)
+    (apply cantor+ base xy-components)))
+
+
+;; no it should be multiply x-digit times base^e
+(defn bad-cantor*
   [base x y]
   ;; DEBUG:
   (println (convert-int-to-seq base x))
