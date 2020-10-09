@@ -14,6 +14,8 @@
                    (fn [oldval] (mod (+ increment (* oldval multiplier))
                                      modulus)))))))
 
+;; NOT RIGHT THIS ISN'T POSIX:
+
 (def posix-modulus (ma/expt 2N 32N))
 (def posix-multiplier 25214903917N)
 (def posix-increment 11N)
