@@ -14,24 +14,12 @@
 ;(mx/set-current-implementation :vectorz)
 
 (defn right-shift-mat
-  ([size]
-   (mx/shift (mx/identity-matrix size) 0 1))
-  ([size shifts]
-   (let [m1 (right-shift-mat size)]
-         (loop [m m1 i shifts]
-               (if (<= i 1)
-                 m
-                 (recur (mx/inner-product m1 m) (dec i)))))))
+  [size shift]
+  (mx/shift (mx/identity-matrix size) 0 shift))
 
 (defn left-shift-mat
-  ([size]
-   (mx/shift (mx/identity-matrix size) 1 1))
-  ([size shifts]
-   (let [m1 (left-shift-mat size)]
-         (loop [m m1 i shifts]
-               (if (<= i 1)
-                 m
-                 (recur (mx/inner-product m1 m) (dec i)))))))
+  [size shift]
+   (mx/shift (mx/identity-matrix size) 1 shift))
 
 ;;;;;;;;;;
 ;; Marsaglia's 32-bit xorshift from Kneusel pp. 50ff:
