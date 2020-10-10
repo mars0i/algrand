@@ -2,6 +2,7 @@
     (:require [clojure.math.numeric-tower :as ma]
               [clojure.core.matrix :as mx]
               ;[denisovan.core] ; for Neanderthal experiments
+              [utils.convertbase :as cb]
     ))
 
 ;; Note I use inner-product rather than mmul
@@ -21,8 +22,24 @@
   [size shift]
    (mx/shift (mx/identity-matrix size) 1 shift))
 
+
+
 ;;;;;;;;;;
-;; Marsaglia's 32-bit xorshift from Kneusel pp. 50ff:
+;; Marsaglia's 32-bit xorshift PRNG from Kneusel pp. 50ff:
 
 (def left13 (left-shift-mat 32 13))
 (def right17 (right-shift-mat 32 17))
+(def left5 (left-shift-mat 32 5))
+(def i32 (mx/identity-matrix 32))
+
+(def xorshift32-mat
+  (mx/inner-product (mx/add i32 left13)
+                    (mx/add i32 right17)
+                    (mx/add i32 left5)))
+
+(def kneusel-seed (mx/matrix (cb/convert-int-to-seq 2 2463534242)))
+
+;; (inner-product kneusel-seed xorshift32) doesn't produce the 
+;; correct result because it uses regular multiplication rather than
+;; F2 operations.  I need an actual xor across the elements.
+
