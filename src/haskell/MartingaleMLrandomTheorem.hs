@@ -1,4 +1,10 @@
-{- |
+import Data.List  (union, transpose) -- no longer used: isPrefixOf
+import Debug.Trace (trace)
+import Data.Typeable (typeOf)
+-- no longer used: import Data.Char  (digitToInt)
+
+
+{-
 
 This is code to help verify/understand part of the second half of
 Downey and Hirschfeldt's (2010) Theorem 6.3.4, p. 236, which is their
@@ -25,21 +31,15 @@ martingale.
 
 -}
 
-import Data.List  (union, transpose) -- no longer used: isPrefixOf
-import Debug.Trace (trace)
-import Data.Typeable (typeOf)
--- no longer used: import Data.Char  (digitToInt)
-
 
 -- TODO: naming mixes up the initial pair lists and the ultimate (Payout, Payout) lists.
 -- TODO: add docstrings
 -- TODO: maybe actually define the d functions so that they can be applied to inputs.
 
 {- |
-   lower_payouts :: String -> [Float]
-
-   'lower_payouts generator' returns a list of payout components for 
-   the length of of string 'generator'.
+lower_payouts :: String -> [Float]
+'lower_payouts generator' returns a list of payout components for 
+the length of of string 'generator'.
 -}
 lower_payouts :: String -> [Float]
 lower_payouts generator =
