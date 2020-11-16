@@ -32,8 +32,6 @@ martingale.
 -}
 
 
--- TODO: naming mixes up the initial pair lists and the ultimate (Payout, Payout) lists.
--- TODO: add docstrings
 -- TODO: maybe actually define the d functions so that they can be applied to inputs.
 
 {- |
@@ -106,6 +104,7 @@ consOtherDigit _ (s:ss) =
        then '0':s:ss
        else '1':s:ss
 
+combineMLtests (x:xs) (y:ys) = (union x y) : combineMLtests xs ys
 combineMLtests xs []         = xs
 combineMLtests [] ys         = ys
 
@@ -134,7 +133,7 @@ multisize = drop 1 (foldr combineMLtests [[]]
 -- Note that even though there are shared prefixes, no string in any
 -- generator set is a prefix of any other (since they're all the same
 -- length!).
-allofem = foldr combineMLtests [[]] 
-                [zeros, ones, terminal_zeros, terminal_ones, zero_ones, 
-                one_zeros]
+someofem = foldr combineMLtests [[]] 
+                 [zeros, ones, terminal_zeros, terminal_ones, zero_ones, 
+                 one_zeros]
 -- don't include e.g. multisize--you'll get prefix relations
