@@ -52,8 +52,8 @@ lower_payouts generator =
    Returns a list of payout components for the infinite sequence generated 
    by string 'generator'.
 -}
-generator_payouts :: String -> [(Maybe Char, Float)]
-generator_payouts generator =
+raw_generator_payouts :: String -> [(Maybe Char, Float)]
+raw_generator_payouts generator =
     zip ((map Just generator) ++ (repeat Nothing))
         ((lower_payouts generator) ++ (repeat 1))
 
@@ -61,14 +61,14 @@ generator_payouts generator =
    Applies 'generator_payouts' to every generator string in Martin-Löf
    test component set of generators 'test_set'.
 -}
-generator_payouts_for_test_set test_set = map generator_payouts test_set
+raw_payouts_for_test_set test_set = map raw_generator_payouts test_set
 -- (kind of silly to separate this out, but useful for testing.)
 
 {- |
-   Applies 'generator_payouts_for_test_set' to every component set of 
+   Applies 'raw_payouts_for_test_set' to every component set of 
    generators for a complete Martin-Löf test.
 -}
-generator_payouts_for_test test = map generator_payouts_for_test_set test
+raw_payouts_for_test test = map raw_payouts_for_test_set test
 
 
 data Payout = ZeroPayout Float | OnePayout Float  deriving (Show, Eq)
@@ -91,10 +91,11 @@ combine_payouts_at_index payouts_at_index =
     foldl acc_payouts (ZeroPayout 0, OnePayout 0) payouts_at_index
 
 combine_payouts_for_test_set payouts_for_test_set =
-    map combine_payouts_at_index (transpose payouts_for_test_set) -- amazingly, can transpose infinite lists
+    map combine_payouts_at_index (transpose payouts_for_test_set)
+    -- amazingly, one can transpose a finite list of infinite lists
 
 payouts_for_test test =
-    map combine_payouts_for_test_set (generator_payouts_for_test test)
+    map combine_payouts_for_test_set (raw_payouts_for_test test)
 
 ----------------------------------------------------------
 -- Conveience functions for constructing M-L tests
