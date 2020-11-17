@@ -6,7 +6,7 @@ import Data.Typeable (typeOf)
 
 {-
 
-This is code to help verify/understand part of the second half of
+Code to help verify/understand part of the second half of
 Downey and Hirschfeldt's (2010) Theorem 6.3.4, p. 236, which is their
 version of Schnorr's theorem that Martin-Löf randomness is equivalent
 to randomness defined by computably enumerable martingales.  In
