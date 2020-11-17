@@ -4,6 +4,10 @@ import Data.Typeable (typeOf)
 -- no longer used: import Data.Char  (digitToInt)
 
 
+-- THIS IS NOT RIGHT.  IT ADDS PAYOUTS TO ALL POSSIBLE STRINGS.  BUT ONLY THOSE
+-- STARTING WITH A PREFIX IN THE GENERATOR SHOULD COUNT.  HOWEVER, WHERE THOSE
+-- PREFIXES OVERLAP, THE PAYOUTS SHOULD BE SUMMED.
+
 {-
 
 Code to help verify/understand part of the second half of
@@ -104,6 +108,8 @@ combine_payouts_for_test_set payouts_for_test_set =
 
 payouts_for_test test =
     map combine_payouts_for_test_set (raw_payouts_for_test test)
+
+
 
 ----------------------------------------------------------
 -- Conveience functions for constructing M-L tests
