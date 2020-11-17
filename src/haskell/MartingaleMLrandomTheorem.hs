@@ -29,6 +29,9 @@ really is a martingale.  This code allows me to perform the
 construction, see the result, and better understand why it creates a
 martingale.
 
+(This is my first recent Haskell experiment.  No doubt it could much
+more succinct and elegant.)
+
 -}
 
 
