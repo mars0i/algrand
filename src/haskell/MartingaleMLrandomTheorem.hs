@@ -34,6 +34,11 @@ martingale.
 
 -- TODO: maybe actually define the d functions so that they can be applied to inputs.
 
+------------------------------------------------------------------
+-- "raw payouts" create values paired with digits from generator
+-- strings according to D&H's rule.
+
+
 {- |
 'lower_payouts generator' returns a list of payout components for 
 the length of of string 'generator'.
@@ -68,6 +73,8 @@ raw_payouts_for_test_set test_set = map raw_generator_payouts test_set
 -}
 raw_payouts_for_test test = map raw_payouts_for_test_set test
 
+------------------------------------------------------------------
+-- "payouts"/Payouts: combine raw payouts into per-digit sums
 
 data Payout = ZeroPayout Float | OnePayout Float  deriving (Show, Eq)
 
