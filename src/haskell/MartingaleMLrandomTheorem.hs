@@ -73,7 +73,7 @@ more succinct and elegant.)
 data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Eq)  
 
 instance Functor Tree where  
-    fmap f EmptyTree = EmptyTree  
+    fmap f EmptyTree = EmptyTree -- probably unused
     fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
 
 thisPayout (Node p _ _) = p
@@ -85,20 +85,23 @@ nextZero EmptyTree = undefined
 nextOne  (Node _ _ one) = one
 nextOne  EmptyTree = undefined
 
+zeroPayoutsTree :: Tree Float
 zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
-onePayoutsTree  = Node 1 (onePayoutsTree)  (onePayoutsTree)
+
+onePayoutsTree  :: Tree Float
+onePayoutsTree  = Node 1.0 (onePayoutsTree)  (onePayoutsTree)
 
 
 {- |
 Example: add_payouts generator (lowerPayouts generator) zeroPayoutsTree
 -}
-addPayouts _    _    EmptyTree = EmptyTree
 addPayouts (g:gs) (p:ps) (Node x next_zero next_one)
     | g == '0' = Node (x+p) (addPayouts gs ps next_zero) next_one
     | g == '1' = Node (x+p) next_zero (addPayouts gs ps next_one)
-addPayouts ""  [] (Node x next_zero next_one) = onePayoutsTree
-addPayouts (g:gs) [] (Node _ _ _) = undefined
-addPayouts "" (p:ps) (Node _ _ _) = undefined
+addPayouts ""  [] (Node _ _ _) = onePayoutsTree -- once generator exhausted, rest are ones
+addPayouts (g:gs) [] (Node _ _ _) = undefined   -- shouldn't happen
+addPayouts "" (p:ps) (Node _ _ _) = undefined   -- shouldn't happen
+addPayouts _    _    EmptyTree = EmptyTree      -- probably shouldn't happen
 
 
 
