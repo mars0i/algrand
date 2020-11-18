@@ -59,6 +59,20 @@ more succinct and elegant.)
 
 -- TODO: maybe actually define the d functions so that they can be applied to inputs.
 
+
+------------------------------------------------------------------
+-- new approach
+
+data Tree a = Node a Tree Tree | Term
+              deriving (Eq, Ord, Show)
+
+instance Functor Tree where
+    fmap f Term = Term
+    fmap f (Node x zero one) = Node (f x) (fmap zero) (fmap one)
+
+
+
+
 ------------------------------------------------------------------
 -- "raw payouts" create values paired with digits from generator
 -- strings according to D&H's rule.
