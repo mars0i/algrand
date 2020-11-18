@@ -74,9 +74,9 @@ data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Eq)
 
 instance Functor Tree where  
     fmap f EmptyTree = EmptyTree  
-    fmap f (Node x next_zero next_one) = Node (f x) (fmap f next_zero) (fmap f next_one)
+    fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
 
-thisPayout (Node x _ _) = x
+thisPayout (Node p _ _) = p
 thisPayout EmptyTree = undefined
 
 nextZero (Node _ zero _) = zero
@@ -85,9 +85,20 @@ nextZero EmptyTree = undefined
 nextOne  (Node _ _ one) = one
 nextOne  EmptyTree = undefined
 
+zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
+onePayoutsTree  = Node 1 (onePayoutsTree)  (onePayoutsTree)
 
 
-zeroPayoutsTree = Node 0 (zeroPayoutsTree) (zeroPayoutsTree)
+{- |
+Example: add_payouts generator (lowerPayouts generator) zeroPayoutsTree
+-}
+addPayouts _    _    EmptyTree = EmptyTree
+addPayouts (g:gs) (p:ps) (Node x next_zero next_one)
+    | g == '0' = Node (x+p) (addPayouts gs ps next_zero) next_one
+    | g == '1' = Node (x+p) next_zero (addPayouts gs ps next_one)
+addPayouts ""  [] (Node x next_zero next_one) = onePayoutsTree
+addPayouts (g:gs) [] (Node _ _ _) = undefined
+addPayouts "" (p:ps) (Node _ _ _) = undefined
 
 
 
@@ -101,11 +112,14 @@ zeroPayoutsTree = Node 0 (zeroPayoutsTree) (zeroPayoutsTree)
 
 
 {- |
-'lower_payouts generator' returns a list of payout components for 
-the length of of string 'generator'.
+'lowerPayouts generator' returns a list of payout components for 
+the length of of string 'generator'.  The first element corresponds to
+the empty string; the last corresponds to the position one less than the
+length of the generator.  These are payouts correspondng to the string up
+to that point.
 -}
-lower_payouts :: String -> [Float]
-lower_payouts generator =
+lowerPayouts :: String -> [Float]
+lowerPayouts generator =
     let len_s = fromIntegral (length generator) in
         map (2**) [-len_s .. -1]
         -- meaning from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
@@ -119,7 +133,7 @@ lower_payouts generator =
 raw_generator_payouts :: String -> [(Maybe Char, Float)]
 raw_generator_payouts generator =
     zip ((map Just generator) ++ (repeat Nothing))
-        ((lower_payouts generator) ++ (repeat 1))
+        ((lowerPayouts generator) ++ (repeat 1))
 
 {- |
    Applies 'generator_payouts' to every generator string in Martin-Löf
