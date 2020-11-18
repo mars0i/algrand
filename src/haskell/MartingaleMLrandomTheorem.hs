@@ -63,12 +63,34 @@ more succinct and elegant.)
 ------------------------------------------------------------------
 -- new approach
 
-data Tree a = Node a Tree Tree | Term
-              deriving (Eq, Ord, Show)
+-- doesn't work:
+-- data Tree a = Node a Tree Tree | Term deriving (Eq, Ord, Show)
+-- instance Functor Tree where fmap f Term = Term fmap f (Node x zero one) = Node (f x) (fmap zero) (fmap one)
 
-instance Functor Tree where
-    fmap f Term = Term
-    fmap f (Node x zero one) = Node (f x) (fmap zero) (fmap one)
+-- partly from Learn You a Haskell:
+
+-- a should be Float; it's the payout
+data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Eq)  
+
+instance Functor Tree where  
+    fmap f EmptyTree = EmptyTree  
+    fmap f (Node x next_zero next_one) = Node (f x) (fmap f next_zero) (fmap f next_one)
+
+thisPayout (Node x _ _) = x
+thisPayout EmptyTree = undefined
+
+nextZero (Node _ zero _) = zero
+nextZero EmptyTree = undefined
+    
+nextOne  (Node _ _ one) = one
+nextOne  EmptyTree = undefined
+
+
+
+zeroPayoutsTree = Node 0 (zeroPayoutsTree) (zeroPayoutsTree)
+
+
+
 
 
 
