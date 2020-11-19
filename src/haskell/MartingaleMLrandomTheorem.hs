@@ -70,24 +70,24 @@ more succinct and elegant.)
 -- partly from Learn You a Haskell:
 
 -- a should be Float; it's the payout
-data Tree a = EmptyTree | Node {payout :: a,
-                                nextZero :: (Tree a),
-                                nextOne :: (Tree a)}
-                                deriving (Show, Eq)  
+data Tree a = Leaf | Node {payout :: a,
+                           nextZero :: (Tree a),
+                           nextOne :: (Tree a)}
+                           deriving (Show, Eq)  
 
 instance Functor Tree where  
-    fmap f EmptyTree = EmptyTree -- probably unused
+    fmap f Leaf = Leaf -- probably unused
     fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
 
 {-
 thisPayout (Node p _ _) = p
-thisPayout EmptyTree = undefined
+thisPayout Leaf = undefined
 
 nextZero (Node _ zero _) = zero
-nextZero EmptyTree = undefined
+nextZero Leaf = undefined
     
 nextOne  (Node _ _ one) = one
-nextOne  EmptyTree = undefined
+nextOne  Leaf = undefined
 -}
 
 zeroPayoutsTree :: Tree Double
@@ -98,6 +98,7 @@ onePayoutsTree  = Node 1.0 (onePayoutsTree) (onePayoutsTree)
 
 
 {- |
+Add payouts for generator string with lower payouts to tree.
 Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
 -}
 addPayouts (g:gs) (p:ps) (Node x next_zero next_one)
@@ -106,8 +107,11 @@ addPayouts (g:gs) (p:ps) (Node x next_zero next_one)
 addPayouts ""  [] (Node _ _ _) = onePayoutsTree -- once generator exhausted, rest are ones
 addPayouts (g:gs) [] (Node _ _ _) = undefined   -- shouldn't happen
 addPayouts "" (p:ps) (Node _ _ _) = undefined   -- shouldn't happen
-addPayouts _    _    EmptyTree = EmptyTree      -- probably shouldn't happen
+addPayouts _    _    Leaf = Leaf      -- probably shouldn't happen
 
+{- | Convenience function to addPayouts directly from a generator -}
+addGenPayouts generator tree =
+    addPayouts generator (lowerPayouts (length generator)) tree
 
 
 {- |
