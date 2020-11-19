@@ -70,12 +70,16 @@ more succinct and elegant.)
 -- partly from Learn You a Haskell:
 
 -- a should be Float; it's the payout
-data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Eq)  
+data Tree a = EmptyTree | Node {payout :: a,
+                                nextZero :: (Tree a),
+                                nextOne :: (Tree a)}
+                                deriving (Show, Eq)  
 
 instance Functor Tree where  
     fmap f EmptyTree = EmptyTree -- probably unused
     fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
 
+{-
 thisPayout (Node p _ _) = p
 thisPayout EmptyTree = undefined
 
@@ -84,16 +88,17 @@ nextZero EmptyTree = undefined
     
 nextOne  (Node _ _ one) = one
 nextOne  EmptyTree = undefined
+-}
 
-zeroPayoutsTree :: Tree Float
+zeroPayoutsTree :: Tree Double
 zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
 
-onePayoutsTree  :: Tree Float
-onePayoutsTree  = Node 1.0 (onePayoutsTree)  (onePayoutsTree)
+onePayoutsTree  :: Tree Double
+onePayoutsTree  = Node 1.0 (onePayoutsTree) (onePayoutsTree)
 
 
 {- |
-Example: add_payouts generator (lowerPayouts generator) zeroPayoutsTree
+Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
 -}
 addPayouts (g:gs) (p:ps) (Node x next_zero next_one)
     | g == '0' = Node (x+p) (addPayouts gs ps next_zero) next_one
@@ -105,29 +110,36 @@ addPayouts _    _    EmptyTree = EmptyTree      -- probably shouldn't happen
 
 
 
-
-
-
-
-------------------------------------------------------------------
--- "raw payouts" create values paired with digits from generator
--- strings according to D&H's rule.
-
-
 {- |
-'lowerPayouts generator' returns a list of payout components for 
-the length of of string 'generator'.  The first element corresponds to
-the empty string; the last corresponds to the position one less than the
-length of the generator.  These are payouts correspondng to the string up
-to that point.
+'lowerPayouts len' returns a list of payout components for a generator of 
+length len.  The first element corresponds to the empty string; the last 
+corresponds to the position one less than the length of the generator.  
+These are payouts correspondng to the string up to that point.
 -}
+lowerPayouts :: Integer -> [Double]
+lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
+
+{-
 lowerPayouts :: String -> [Float]
 lowerPayouts generator =
     let len_s = fromIntegral (length generator) in
         map (2**) [-len_s .. -1]
         -- meaning from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
         -- Debug.Trace.trace ("len_s = " ++ show len_s) 
+-}
 
+
+
+
+---------------------------------------------------------------
+-- Old code:
+
+
+------------------------------------------------------------------
+-- "raw payouts" create values paired with digits from generator
+-- strings according to D&H's rule.
+
+{-
 
 {- |
    Returns a list of payout components for the infinite sequence generated 
@@ -179,7 +191,7 @@ combine_payouts_for_test_set payouts_for_test_set =
 
 payouts_for_test test =
     map combine_payouts_for_test_set (raw_payouts_for_test test)
-
+-}
 
 
 ----------------------------------------------------------
