@@ -116,7 +116,7 @@ length len.  The first element corresponds to the empty string; the last
 corresponds to the position one less than the length of the generator.  
 These are payouts correspondng to the string up to that point.
 -}
-lowerPayouts :: Integer -> [Double]
+lowerPayouts :: Int -> [Double]
 lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
 
 {-
