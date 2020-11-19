@@ -1,6 +1,7 @@
 import Data.List  (union, transpose) -- no longer used: isPrefixOf
 import Debug.Trace (trace)
 import Data.Typeable (typeOf)
+import Data.Foldable (foldr', foldl')
 -- no longer used: import Data.Char  (digitToInt)
 
 
@@ -79,16 +80,17 @@ instance Functor Tree where
     fmap f Leaf = Leaf -- probably unused
     fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
 
-{-
-thisPayout (Node p _ _) = p
-thisPayout Leaf = undefined
 
-nextZero (Node _ zero _) = zero
-nextZero Leaf = undefined
-    
-nextOne  (Node _ _ one) = one
-nextOne  Leaf = undefined
--}
+-- FIXME
+boundedTreeEqual n tree1 tree2 =
+    payout tree1 == payout tree2 
+    && boundedTreeEqual (n-1) (nextZero tree1) (nextZero tree2)
+    && boundedTreeEqual (n-1) (nextOne tree1)  (nextOne tree2)
+boundedTreeEqual n Leaf Leaf = True
+boundedTreeEqual n tree1 Leaf = False
+boundedTreeEqual n Leaf tree1 = False
+boundedTreeEqual 0 _ _ = True
+
 
 zeroPayoutsTree :: Tree Double
 zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
@@ -96,6 +98,15 @@ zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
 onePayoutsTree  :: Tree Double
 onePayoutsTree  = Node 1.0 (onePayoutsTree) (onePayoutsTree)
 
+
+{- |
+'lowerPayouts len' returns a list of payout components for a generator of 
+length len.  The first element corresponds to the empty string; the last 
+corresponds to the position one less than the length of the generator.  
+These are payouts correspondng to the string up to that point.
+-}
+lowerPayouts :: Int -> [Double]
+lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
 
 {- |
 Add payouts for generator string with lower payouts to tree.
@@ -109,97 +120,18 @@ addPayouts (g:gs) [] (Node _ _ _) = undefined   -- shouldn't happen
 addPayouts "" (p:ps) (Node _ _ _) = undefined   -- shouldn't happen
 addPayouts _    _    Leaf = Leaf      -- probably shouldn't happen
 
-{- | Convenience function to addPayouts directly from a generator -}
-addGenPayouts generator tree =
+{- | Convenience function to addPayouts to a tree directly from a generator -}
+addGeneratorPayouts tree generator =
     addPayouts generator (lowerPayouts (length generator)) tree
-
-
-{- |
-'lowerPayouts len' returns a list of payout components for a generator of 
-length len.  The first element corresponds to the empty string; the last 
-corresponds to the position one less than the length of the generator.  
-These are payouts correspondng to the string up to that point.
--}
-lowerPayouts :: Int -> [Double]
-lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
-
-{-
-lowerPayouts :: String -> [Float]
-lowerPayouts generator =
-    let len_s = fromIntegral (length generator) in
-        map (2**) [-len_s .. -1]
-        -- meaning from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
-        -- Debug.Trace.trace ("len_s = " ++ show len_s) 
--}
-
-
-
-
----------------------------------------------------------------
--- Old code:
-
-
-------------------------------------------------------------------
--- "raw payouts" create values paired with digits from generator
--- strings according to D&H's rule.
-
-{-
-
-{- |
-   Returns a list of payout components for the infinite sequence generated 
-   by string 'generator'.
--}
-raw_generator_payouts :: String -> [(Maybe Char, Float)]
-raw_generator_payouts generator =
-    zip ((map Just generator) ++ (repeat Nothing))
-        ((lowerPayouts generator) ++ (repeat 1))
-
-{- |
-   Applies 'generator_payouts' to every generator string in Martin-Löf
-   test component set of generators 'test_set'.
--}
-raw_payouts_for_test_set test_set = map raw_generator_payouts test_set
--- (kind of silly to separate this out, but useful for testing.)
-
-{- |
-   Applies 'raw_payouts_for_test_set' to every component set of 
-   generators for a complete Martin-Löf test.
--}
-raw_payouts_for_test test = map raw_payouts_for_test_set test
-
-------------------------------------------------------------------
--- "payouts"/Payouts: combine raw payouts into per-digit sums
-
-data Payout = ZeroPayout Float | OnePayout Float  deriving (Show, Eq)
-
-{- |
-    Add payout 'p' in '(Maybe Char, p)' to payouts already accumulated in 
-    '(ZeroPayout p0, OnePayout p1)' for each digit '0', '1'.
-    'Just i' means that payout p is to be added for instances of i
-    (i.e. '0', or '1').
-    'Nothing' means that payout p applies to both '0' and '1', i.e.
-    it will be added both to 'ZeroPayout p0' and 'OnePayout p1'.
--}
-acc_payouts ::  (Payout, Payout) -> (Maybe Char, Float) -> (Payout, Payout)
-acc_payouts (ZeroPayout p0, OnePayout p1) (Just '0', p) =  (ZeroPayout (p0 + p), OnePayout p1)
-acc_payouts (ZeroPayout p0, OnePayout p1) (Just '1', p) =  (ZeroPayout p0,       OnePayout (p1 + p))
-acc_payouts (ZeroPayout p0, OnePayout p1) (Nothing,  p) =  (ZeroPayout (p0 + p), OnePayout (p1 + p))
-
--- Assumes that there is a finite number of generators for each test set; this is not required by M-L.
-combine_payouts_at_index payouts_at_index =
-    foldl acc_payouts (ZeroPayout 0, OnePayout 0) payouts_at_index
-
-combine_payouts_for_test_set payouts_for_test_set =
-    map combine_payouts_at_index (transpose payouts_for_test_set)
-    -- amazingly, one can transpose a finite list of infinite lists
-
-payouts_for_test test =
-    map combine_payouts_for_test_set (raw_payouts_for_test test)
--}
+        
+{- | Sum payouts from all generators in list generators. -}
+sumGeneratorSet generators =
+    foldl addGeneratorPayouts zeroPayoutsTree generators
+-- to use foldl vs foldr, swap order of args for addGeneratorPayouts
 
 
 ----------------------------------------------------------
--- Conveience functions for constructing M-L tests
+-- Convenience functions for constructing M-L tests
 
 consOtherDigit initstr [] = initstr
 consOtherDigit _ (s:ss) =
