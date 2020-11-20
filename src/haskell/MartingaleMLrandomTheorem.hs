@@ -1,8 +1,8 @@
 import Data.List  (union, transpose) -- no longer used: isPrefixOf
-import Debug.Trace (trace)
-import Data.Typeable (typeOf)
-import Data.Foldable (foldr', foldl')
--- no longer used: import Data.Char  (digitToInt)
+import Debug.Trace (trace)    -- DEBUG
+import Data.Typeable (typeOf) -- DEBUG
+-- import Data.Foldable (foldr', foldl')
+-- import Data.Char  (digitToInt)
 
 
 -- THIS IS NOT RIGHT.  IT ADDS PAYOUTS TO ALL POSSIBLE STRINGS.  BUT ONLY THOSE
@@ -81,16 +81,34 @@ instance Functor Tree where
     fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
 
 
--- FIXME
-boundedTreeEqual n tree1 tree2 =
-    payout tree1 == payout tree2 
-    && boundedTreeEqual (n-1) (nextZero tree1) (nextZero tree2)
-    && boundedTreeEqual (n-1) (nextOne tree1)  (nextOne tree2)
-boundedTreeEqual n Leaf Leaf = True
-boundedTreeEqual n tree1 Leaf = False
-boundedTreeEqual n Leaf tree1 = False
-boundedTreeEqual 0 _ _ = True
+-- test data
+gen1 = "101"
+gen2 = "1001"
+gp1 = addPayouts gen1 (lowerPayouts (length gen1)) zeroPayoutsTree
+gp2 = addPayouts gen2 (lowerPayouts (length gen2)) gp1
+g2s = sumGeneratorSet [gen1,gen2]
 
+copyTree Leaf = Leaf
+copyTree (Node p z o) = Node p (copyTree z) (copyTree o)
+
+truncateTree _ Leaf = Leaf
+truncateTree n (Node p z o) =
+    if n <= 0
+       then Leaf
+       else Node p (truncateTree (n-1) z) (truncateTree (n-1) z)
+
+-- Slow because it has to construct truncated trees, which are exponential in n
+boundedTreeEqual n t1 t2 = (truncateTree n t1) == (truncateTree n t2)
+
+-- Just as slow?
+boundedTreeEqual2 _ Leaf Leaf = True
+boundedTreeEqual2 _ Leaf _    = False
+boundedTreeEqual2 _ _ Leaf    = False
+boundedTreeEqual2 n (Node p1 z1 o1) (Node p2 z2 o2) =
+    if n <= 0
+       then p1 == p2
+       else (boundedTreeEqual2 (n-1) z1 z2) && (boundedTreeEqual2 (n-1) o1 o2)
+    
 
 zeroPayoutsTree :: Tree Double
 zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
