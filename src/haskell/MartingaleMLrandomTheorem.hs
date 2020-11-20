@@ -5,28 +5,6 @@ import Data.Typeable (typeOf) -- DEBUG
 -- import Data.Char  (digitToInt)
 
 
--- THIS IS NOT RIGHT.  IT ADDS PAYOUTS TO ALL POSSIBLE STRINGS.  BUT ONLY THOSE
--- STARTING WITH A PREFIX IN THE GENERATOR SHOULD COUNT.  HOWEVER, WHERE THOSE
--- PREFIXES OVERLAP, THE PAYOUTS SHOULD BE SUMMED.
-
--- The problem is that I have the payouts organized as a sequence of pairs.
--- What I need is a tree: an infinite tree.
--- A tree starts with "".  I can either make it the full binary tree, with zero
--- payouts on some branches, or just represent the parts with payouts.  
--- In the latter case, while an input string has length less than the longest string
--- in a generator set (assuming it's finite), the payouts are summed from the current
--- location in all of the still-overlapping generator prefixes.
--- If a string branches off of all prefixes, subsequent payouts are zero.
--- if a string matches a prefix but goes beyond its end, then all possible
--- extensions each get payout 1 per location.  
--- Note that since the generator set is itself prefix-free, once a string matching
--- a prefix goes beyond it, the other generators can be ignored, since they can't be
--- prefixes of any of the extended strings.
--- 
--- So I don't actually need an infinite tree per se, since the default behavior after
--- going beyond a generator prefix's length is always the same, and involved no summing.
--- (I didn't realize this previously.)
-
 {-
 
 Code to help verify/understand part of the second half of
