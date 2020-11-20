@@ -40,13 +40,8 @@ more succinct and elegant.)
 
 
 ------------------------------------------------------------------
--- new approach
+-- Basic definitions and functions
 
--- doesn't work:
--- data Tree a = Node a Tree Tree | Term deriving (Eq, Ord, Show)
--- instance Functor Tree where fmap f Term = Term fmap f (Node x zero one) = Node (f x) (fmap zero) (fmap one)
-
--- partly from Learn You a Haskell:
 
 -- a should be Float; it's the payout
 data Tree a = Leaf | Node {payout :: a,
@@ -58,36 +53,45 @@ instance Functor Tree where
     fmap f Leaf = Leaf -- probably unused
     fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
 
-
--- test data
-gen1 = "101"
-gen2 = "1001"
-gp1 = addPayouts gen1 (lowerPayouts (length gen1)) zeroPayoutsTree
-gp2 = addPayouts gen2 (lowerPayouts (length gen2)) gp1
-g2s = sumGeneratorSet [gen1,gen2]
-
+{- |
+'copyTree tree' generates a new copy of tree.
+-}
 copyTree Leaf = Leaf
 copyTree (Node p z o) = Node p (copyTree z) (copyTree o)
 
+{- |
+'truncateTree n tree' returns a tree that is identical tree up to
+depth n, where it is truncated by replacing Nodes with Leafs.
+-}
 truncateTree _ Leaf = Leaf
 truncateTree n (Node p z o) =
     if n <= 0
        then Leaf
        else Node p (truncateTree (n-1) z) (truncateTree (n-1) z)
 
--- Slow because it has to construct truncated trees, which are exponential in n
-boundedTreeEqual n t1 t2 = (truncateTree n t1) == (truncateTree n t2)
-
--- Just as slow?
-boundedTreeEqual2 _ Leaf Leaf = True
-boundedTreeEqual2 _ Leaf _    = False
-boundedTreeEqual2 _ _ Leaf    = False
-boundedTreeEqual2 n (Node p1 z1 o1) (Node p2 z2 o2) =
+{- |
+'boundedTreeEqual n tree1 tree2' tests whether the two trees are
+identical up to depth n.
+-}
+-- This is a lot faster than using truncateTree.
+boundedTreeEqual :: (Integral a) => a -> Tree Double -> Tree Double -> Bool
+boundedTreeEqual _ Leaf Leaf = True
+boundedTreeEqual _ Leaf _    = False
+boundedTreeEqual _ _ Leaf    = False
+boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
     if n <= 0
        then p1 == p2
-       else (boundedTreeEqual2 (n-1) z1 z2) && (boundedTreeEqual2 (n-1) o1 o2)
+       else (boundedTreeEqual (n-1) z1 z2) && (boundedTreeEqual (n-1) o1 o2)
+
+-- some test data
+gen1 = "101110110"
+gen2 = "1001001010101"
+gp1 = addPayouts gen1 (lowerPayouts (length gen1)) zeroPayoutsTree
+gp2 = addPayouts gen2 (lowerPayouts (length gen2)) gp1
+g2s = sumGeneratorSet [gen1,gen2]
     
 
+-- not test data; these are essential
 zeroPayoutsTree :: Tree Double
 zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
 
