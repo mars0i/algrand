@@ -112,7 +112,7 @@ lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) 
 -- intention.  It doesn't even produce a Martingale for a single generator
 -- string.  Typically, the next payouts are both equal, and both twice
 -- the previous payout, so that E(X_i) = 4 X_{i-1}.  (!)  Maybe what I intended
--- was that only of those get a payout, so it's an off-by one error.
+-- was that only of those get a payout, so it's an off-by-one error.
 {- |
 Add payouts for generator string with lower payouts to tree.
 Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
