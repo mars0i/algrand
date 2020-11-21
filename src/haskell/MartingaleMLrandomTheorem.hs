@@ -114,27 +114,32 @@ lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) 
 -- the previous payout, so that E(X_i) = 4 X_{i-1}.  (!)  Maybe what I intended
 -- was that only of those get a payout, so it's an off-by-one error.
 {- |
-Add payouts for generator string with lower payouts to tree.
+Add payouts for generator string with lower payouts to tree.  The first payout
+corresponds to the empty string.
 Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
 -}
-addPayouts (g:gs) (p:ps) (Node x next_zero next_one)
-    | g == '0' = Node (x+p) (addPayouts gs ps next_zero) next_one
-    | g == '1' = Node (x+p) next_zero (addPayouts gs ps next_one)
-addPayouts ""  [] (Node _ _ _) = onePayoutsTree -- once generator exhausted, rest are ones
-addPayouts (g:gs) [] (Node _ _ _) = undefined   -- shouldn't happen
-addPayouts "" (p:ps) (Node _ _ _) = undefined   -- shouldn't happen
-addPayouts _    _    Leaf = Leaf      -- probably shouldn't happen
+addPayouts (g:gs) pays@(p:ps) (Node x next_zero next_one)
+    | g == '0' = 
+        trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+        (Node (x+p) (addPayouts gs ps next_zero) next_one)
+    | g == '1' = 
+        trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+        (Node (x+p) next_zero (addPayouts gs ps next_one))
+addPayouts ""  [] (Node _ _ _) = trace "empty args" onePayoutsTree -- once generator exhausted, rest are ones
+addPayouts (g:gs) [] (Node _ _ _) = trace "empty pays" undefined   -- shouldn't happen
+addPayouts "" (p:ps) (Node _ _ _) = trace "empty string" undefined   -- shouldn't happen
+addPayouts _    _    Leaf = trace "default case" Leaf      -- probably shouldn't happen
 
 {- | Convenience function to addPayouts to a tree directly from a generator -}
 addGeneratorPayouts tree generator =
     addPayouts generator (lowerPayouts (length generator)) tree
         
-{- | Sum payouts from all generators in list generators. -}
+{- | Sum payouts from all generators in list generators. See addPayouts. -}
 sumGeneratorSet generators =
     foldl addGeneratorPayouts zeroPayoutsTree generators
 -- to use foldl vs foldr, swap order of args for addGeneratorPayouts
 
-{- | Transform each generator set in a list into a test tree. -}
+{- | Transform each generator set in a list into a test tree. See addPayouts. -}
 makeMLtest :: [[String]] -> [Tree Double]
 makeMLtest generator_set_list = map sumGeneratorSet generator_set_list
 
