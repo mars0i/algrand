@@ -129,6 +129,24 @@ sumGeneratorSet generators =
     foldl addGeneratorPayouts zeroPayoutsTree generators
 -- to use foldl vs foldr, swap order of args for addGeneratorPayouts
 
+{- | 
+Tests whether node satisfies the martingale property, assigning equal 
+probability to each branch.  In other words, is the simple average of the 
+two child payouts equal to the parent payout for each (non-Leaf) node?
+-}
+isMartingaleNode (Node p (Node zp _ _) (Node op _ _)) = (zp + op)/2 == p
+isMartingaleNode (Node _ Leaf Leaf) = True -- OK for a truncated tree
+isMartingaleNode _ = False -- unbalanced (?)
+
+{- | 
+Tests whether a tree satisfies the martingale property, assigning equal 
+probability to each branch. In other words, is the simple average of the 
+two child payouts always equal to the parent payout for each non-Leaf node?
+(This obviously won't work with infinite trees.)
+-}
+isMartingaleTree top@(Node _ z o) =
+    isMartingaleNode top && isMartingaleNode z && isMartingaleNode o
+
 
 ----------------------------------------------------------
 -- Convenience functions for constructing M-L tests
