@@ -129,6 +129,10 @@ sumGeneratorSet generators =
     foldl addGeneratorPayouts zeroPayoutsTree generators
 -- to use foldl vs foldr, swap order of args for addGeneratorPayouts
 
+{- | Transform each generator set in a list into a test tree. -}
+makeMLtest :: [[String]] -> [Tree Double]
+makeMLtest generator_set_list = map sumGeneratorSet generator_set_list
+
 {- | 
 Tests whether node satisfies the martingale property, assigning equal 
 probability to each branch.  In other words, is the simple average of the 
