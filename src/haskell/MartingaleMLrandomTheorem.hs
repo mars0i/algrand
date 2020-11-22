@@ -106,20 +106,43 @@ lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) 
 -- string.  Typically, the next payouts are both equal, and both twice
 -- the previous payout, so that E(X_i) = 4 X_{i-1}.  (!)  Maybe what I intended
 -- was that only of those get a payout, so it's an off-by-one error.
+
+-- Bad behavior notes:
+--   Input '1' is processed only once.
+--   Input '0' is always processed *and applies to both branches*
+--   You get an infinite tree even if the initial tree arg is finite, 
+--     because the default "" [] case returns onePayoutsTree.
+--   But if the function is modified so that the default "" [] case returns 
+--     a terminal node, then '1' is processed the appropriate number of times.
+
+{- 
+Is this what is happening?:
+Even if the initial tree arg is truncated, 
+if you try to go down the '1' branch, before that, next0 appears, and that
+... what? will end up in onePayoutsTree?  How?  How do the first two
+args ever get eaten in that case.
+But you never go further down the '1' branch.  And in what gets
+returned, that was never processed, is just what was in onePayoutsTree??
+What I'm saying does not make sense.
+
+Consider modifying to construct the infinite tree rather than depending
+on zeroPayoutsTree and onePayoutsTree.
+-} 
+
+
 {- |
 Add payouts for generator string with lower payouts to tree.  The first payout
 corresponds to the empty string.
 Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
 -}
 addPayouts (g:gs) (p:ps) (Node x next0 next1)
-  | g == '0' = 
-      trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
-      (Node (x+p) (addPayouts gs ps next0) next1)
-  | g == '1' = 
-      trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
-      (Node (x+p) next0 (addPayouts gs ps next1)) -- FIXME this line of code is ending the recursion. Because it's 2nd. Why?
+  | g == '0' = trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+                     (Node (x+p) (addPayouts gs ps next0) next1)
+  | g == '1' = trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+                     (Node (x+p) next0 (addPayouts gs ps next1)) -- FIXME this line of code is ending the recursion. Because it's 2nd. Why?
   | otherwise = undefined
 addPayouts ""  [] (Node _ _ _) = trace "empty args" onePayoutsTree -- once generator exhausted, rest are ones
+-- addPayouts ""  [] (Node _ _ _) = trace "empty args" (Node (-1000) Leaf Leaf) -- DEBUG
 addPayouts (g:gs) [] (Node _ _ _) = trace "empty payout list" undefined   -- shouldn't happen
 addPayouts "" (p:ps) (Node _ _ _) = trace "empty data string" undefined   -- shouldn't happen
 addPayouts _    _    Leaf = trace "default case" Leaf      -- probably shouldn't happen
@@ -130,7 +153,7 @@ foo (g:gs) (Node x next0 next1)
   | g == '0' = trace "\n|0|\n" (Node (x+1) (foo gs next0) next1)
   | g == '1' = trace "\n|1|\n" (Node (x+1) next0 (foo gs next1))
   | otherwise = undefined
-foo _ node = node
+foo _ node = Node 42 Leaf Leaf
 
 
 {- | Convenience function to addPayouts to a tree directly from a generator -}
