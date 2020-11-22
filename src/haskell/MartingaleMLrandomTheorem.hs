@@ -1,6 +1,7 @@
 import Data.List  (union, transpose) -- no longer used: isPrefixOf
 import Debug.Trace (trace)    -- DEBUG
 import Data.Typeable (typeOf) -- DEBUG
+import qualified Data.Tree  -- so I can convert to these trees and use some of their functions
 -- import Data.Foldable (foldr', foldl')
 -- import Data.Char  (digitToInt)
 
@@ -51,7 +52,7 @@ data Tree a = Leaf | Node {payout :: a,
 
 instance Functor Tree where  
     fmap f Leaf = Leaf -- probably unused
-    fmap f (Node p next_zero next_one) = Node (f p) (fmap f next_zero) (fmap f next_one)
+    fmap f (Node p next0 next1) = Node (f p) (fmap f next0) (fmap f next1)
 
 {- |
 'copyTree tree' generates a new copy of tree.
@@ -83,14 +84,6 @@ boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
        then p1 == p2
        else (boundedTreeEqual (n-1) z1 z2) && (boundedTreeEqual (n-1) o1 o2)
 
--- some test data
-gen1 = "101110110"
-gen2 = "1001001010101"
-gp1 = addPayouts gen1 (lowerPayouts (length gen1)) zeroPayoutsTree
-gp2 = addPayouts gen2 (lowerPayouts (length gen2)) gp1
-g2s = sumGeneratorSet [gen1,gen2]
-    
-
 -- not test data; these are essential
 zeroPayoutsTree :: Tree Double
 zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
@@ -118,17 +111,27 @@ Add payouts for generator string with lower payouts to tree.  The first payout
 corresponds to the empty string.
 Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
 -}
-addPayouts (g:gs) pays@(p:ps) (Node x next_zero next_one)
-    | g == '0' = 
-        trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
-        (Node (x+p) (addPayouts gs ps next_zero) next_one)
-    | g == '1' = 
-        trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
-        (Node (x+p) next_zero (addPayouts gs ps next_one))
+addPayouts (g:gs) pays@(p:ps) (Node x next0 next1)
+  | g == '0' = 
+      trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+      (Node (x+p) (addPayouts gs ps next0) next1)
+  | g == '1' = 
+      trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+      (Node (x+p) next0 (addPayouts gs ps next1)) -- FIXME this line of code is ending the recursion. Because it's 2nd. Why?
+  | otherwise = undefined
 addPayouts ""  [] (Node _ _ _) = trace "empty args" onePayoutsTree -- once generator exhausted, rest are ones
-addPayouts (g:gs) [] (Node _ _ _) = trace "empty pays" undefined   -- shouldn't happen
-addPayouts "" (p:ps) (Node _ _ _) = trace "empty string" undefined   -- shouldn't happen
+addPayouts (g:gs) [] (Node _ _ _) = trace "empty payout list" undefined   -- shouldn't happen
+addPayouts "" (p:ps) (Node _ _ _) = trace "empty data string" undefined   -- shouldn't happen
 addPayouts _    _    Leaf = trace "default case" Leaf      -- probably shouldn't happen
+--       trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+
+-- MWE - THIS WORKS!  Why??
+foo (g:gs) (Node x next0 next1)
+  | g == '0' = trace "\n|0|\n" (Node (x+1) (foo gs next0) next1)
+  | g == '1' = trace "\n|1|\n" (Node (x+1) next0 (foo gs next1))
+  | otherwise = undefined
+foo _ node = node
+
 
 {- | Convenience function to addPayouts to a tree directly from a generator -}
 addGeneratorPayouts tree generator =
@@ -161,6 +164,18 @@ two child payouts always equal to the parent payout for each non-Leaf node?
 isMartingaleTree top@(Node _ z o) =
     isMartingaleNode top && isMartingaleNode z && isMartingaleNode o
 
+----------------------------------------------------------
+-- Borrow tools from Data.Tree
+-- I don't want that representation, but by converting to it, we get access
+-- to one more more useful functions.
+
+{- | Convert our Tree to Data.Tree -}
+toDataTree Leaf = Data.Tree.Node (-42.0) []  -- Have to have a label, even for a leaf node
+toDataTree (Node p next0 next1) =
+    Data.Tree.Node p [toDataTree next0, toDataTree next1]
+
+{- | Draw an ASCII diagram of a tree using Data.Tree.drawTree, other functions. -}
+drawTree tree = putStr $ Data.Tree.drawTree $ fmap show (toDataTree tree)
 
 ----------------------------------------------------------
 -- Convenience functions for constructing M-L tests
@@ -204,3 +219,14 @@ someofem = foldr combineMLtests [[]]
                  [zeros, ones, terminal_zeros, terminal_ones, zero_ones, 
                  one_zeros]
 -- don't include e.g. multisize--you'll get prefix relations
+
+
+
+{-
+-- some test data
+gen1 = "101110110"
+gen2 = "1001001010101"
+gp1 = addPayouts gen1 (lowerPayouts (length gen1)) zeroPayoutsTree
+gp2 = addPayouts gen2 (lowerPayouts (length gen2)) gp1
+g2s = sumGeneratorSet [gen1,gen2]
+-}
