@@ -51,7 +51,7 @@ data Tree a = Leaf | Node {payout :: a,
                            deriving (Show, Eq)  
 
 instance Functor Tree where  
-    fmap f Leaf = Leaf -- probably unused
+    fmap f Leaf = f Leaf
     fmap f (Node p next0 next1) = Node (f p) (fmap f next0) (fmap f next1)
 
 {- |
