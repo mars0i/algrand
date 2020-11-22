@@ -111,7 +111,7 @@ Add payouts for generator string with lower payouts to tree.  The first payout
 corresponds to the empty string.
 Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
 -}
-addPayouts (g:gs) pays@(p:ps) (Node x next0 next1)
+addPayouts (g:gs) (p:ps) (Node x next0 next1)
   | g == '0' = 
       trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
       (Node (x+p) (addPayouts gs ps next0) next1)
