@@ -51,7 +51,7 @@ data Tree a = Leaf | Node {payout :: a,
                            deriving (Show, Eq)  
 
 instance Functor Tree where  
-    fmap f Leaf = f Leaf
+    fmap f Leaf = Leaf
     fmap f (Node p next0 next1) = Node (f p) (fmap f next0) (fmap f next1)
 
 {- |
@@ -182,6 +182,7 @@ foo (g:gs) (Node x next0 next1)
   | g == 2 = Node g next0 (foo gs next1)
   | otherwise = undefined
 foo _ node = Node 27 Leaf Leaf
+-- NOV 23 IT STARTED WORKING !?!?!
 -- This exhibits the problem if passed zeroPayoutsTree, then truncated, e.g.:
 --       drawTree $ truncateTree 6 $ foo [1,1,2,1,1,2] zeroPayoutsTree
 -- but works if you pass it a truncated zeroPayoutsTree, e.g.:
