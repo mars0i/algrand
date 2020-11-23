@@ -1,7 +1,7 @@
 import Data.List  (union, transpose) -- no longer used: isPrefixOf
-import Debug.Trace (trace)    -- DEBUG
-import Data.Typeable (typeOf) -- DEBUG
 import qualified Data.Tree  -- so I can convert to these trees and use some of their functions
+import Debug.Trace (trace)    -- DEBUG
+-- import Data.Typeable (typeOf) -- DEBUG
 -- import Data.Foldable (foldr', foldl')
 -- import Data.Char  (digitToInt)
 
@@ -68,7 +68,7 @@ truncateTree _ Leaf = Leaf
 truncateTree n (Node p z o) =
     if n <= 0
        then Leaf
-       else Node p (truncateTree (n-1) z) (truncateTree (n-1) z)
+       else Node p (truncateTree (n-1) z) (truncateTree (n-1) o)
 
 {- |
 'boundedTreeEqual n tree1 tree2' tests whether the two trees are
@@ -86,10 +86,14 @@ boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
 
 -- not test data; these are essential
 zeroPayoutsTree :: Tree Double
-zeroPayoutsTree = Node 0.0 (zeroPayoutsTree) (zeroPayoutsTree)
+zeroPayoutsTree = Node 0.0 zeroPayoutsTree zeroPayoutsTree
+
+-- I THINK this differs from zeroPayoutsTree in that doesn't share structure;
+-- each node is newly constructed.
+zeroNodes _ = Node 0.0 (zeroNodes 42) (zeroNodes 42)
 
 onePayoutsTree  :: Tree Double
-onePayoutsTree  = Node 1.0 (onePayoutsTree) (onePayoutsTree)
+onePayoutsTree  = Node 1.0 onePayoutsTree onePayoutsTree
 
 
 {- |
@@ -136,24 +140,98 @@ corresponds to the empty string.
 Example: addPayouts generator (lowerPayouts (length generator)) zeroPayoutsTree
 -}
 addPayouts (g:gs) (p:ps) (Node x next0 next1)
-  | g == '0' = trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
-                     (Node (x+p) (addPayouts gs ps next0) next1)
-  | g == '1' = trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
-                     (Node (x+p) next0 (addPayouts gs ps next1)) -- FIXME this line of code is ending the recursion. Because it's 2nd. Why?
+  | g == '0' = Node {payout=(x+p), nextZero=(addPayouts gs ps next0), nextOne=next1}
+  | g == '1' = Node {payout=(x+p), nextZero=next0, nextOne=(addPayouts gs ps next1)}
+  | otherwise = undefined -- no other characters allowed
+addPayouts "" [] _ = onePayoutsTree -- default case when lists exhausted
+addPayouts _  _  _ = undefined      -- lists should be same length, Leafs not allowed
+
+-- addPayouts ""  [] (Node _ _ _) = trace "empty args" (Node (-1000) Leaf Leaf) -- DEBUG
+--       trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+
+
+-- more complicated version:
+{-
+addPayouts (g:gs) (p:ps) (Node x next0 next1)
+  | g == '0' = Node {payout=(x+p), nextZero=(addPayouts gs ps next0), nextOne=next1}
+  | g == '1' = Node {payout=(x+p), nextZero=next0, nextOne=(addPayouts gs ps next1)}
   | otherwise = undefined
 addPayouts ""  [] (Node _ _ _) = trace "empty args" onePayoutsTree -- once generator exhausted, rest are ones
 -- addPayouts ""  [] (Node _ _ _) = trace "empty args" (Node (-1000) Leaf Leaf) -- DEBUG
 addPayouts (g:gs) [] (Node _ _ _) = trace "empty payout list" undefined   -- shouldn't happen
 addPayouts "" (p:ps) (Node _ _ _) = trace "empty data string" undefined   -- shouldn't happen
 addPayouts _    _    Leaf = trace "default case" Leaf      -- probably shouldn't happen
---       trace ("\ng: "++show g++" gs: "++show gs++"\np: "++show p++" ps: "++show ps++"\nnode now: "++show x++"\n") -- DEBUG
+-}
 
--- MWE - THIS WORKS!  Why??
+{-
+-- kinda works and shows that problem is not addPayouts' use of guards
+fooPayouts gas@(g:gs) pas@(p:ps) (Node x next0 next1) =
+    if g == '0'
+       then Node (x+p) (fooPayouts gs ps next0) next1
+       else if g == '1'
+       then Node (x+p) next0 (addPayouts gs ps next1)
+       else if gas == "" && pas == []
+       then onePayoutsTree
+       else undefined
+-}
+
+
+
 foo (g:gs) (Node x next0 next1)
-  | g == '0' = trace "\n|0|\n" (Node (x+1) (foo gs next0) next1)
-  | g == '1' = trace "\n|1|\n" (Node (x+1) next0 (foo gs next1))
+  | g == 1 = Node g (foo gs next0) next1
+  | g == 2 = Node g next0 (foo gs next1)
   | otherwise = undefined
-foo _ node = Node 42 Leaf Leaf
+foo _ node = Node 27 Leaf Leaf
+-- This exhibits the problem if passed zeroPayoutsTree, then truncated, e.g.:
+--       drawTree $ truncateTree 6 $ foo [1,1,2,1,1,2] zeroPayoutsTree
+-- but works if you pass it a truncated zeroPayoutsTree, e.g.:
+--       drawTree $ foo [1,2,1,1,2,2] $ truncateTree 6 zeroPayoutsTree
+-- (afaic, this makes no sense.)
+-- In more detail:
+--
+-- A. If passed an untruncated zeroPayoutsTree, it will keep processing 1's until
+-- it finds a 2, and then seems to ignore the rest of the list, and:
+-- it adds a 1 or 2 to *each* branch below current branch (which is not right).
+-- So e.g. [1,1,2,1] will produce:
+--      1
+--   1     1
+--  2 2   2 2
+-- and the rest zeros.  (Which is inexplicable to me.)
+--
+-- B. If passed a truncated zeroPayoutsTree, the entire process happens
+-- correctly, and you get:
+--                     1
+--            1                0
+--        2       0         0     0
+--      0   1   0   0      0 0   0  0
+--        27
+-- [NOTICE that this current invocation determines which branch gets a number 
+-- in the *next* call.  It's a bit off-by-one from what you might expect.
+-- And then it's only in the next node indicated by the last item in the list
+-- (i.e. the next one-node if that was a 1, or two-node if it was a two) that
+-- the terminal node with 27 appears.  All of the other nodes are terminated
+-- by the node-truncate payout -42.  So all of those should normally get
+-- zeroPayoutsTree, and the one with 27 should normally get onePayoutsTree.
+-- that would be what would be parallel to the intention of addPayouts.]
+-------------------------------------------------------------------------
+-- OK I THINK I UNDERSTAND PART OF THE PROBLEM.  Maybe.
+-- Look at the definition of zeroPayoutsTree:
+-- zeroPayoutsTree = Node 0.0 zeroPayoutsTree zeroPayoutsTree
+-- The two branches are *the same tree*.  So maybe what's happening is
+-- that when I replace a node, I am replacing it in *both* branches.
+-- (Really?  That seems wrong.  But would make sense of some of the behavior.)
+-- But when I use a truncated input tree, *truncateTree has replace each node
+-- with a new node.  There is no sharing of nodes.
+-- BUT: using copyTree doesn't get rid of the problem.  Yet it seems to do
+-- in same thing as truncateTree.
+-- OTOH: Replacing zeroPayoutsTree with a call to my new zeroNodes function
+-- *does* fix the problem.  This new function is designed to create each
+-- node anew.
+-- (This doesn't yet explain why the replacement stops after going down the
+-- right/ones branch when I use zeroPayoutsTree.)
+-- [note truncateTree had a bug.  I was using the zero branch in both branches.
+-- but fixing it didn't change the results.]
+
 
 
 {- | Convenience function to addPayouts to a tree directly from a generator -}
