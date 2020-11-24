@@ -55,20 +55,20 @@ copyTree Leaf = Leaf
 copyTree (Node p z o) = Node p (copyTree z) (copyTree o)
 
 {- |
-'truncateTree n tree' returns a tree that is identical tree up to
+'takeTree n tree' returns a tree that is identical tree up to
 depth n, where it is truncated by replacing Nodes with Leafs.
 -}
-truncateTree _ Leaf = Leaf
-truncateTree n (Node p z o) =
+takeTree _ Leaf = Leaf
+takeTree n (Node p z o) =
     if n <= 0
        then Leaf
-       else Node p (truncateTree (n-1) z) (truncateTree (n-1) o)
+       else Node p (takeTree (n-1) z) (takeTree (n-1) o)
 
 {- |
 'boundedTreeEqual n tree1 tree2' tests whether the two trees are
 identical up to depth n.
 -}
--- This is a lot faster than using truncateTree.
+-- This is a lot faster than using takeTree.
 boundedTreeEqual :: (Integral a) => a -> Tree Double -> Tree Double -> Bool
 boundedTreeEqual _ Leaf Leaf = True
 boundedTreeEqual _ Leaf _    = False
@@ -140,7 +140,7 @@ two child payouts always equal to the parent payout for each non-Leaf node?
 This obviously won't work with infinite trees.
 Example to show that the first 50 test sets for martingale repreentation mm
 of an M-L test are martingale up to 15 deep, each:
-   take 50 $ map (\t -> isMartingaleTree (truncateTree 15 t)) mm
+   take 50 $ map (\t -> isMartingaleTree (takeTree 15 t)) mm
 Remember that increasing depth needs exponentially more space and time.
 -}
 isMartingaleTree Leaf = True
