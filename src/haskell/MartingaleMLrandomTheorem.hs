@@ -44,6 +44,9 @@ data Tree a = Leaf | Node {payout :: a,
                            nextOne :: (Tree a)}
                            deriving (Show, Eq)  
 
+children (Node _ z o) = [z, o]
+children Leaf = [Leaf] -- or undefined?
+
 instance Functor Tree where  
     fmap f Leaf = Leaf
     fmap f (Node p next0 next1) = Node (f p) (fmap f next0) (fmap f next1)
@@ -149,6 +152,24 @@ isMartingaleTree top@(Node _ z o) =
 -- Note can't use fmap in any obvious way here because it maps over *payouts*,
 -- and this function has to map over *nodes*, since it has to get the
 -- next nodes as well.  What I need is more like a fold.
+
+
+
+-- Folds inspired by Data.Tree's rosetree fold, but the function argument here
+-- operates on nodes, not node values (payouts).
+
+-- v3:
+-- foldTree f = go where
+--    go n@(Node p z o) = f n z o
+
+-- v2:
+-- foldTree f = go where
+
+-- attempt to define isMartingaleTree in terms of above foldTree
+-- ismt Leaf = True
+-- ismt node = foldTree f node where
+--    f n ns = isMartingaleNode n && foldl ismt ns
+
 
 ----------------------------------------------------------
 -- Borrow tools from Data.Tree
