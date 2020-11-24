@@ -5,9 +5,7 @@ import Debug.Trace (trace)    -- DEBUG
 -- import Data.Foldable (foldr', foldl')
 -- import Data.Char  (digitToInt)
 
-
 {-
-
 Code to help verify/understand part of the second half of
 Downey and Hirschfeldt's (2010) Theorem 6.3.4, p. 236, which is their
 version of Schnorr's theorem that Martin-Löf randomness is equivalent
@@ -30,10 +28,6 @@ description of d_n is terse, and I had trouble working out why d_n
 really is a martingale.  This code allows me to perform the
 construction, see the result, and better understand why it creates a
 martingale.
-
-(This is my first recent Haskell experiment.  No doubt it could much
-more succinct and elegant.)
-
 -}
 
 
@@ -102,6 +96,7 @@ These are payouts correspondng to the string up to that point.
 lowerPayouts :: Int -> [Double]
 lowerPayouts len = map (2^^) [-len .. -1] -- from D&H: map ((2**) . (-len_s +)) [0 .. len_s-1]
 
+
 {- |
 Add payouts for generator string with lower payouts to tree.  The first payout
 corresponds to the empty string.
@@ -142,10 +137,18 @@ isMartingaleNode _ = False -- unbalanced (?)
 Tests whether a tree satisfies the martingale property, assigning equal 
 probability to each branch. In other words, is the simple average of the 
 two child payouts always equal to the parent payout for each non-Leaf node?
-(This obviously won't work with infinite trees.)
+This obviously won't work with infinite trees.
+Example to show that the first 50 test sets for martingale repreentation mm
+of an M-L test are martingale up to 15 deep, each:
+   take 50 $ map (\t -> isMartingaleTree (truncateTree 15 t)) mm
+Remember that increasing depth needs exponentially more space and time.
 -}
+isMartingaleTree Leaf = True
 isMartingaleTree top@(Node _ z o) =
-    isMartingaleNode top && isMartingaleNode z && isMartingaleNode o
+    isMartingaleNode top && isMartingaleTree z && isMartingaleTree o
+-- Note can't use fmap in any obvious way here because it maps over *payouts*,
+-- and this function has to map over *nodes*, since it has to get the
+-- next nodes as well.  What I need is more like a fold.
 
 ----------------------------------------------------------
 -- Borrow tools from Data.Tree
@@ -174,7 +177,7 @@ combineMLtests xs []         = xs
 combineMLtests [] ys         = ys
 
 --------------------------------------------------
--- Example M-L tests
+-- Example generator sets for M-L tests
 
 -- prefix-free generators for M-L tests for infinite zeros and infinite ones
 zeros          = iterate (\ss -> map ('0':) ss) [""] -- 0, 00, 000, ...
@@ -189,9 +192,10 @@ alternators = combineMLtests zero_ones one_zeros
 zeros_or_ones = combineMLtests zeros ones
 terminal_both = combineMLtests terminal_zeros terminal_ones
 
--- remove the first set since it includes "", a prefix to other elements
+-- Remove the first set since it includes "", a prefix to other elements,
+-- and remove the second since it includes "1", which is a prefix for "110".
 multisize :: [[String]]
-multisize = drop 1 (foldr combineMLtests [[]] 
+multisize = drop 2 (foldr combineMLtests [[]] 
                           [terminal_ones, drop 2 terminal_zeros, 
                           drop 4 terminal_ones, drop 6 zeros])
 
