@@ -42,14 +42,16 @@ martingale.
 data Tree a = Leaf | Node {payout :: a,
                            nextZero :: (Tree a),
                            nextOne :: (Tree a)}
-                           deriving (Show, Eq)  
-
-children (Node _ z o) = [z, o]
-children Leaf = [Leaf] -- or undefined?
+   deriving (Show, Eq)  
 
 instance Functor Tree where  
     fmap f Leaf = Leaf
     fmap f (Node p next0 next1) = Node (f p) (fmap f next0) (fmap f next1)
+
+children (Node _ z o) = [z, o]
+children Leaf = [Leaf] -- or undefined?
+
+
 
 {- |
 'copyTree tree' generates a new copy of tree.
@@ -67,6 +69,8 @@ takeTree n (Node p z o) =
        then Leaf
        else Node p (takeTree (n-1) z) (takeTree (n-1) o)
 
+
+
 {- |
 'boundedTreeEqual n tree1 tree2' tests whether the two trees are
 identical up to depth n.
@@ -80,6 +84,30 @@ boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
     if n <= 0
        then p1 == p2
        else (boundedTreeEqual (n-1) z1 z2) && (boundedTreeEqual (n-1) o1 o2)
+
+----------------------------------------------
+
+{- | Like a zipper, but only for examining, not modifying. -}
+data Slipper a = Empty | Slipper {parent :: (Slipper a), current :: (Tree a)}
+
+instance Show a => Show (Slipper a) where
+    show (Slipper _ Leaf) = "leaf"
+    show (Slipper _ (Node p (Node pz _ _) (Node po _ _))) =
+        "<"++(show p)++" [z: "++(show pz)++" o: "++(show po)++"]>"
+
+goZero slip@(Slipper _ (Node _ next0 _)) = Slipper slip next0
+goZero slip@(Slipper _ Leaf) = slip -- can't go past a leaf
+
+goOne slip@(Slipper _ (Node _ _ next1)) = Slipper slip next1
+goOne slip@(Slipper _ Leaf) = slip -- can't go past a leaf
+
+-- trees are horizontal, with the head at left; others would use "goUp"
+goLeft (Slipper (Slipper grandparentSlip parentNode) _) =
+    Slipper grandparentSlip parentNode
+goLeft slip@(Slipper Empty cur) = slip -- can't go past beginning of sequence
+
+
+----------------------------------------------
 
 -- not test data; these are essential
 zeroPayoutsTree :: Tree Double
