@@ -91,7 +91,9 @@ boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
 data Slipper a = Empty | Slipper {parent :: (Slipper a), current :: (Tree a)}
 
 instance Show a => Show (Slipper a) where
-    show (Slipper _ Leaf) = "leaf"
+    show (Slipper _ Leaf) = "<Leaf>"
+    show (Slipper Top (Node p (Node pz _ _) (Node po _ _))) =
+        "top: <"++(show p)++" [z: "++(show pz)++" o: "++(show po)++"]>"
     show (Slipper _ (Node p (Node pz _ _) (Node po _ _))) =
         "<"++(show p)++" [z: "++(show pz)++" o: "++(show po)++"]>"
 
