@@ -37,12 +37,18 @@ martingale.
 ------------------------------------------------------------------
 -- Basic definitions and functions
 
-
--- a should be Float; it's the payout
+-- | Trees represent functions from possible finite strings of 0's and 1's to
+-- real numbers.  The payout field contains the value for the string of 0's 
+-- and 1's up to this point.  The nextZero and nextOne contents represent 
+-- the two possible next digits with their payouts, and subsequent possible
+-- digits and payouts.  Note that the very first node in the entire tree 
+-- typically represents neither 0 nor 1; it represents the empty sequence.
 data Tree a = Leaf | Node {payout :: a,
                            nextZero :: (Tree a),
                            nextOne :: (Tree a)}
    deriving (Show, Eq)  
+
+-- a should be Float; it's the payout
 
 instance Functor Tree where  
     fmap f Leaf = Leaf
@@ -86,36 +92,46 @@ boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
        else (boundedTreeEqual (n-1) z1 z2) && (boundedTreeEqual (n-1) o1 o2)
 
 ----------------------------------------------
+-- Slipper functions
 
--- | Like a zipper, but only for examining, not modifying.
-data Slipper a = Empty | Slipper {parent :: (Slipper a), current :: (Tree a)}
+-- | A Slipper is like a zipper, but it is only for examining, not modifying.
+-- A Slipper slips along the paths of a tree, but doesn't reconstruct it, 
+-- i.e. it doesn't zip up a new tree when backing out.
+-- Note that we conceive of Trees with root at left, branching to the right.
+-- The current implementation of Slipper is simply a list of Tree nodes: 
+-- the current node followed by its parent and other ancestors, in reverse 
+-- order.  We move left by popping nodes off the list.  Moving right 
+-- means extracting the zero or one node from the current node and then 
+-- pushing it onto the list.  (The first node is neither 0 nor 1; it 
+-- represents the empty sequence.)
 
--- I want to display the values of the two children as well as of theu current:
-instance Show a => Show (Slipper a) where
-    show (Slipper _ Leaf) = "<Leaf>"
-    show (Slipper Empty (Node p (Node pz _ _) (Node po _ _))) =
-        "top: <"++(show p)++" [z: "++(show pz)++" o: "++(show po)++"]>"
-    show (Slipper _ (Node p (Node pz _ _) (Node po _ _))) =
+type Slipper a = [Tree a]
+
+-- I want to display the values of the two children as well as of the current:
+showCurr :: (Show a) => Slipper a -> String
+showCurr ( (Node p (Node pz _ _) (Node po _ _)) : ns ) =
         "<"++(show p)++" [z: "++(show pz)++" o: "++(show po)++"]>"
+showCurr ( (Node p Leaf (Node po _ _)) : ns ) =
+        "<"++(show p)++" [z: "++"leaf"++" o: "++(show po)++"]>"
+showCurr ( (Node p (Node pz _ _) Leaf) : ns ) =
+        "<"++(show p)++" [z: "++(show pz)++" o: "++"leaf"++"]>"
+showCurr (Leaf:ns) = "<leaf>"
 
 -- | Initialize a slipper at the beginning of a tree.
-slipOnto tree = Slipper Empty tree
+slipOnto :: Tree a -> Slipper a
+slipOnto node = [node]
 
 -- | Move right to the zero node
-goZero slip@(Slipper _ (Node _ next0 _)) = Slipper slip next0
-goZero slip@(Slipper _ Leaf) = slip -- can't go past a leaf
+goZero :: Slipper a -> Slipper a
+goZero nodes@((Node _ next0 _):ns) = next0:nodes
 
 -- | Move right to the one node
-goOne slip@(Slipper _ (Node _ _ next1)) = Slipper slip next1
-goOne slip@(Slipper _ Leaf) = slip -- can't go past a leaf
+goOne :: Slipper a -> Slipper a
+goOne nodes@((Node _ _ next1):ns) = next1:nodes
 
--- Move left to the parent node.
-goLeft (Slipper (Slipper grandparentSlip parentNode) _) =
-    Slipper grandparentSlip parentNode
-goLeft slip@(Slipper Empty cur) = slip -- can't go past beginning of sequence
-
-
-
+-- | Move left to the parent node.
+goPrev :: Slipper a -> Slipper a
+goPrev (_:ns) = ns
 
 ----------------------------------------------
 
