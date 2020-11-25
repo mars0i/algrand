@@ -87,26 +87,33 @@ boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
 
 ----------------------------------------------
 
-{- | Like a zipper, but only for examining, not modifying. -}
+-- | Like a zipper, but only for examining, not modifying.
 data Slipper a = Empty | Slipper {parent :: (Slipper a), current :: (Tree a)}
 
 instance Show a => Show (Slipper a) where
     show (Slipper _ Leaf) = "<Leaf>"
-    show (Slipper Top (Node p (Node pz _ _) (Node po _ _))) =
+    show (Slipper Empty (Node p (Node pz _ _) (Node po _ _))) =
         "top: <"++(show p)++" [z: "++(show pz)++" o: "++(show po)++"]>"
     show (Slipper _ (Node p (Node pz _ _) (Node po _ _))) =
         "<"++(show p)++" [z: "++(show pz)++" o: "++(show po)++"]>"
 
+-- | Initialize a slipper at the beginning of a tree.
+slipOnto tree = Slipper Empty tree
+
+-- | Move right to the zero node
 goZero slip@(Slipper _ (Node _ next0 _)) = Slipper slip next0
 goZero slip@(Slipper _ Leaf) = slip -- can't go past a leaf
 
+-- | Move right to the one node
 goOne slip@(Slipper _ (Node _ _ next1)) = Slipper slip next1
 goOne slip@(Slipper _ Leaf) = slip -- can't go past a leaf
 
--- trees are horizontal, with the head at left; others would use "goUp"
+-- Move left to the parent node.
 goLeft (Slipper (Slipper grandparentSlip parentNode) _) =
     Slipper grandparentSlip parentNode
 goLeft slip@(Slipper Empty cur) = slip -- can't go past beginning of sequence
+
+
 
 
 ----------------------------------------------
