@@ -90,6 +90,7 @@ boundedTreeEqual n (Node p1 z1 o1) (Node p2 z2 o2) =
 -- | Like a zipper, but only for examining, not modifying.
 data Slipper a = Empty | Slipper {parent :: (Slipper a), current :: (Tree a)}
 
+-- I want to display the values of the two children as well as of theu current:
 instance Show a => Show (Slipper a) where
     show (Slipper _ Leaf) = "<Leaf>"
     show (Slipper Empty (Node p (Node pz _ _) (Node po _ _))) =
