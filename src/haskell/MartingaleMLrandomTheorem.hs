@@ -1,6 +1,7 @@
-import Data.List  (union, transpose) -- no longer used: isPrefixOf
+import Data.List  (union, transpose, sortBy, isPrefixOf)
 import qualified Data.Tree  -- so I can convert to these trees and use some of their functions
 import Debug.Trace (trace)    -- DEBUG
+-- import Data.Set (toList, fromList)
 -- import Data.Typeable (typeOf) -- DEBUG
 -- import Data.Foldable (foldr', foldl')
 -- import Data.Char  (digitToInt)
@@ -290,10 +291,6 @@ someofem = foldr combineMLtests [[]]
 -- System.Random uses a Steele et al. SplitMix PRNG:
 -- https://hackage.haskell.org/package/random-1.2.0/docs/System-Random.html
 
--- this experiment doesn't work, though innards works in ghci:
--- r = do {return getStdRandom (randomR (1,6))}
-
--- topRng = getStdGen  -- This isn't an RNG, it's an IO action.
 
 -- |
 -- Returns an unlimited number of random lists of 0's and 1's, of random 
@@ -309,24 +306,25 @@ generateGenerators rng maxLen =
             in (take len seq) : (selectStrings g' (drop len seq))
      in selectStrings rngForFirstLength randSeq
 
+-- |
+-- compare function for sortBy that puts shorter lists first, and only 
+-- compares contents for lists of equal length.
+compareSizeFirst xs ys
+  | length xs < length ys = LT
+  | length xs > length ys = GT
+  | otherwise = compare xs ys
 
+-- FIXME doesn't work because only compares with next list; needs to compare
+-- with all subsequent lists.
+-- | Given a sorted list of lists, removes lists that are prefixes.
+removeSortedPrefixes [] = []
+removeSortedPrefixes [x] = [x]
+removeSortedPrefixes (x:y:zs) =
+    if isPrefixOf x y
+       then removeSortedPrefixes (y:zs)
+       else x : removeSortedPrefixes (y:zs)
 
-{- cruft:
-    where generateOne seq =
-       let (len, g) = randomR (1,max_len) rng in
-                newString = take n_generators $ randomRs (0,1) g
-                restOfSeq = drop n_generators $ randomRs (0,1) g
-             in (newString, restOfSeq)
--}
-
-
-
-
-{-
--- some test data
-gen1 = "101110110"
-gen2 = "1001001010101"
-gp1 = addPayouts gen1 (lowerPayouts (length gen1)) zeroPayoutsTree
-gp2 = addPayouts gen2 (lowerPayouts (length gen2)) gp1
-g2s = sumGeneratorSet [gen1,gen2]
--}
+-- DOES THIS WORK?
+-- | Given a list of lists, removes lists that are prefixes.
+removePrefixes generators =
+    removeSortedPrefixes (sortBy compareSizeFirst generators)
