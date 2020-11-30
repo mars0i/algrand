@@ -295,13 +295,23 @@ someofem = foldr combineMLtests [[]]
 
 topRng = getStdGen
 
-generateGeneratorSet rng n_generators max_len =
-    if n_generators > 0
-       then let (len, g) = randomR (1,max_len) rng in
-                new_generator = take n_generators $ randomRs (0,1) g
-                rest_sequence = drop n_generators $ randomRs (0,1) g
-             in -- need to fill in here
+generateGenerators rng maxLen =
+    let randSeq = randomRs (0,1) rng
+        rng' = newStdGen
+        selectStrings g seq =
+            let (len, g') = randomR (1, maxLen) g
+            in (take len seq) : (selectStrings g (drop len seq))
+     in selectStrings rng' randSeq
 
+
+
+{- cruft:
+    where generateOne seq =
+       let (len, g) = randomR (1,max_len) rng in
+                newString = take n_generators $ randomRs (0,1) g
+                restOfSeq = drop n_generators $ randomRs (0,1) g
+             in (newString, restOfSeq)
+-}
 
 
 
