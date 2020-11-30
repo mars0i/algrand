@@ -4,6 +4,7 @@ import Debug.Trace (trace)    -- DEBUG
 -- import Data.Typeable (typeOf) -- DEBUG
 -- import Data.Foldable (foldr', foldl')
 -- import Data.Char  (digitToInt)
+import System.Random
 
 {-
 Code to help verify/understand part of the second half of
@@ -281,6 +282,27 @@ someofem = foldr combineMLtests [[]]
                  [zeros, ones, terminal_zeros, terminal_ones, zero_ones, 
                  one_zeros]
 -- don't include e.g. multisize--you'll get prefix relations
+
+
+-----------------------------------------------
+-- Random generation of generator sets
+
+-- System.Random uses a Steele et al. SplitMix PRNG:
+-- https://hackage.haskell.org/package/random-1.2.0/docs/System-Random.html
+
+-- this experiment doesn't work, though innards works in ghci:
+-- r = do {return getStdRandom (randomR (1,6))}
+
+topRng = getStdGen
+
+generateGeneratorSet rng n_generators max_len =
+    if n_generators > 0
+       then let (len, g) = randomR (1,max_len) rng in
+                new_generator = take n_generators $ randomRs (0,1) g
+                rest_sequence = drop n_generators $ randomRs (0,1) g
+             in -- need to fill in here
+
+
 
 
 
