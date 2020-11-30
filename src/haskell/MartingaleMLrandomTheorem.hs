@@ -295,6 +295,12 @@ someofem = foldr combineMLtests [[]]
 
 -- topRng = getStdGen  -- This isn't an RNG, it's an IO action.
 
+-- |
+-- Returns an unlimited number of random lists of 0's and 1's, of random 
+-- length between 1 and maxLen, inclusive.  rng is an instance of RandomGen.
+-- (This returns an infinite list of lists, but of course there are only
+-- sum_{k=1}^n 2^k such lists, where n = maxLen.)
+generateGenerators :: (Random a, RandomGen t, Integral a) => t -> Int -> [[a]]
 generateGenerators rng maxLen =
     let (rngForSeq, rngForFirstLength) = split rng
         randSeq = randomRs (0,1) rngForSeq
