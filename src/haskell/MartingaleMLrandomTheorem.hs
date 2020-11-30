@@ -293,15 +293,15 @@ someofem = foldr combineMLtests [[]]
 -- this experiment doesn't work, though innards works in ghci:
 -- r = do {return getStdRandom (randomR (1,6))}
 
-topRng = getStdGen
+-- topRng = getStdGen  -- This isn't an RNG, it's an IO action.
 
 generateGenerators rng maxLen =
-    let randSeq = randomRs (0,1) rng
-        rng' = newStdGen
+    let (rngForSeq, rngForFirstLength) = split rng
+        randSeq = randomRs (0,1) rngForSeq
         selectStrings g seq =
             let (len, g') = randomR (1, maxLen) g
-            in (take len seq) : (selectStrings g (drop len seq))
-     in selectStrings rng' randSeq
+            in (take len seq) : (selectStrings g' (drop len seq))
+     in selectStrings rngForFirstLength randSeq
 
 
 
