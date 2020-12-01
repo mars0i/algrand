@@ -314,17 +314,18 @@ compareSizeFirst xs ys
   | length xs > length ys = GT
   | otherwise = compare xs ys
 
--- FIXME doesn't work because only compares with next list; needs to compare
--- with all subsequent lists.
--- | Given a sorted list of lists, removes lists that are prefixes.
+-- | 
+-- Given a list of lists sorted by size and the usual ordering, removes 
+-- lists that are prefixes of later lists.
 removeSortedPrefixes [] = []
-removeSortedPrefixes [x] = [x]
-removeSortedPrefixes (x:y:zs) =
-    if isPrefixOf x y
-       then removeSortedPrefixes (y:zs)
-       else x : removeSortedPrefixes (y:zs)
+removeSortedPrefixes (x:xs) =
+    if any (isPrefixOf x) xs
+       then removeSortedPrefixes xs
+       else x : removeSortedPrefixes xs
+-- This is O(n^2), and there might be a faster way, but it's OK for me.
 
--- DOES THIS WORK?
 -- | Given a list of lists, removes lists that are prefixes.
 removePrefixes generators =
     removeSortedPrefixes (sortBy compareSizeFirst generators)
+-- We sort by size because if x is longer than what follows it, it can't
+-- possibly be a prefix.
