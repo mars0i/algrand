@@ -307,24 +307,25 @@ generateGenerators rng maxLen =
      in selectStrings rngForFirstLength randSeq
 
 -- |
--- compare function for sortBy that puts shorter lists first, and only 
--- compares contents for lists of equal length.
+-- This is a compare function for sortBy that puts shorter lists first, and 
+-- only compares contents for lists of equal length.
 compareSizeFirst xs ys
   | length xs < length ys = LT
   | length xs > length ys = GT
   | otherwise = compare xs ys
 
 -- | 
--- Given a list of lists sorted by size and the usual ordering, removes 
--- lists that are prefixes of later lists.
+-- Given a finite list of lists sorted by size and the usual ordering,
+-- removes lists that are prefixes of later lists.
 removeSortedPrefixes [] = []
 removeSortedPrefixes (x:xs) =
     if any (isPrefixOf x) xs
        then removeSortedPrefixes xs
        else x : removeSortedPrefixes xs
--- This is O(n^2), and there might be a faster way, but it's OK for me.
+-- This is O(n^2) in number of lists, and there might be a faster way,
+-- but it's OK for me.
 
--- | Given a list of lists, removes lists that are prefixes.
+-- | Given a finite list of lists, removes lists that are prefixes.
 removePrefixes generators =
     removeSortedPrefixes (sortBy compareSizeFirst generators)
 -- We sort by size because if x is longer than what follows it, it can't
