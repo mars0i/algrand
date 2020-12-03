@@ -62,7 +62,7 @@ children Leaf = [Leaf] -- or undefined?
 
 
 {- |
-'copyTree tree' generates a new copy of tree.
+'copyTree tree' makes a new copy of tree.
 -}
 copyTree Leaf = Leaf
 copyTree (Node p z o) = Node p (copyTree z) (copyTree o)
@@ -288,6 +288,9 @@ someofem = foldr combineMLtests [[]]
 -----------------------------------------------
 -- Random generation of generator sets
 
+-- Example usage:
+-- gs = removePrefixes $ take 20 $ generateGenerators (System.Random.mkStdGen 524) 13
+
 -- System.Random uses a Steele et al. SplitMix PRNG:
 -- https://hackage.haskell.org/package/random-1.2.0/docs/System-Random.html
 
@@ -297,8 +300,8 @@ someofem = foldr combineMLtests [[]]
 -- length between 1 and maxLen, inclusive.  rng is an instance of RandomGen.
 -- (This returns an infinite list of lists, but of course there are only
 -- sum_{k=1}^n 2^k such lists, where n = maxLen.)
-generateGenerators :: (Random a, RandomGen t, Integral a) => t -> Int -> [[a]]
-generateGenerators rng maxLen =
+generateGeneratorLists :: (Random a, RandomGen t, Integral a) => t -> Int -> [[a]]
+generateGeneratorLists rng maxLen =
     let (rngForSeq, rngForFirstLength) = split rng
         randSeq = randomRs (0,1) rngForSeq
         selectStrings g seq =
@@ -330,3 +333,4 @@ removePrefixes generators =
     removeSortedPrefixes (sortBy compareSizeFirst generators)
 -- We sort by size because if x is longer than what follows it, it can't
 -- possibly be a prefix.
+

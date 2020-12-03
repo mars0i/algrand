@@ -12,6 +12,10 @@ import System.Random.Mersenne.Pure64 -- package mersenne-random-pure64
 import System.Random.Mersenne -- package mersenne-random
 import Data.PCGen -- package pcgen, an O'Neill PCG PRNG
 
+-- I think that System.Random 1.2, based on SplitMix, is fine for
+-- many uses.  It has a period of 2^64, though, which might not be 
+-- enough for some simulations.
+
 
 {- Example:
 
