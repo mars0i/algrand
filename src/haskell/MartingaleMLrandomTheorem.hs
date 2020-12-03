@@ -4,7 +4,7 @@ import Debug.Trace (trace)    -- DEBUG
 -- import Data.Set (toList, fromList)
 -- import Data.Typeable (typeOf) -- DEBUG
 -- import Data.Foldable (foldr', foldl')
--- import Data.Char  (digitToInt)
+import Data.Char  (intToDigit) -- digitToInt
 import System.Random
 
 {-
@@ -300,13 +300,13 @@ someofem = foldr combineMLtests [[]]
 -- length between 1 and maxLen, inclusive.  rng is an instance of RandomGen.
 -- (This returns an infinite list of lists, but of course there are only
 -- sum_{k=1}^n 2^k such lists, where n = maxLen.)
-generateGeneratorLists :: (Random a, RandomGen t, Integral a) => t -> Int -> [[a]]
+generateGeneratorLists :: RandomGen t => t -> Int -> [String]
 generateGeneratorLists rng maxLen =
     let (rngForSeq, rngForFirstLength) = split rng
         randSeq = randomRs (0,1) rngForSeq
         selectStrings g seq =
             let (len, g') = randomR (1, maxLen) g
-            in (take len seq) : (selectStrings g' (drop len seq))
+            in (map intToDigit (take len seq)) : (selectStrings g' (drop len seq))
      in selectStrings rngForFirstLength randSeq
 
 -- |
