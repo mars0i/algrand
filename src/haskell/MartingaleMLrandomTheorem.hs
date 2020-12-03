@@ -30,6 +30,16 @@ description of d_n is terse, and I had trouble working out why d_n
 really is a martingale.  This code allows me to perform the
 construction, see the result, and better understand why it creates a
 martingale.
+
+
+Example:
+
+gs = generateGenerators (System.Random.mkStdGen 524) 13
+np = removePrefixes $ take 20 $ gs
+mt = sumGeneratorSet np
+isMartingaleTree $ takeTree 10 mt
+drawTree $ takeTree 6 mt
+
 -}
 
 
@@ -290,6 +300,9 @@ someofem = foldr combineMLtests [[]]
 
 -- Example usage:
 -- gs = removePrefixes $ take 20 $ generateGenerators (System.Random.mkStdGen 524) 13
+-- mt = sumGeneratorSet generators
+-- isMartingaleTree $ takeTree 10 mt
+-- drawTree $ takeTree 6 mt
 
 -- System.Random uses a Steele et al. SplitMix PRNG:
 -- https://hackage.haskell.org/package/random-1.2.0/docs/System-Random.html
