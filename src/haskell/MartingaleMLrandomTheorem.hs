@@ -5,12 +5,12 @@ import Debug.Trace (trace)    -- DEBUG
 -- import Data.Foldable (foldr', foldl')
 import Data.Char  (intToDigit) -- digitToInt
 
+-- For these, need to run ghci as something like:
+-- stack ghci --package pretty-tree  --package containers --package random
 import System.Random (RandomGen, randomR, randomRs, split, mkStdGen) -- package random
 import qualified Data.Tree (drawTree, Tree(Node)) -- package containers
--- import qualified Data.Tree.Pretty (drawVerticalTree) -- package pretty-tree
+import qualified Data.Tree.Pretty (drawVerticalTree) -- package pretty-tree
 
--- Need to run ghci as something like:
--- stack ghci --package pretty-tree  --package containers --package random
 
 {-
 Code to help verify/understand part of the second half of
@@ -44,7 +44,7 @@ np = removePrefixes $ take 20 $ gs
 mt = sumGeneratorSet np
 isMartingaleTree $ takeTree 10 mt
 drawTree $ takeTree 6 mt
-drawVerticalTree $ takeTree 6 mt
+drawVerticalTree $ takeTree 4 mt
 
 -}
 
@@ -256,8 +256,8 @@ toDataTree (Node p next0 next1) =
 {- | Draw an ASCII diagram of a tree using Data.Tree.drawTree, other functions. -}
 drawTree tree = putStr $ Data.Tree.drawTree $ fmap show (toDataTree tree)
 
--- drawVerticalTree tree = 
---     putStr $ Data.Tree.Pretty.drawVerticalTree $ fmap show (toDataTree tree)
+drawVerticalTree tree = 
+    putStr $ Data.Tree.Pretty.drawVerticalTree $ fmap show (toDataTree tree)
 
 ----------------------------------------------------------
 -- Convenience functions for constructing M-L tests
