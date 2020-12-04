@@ -9,7 +9,7 @@ import Data.Char  (intToDigit) -- digitToInt
 -- stack ghci --package pretty-tree  --package containers --package random
 import System.Random (RandomGen, randomR, randomRs, split, mkStdGen) -- package random
 import qualified Data.Tree (drawTree, Tree(Node)) -- package containers
-import qualified Data.Tree.Pretty (drawVerticalTree) -- package pretty-tree
+import qualified Data.Tree.Pretty (drawVerticalTree, drawVerticalTreeWith) -- package pretty-tree
 
 
 {-
@@ -65,7 +65,6 @@ data Tree a = Leaf | Node {payout :: a,
                            nextZero :: (Tree a),
                            nextOne :: (Tree a)}
    deriving (Show, Eq)  
-
 -- a should be Float; it's the payout
 
 instance Functor Tree where  
@@ -253,11 +252,22 @@ toDataTree Leaf = Data.Tree.Node (-42.0) []  -- Have to have a label, even for a
 toDataTree (Node p next0 next1) =
     Data.Tree.Node p [toDataTree next0, toDataTree next1]
 
-{- | Draw an ASCII diagram of a tree using Data.Tree.drawTree, other functions. -}
-drawTree tree = putStr $ Data.Tree.drawTree $ fmap show (toDataTree tree)
+-- |
+-- Like show for numbers, but if x < 0, returns a string containing a space.
+-- This allows more compact trees display, since I'm translating leaf values
+-- into negative numbers.
+showNonNeg x = if x < 0 then "-" else show x
 
+{- | Print an ASCII diagram of a tree using Data.Tree.drawTree. -}
+drawTree tree = putStr $ Data.Tree.drawTree $ fmap showNonNeg (toDataTree tree)
+
+{- | Print an ASCII diagram of a tree using Data.Tree.Pretty.drawVerticalTree. -}
 drawVerticalTree tree = 
-    putStr $ Data.Tree.Pretty.drawVerticalTree $ fmap show (toDataTree tree)
+    putStr $ Data.Tree.Pretty.drawVerticalTree $ fmap showNonNeg (toDataTree tree)
+
+{- | Print an ASCII diagram of a tree using Data.Tree.Pretty.drawVerticalTreeWith. -}
+drawVerticalTreeWith width tree = 
+    putStr $ Data.Tree.Pretty.drawVerticalTreeWith width $ fmap showNonNeg (toDataTree tree)
 
 ----------------------------------------------------------
 -- Convenience functions for constructing M-L tests
