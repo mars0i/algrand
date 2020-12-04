@@ -1,11 +1,16 @@
 import Data.List  (union, transpose, sortBy, isPrefixOf)
-import qualified Data.Tree  -- so I can convert to these trees and use some of their functions
 import Debug.Trace (trace)    -- DEBUG
 -- import Data.Set (toList, fromList)
 -- import Data.Typeable (typeOf) -- DEBUG
 -- import Data.Foldable (foldr', foldl')
 import Data.Char  (intToDigit) -- digitToInt
-import System.Random
+
+import System.Random (RandomGen, randomR, randomRs, split, mkStdGen) -- package random
+import qualified Data.Tree (drawTree, Tree(Node)) -- package containers
+-- import qualified Data.Tree.Pretty (drawVerticalTree) -- package pretty-tree
+
+-- Need to run ghci as something like:
+-- stack ghci --package pretty-tree  --package containers --package random
 
 {-
 Code to help verify/understand part of the second half of
@@ -34,11 +39,12 @@ martingale.
 
 Example:
 
-gs = generateGenerators (System.Random.mkStdGen 524) 13
+gs = generateGeneratorLists (System.Random.mkStdGen 524) 13
 np = removePrefixes $ take 20 $ gs
 mt = sumGeneratorSet np
 isMartingaleTree $ takeTree 10 mt
 drawTree $ takeTree 6 mt
+drawVerticalTree $ takeTree 6 mt
 
 -}
 
@@ -250,6 +256,9 @@ toDataTree (Node p next0 next1) =
 {- | Draw an ASCII diagram of a tree using Data.Tree.drawTree, other functions. -}
 drawTree tree = putStr $ Data.Tree.drawTree $ fmap show (toDataTree tree)
 
+-- drawVerticalTree tree = 
+--     putStr $ Data.Tree.Pretty.drawVerticalTree $ fmap show (toDataTree tree)
+
 ----------------------------------------------------------
 -- Convenience functions for constructing M-L tests
 
@@ -299,7 +308,7 @@ someofem = foldr combineMLtests [[]]
 -- Random generation of generator sets
 
 -- Example usage:
--- gs = removePrefixes $ take 20 $ generateGenerators (System.Random.mkStdGen 524) 13
+-- gs = removePrefixes $ take 20 $ generateGeneratorLists (System.Random.mkStdGen 524) 13
 -- mt = sumGeneratorSet generators
 -- isMartingaleTree $ takeTree 10 mt
 -- drawTree $ takeTree 6 mt
@@ -315,7 +324,7 @@ someofem = foldr combineMLtests [[]]
 -- sum_{k=1}^n 2^k such lists, where n = maxLen.)
 generateGeneratorLists :: RandomGen t => t -> Int -> [String]
 generateGeneratorLists rng maxLen =
-    let (rngForSeq, rngForFirstLength) = split rng
+    let (rngForSeq, rngForFirstLength) = System.Random.split rng
         randSeq = randomRs (0,1) rngForSeq
         selectStrings g seq =
             let (len, g') = randomR (1, maxLen) g
