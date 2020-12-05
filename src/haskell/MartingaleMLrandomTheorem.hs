@@ -5,8 +5,9 @@ import Debug.Trace (trace)    -- DEBUG
 -- import Data.Foldable (foldr', foldl')
 import Data.Char  (intToDigit) -- digitToInt
 
--- For these, need to run ghci as something like:
+-- For the following, need to run ghci as something like:
 -- stack ghci --package pretty-tree  --package containers --package random
+
 import System.Random (RandomGen, randomR, randomRs, split, mkStdGen) -- package random
 import qualified Data.Tree (drawTree, Tree(Node)) -- package containers
 import qualified Data.Tree.Pretty (drawVerticalTree, drawVerticalTreeWith) -- package pretty-tree
@@ -40,7 +41,7 @@ martingale.
 Example:
 
 gs = generateGeneratorLists (System.Random.mkStdGen 524) 13
-np = removePrefixes $ take 20 $ gs
+np = removePrefixes $ take 20 $ gs -- The arg to removePrefixes must be finite.
 mt = sumGeneratorSet np
 isMartingaleTree $ takeTree 10 mt
 drawTree $ takeTree 6 mt
