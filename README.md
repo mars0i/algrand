@@ -1,9 +1,11 @@
 # algrand
-Code for thinking about algorithmic randomness
+A motley collection of code written to help me think about algorithmic
+randomness.
 
-Most of this is in Clojure.  (I use Sean Luke's Java Mersenne Twister
-for pseudorandom number generation.) The Clojure source is under
-*src/clj*`, with the fun stuff in *src/clj/algrand*.
+Most of this is in Clojure. The Clojure source is under *src/clj*`, with
+the fun stuff in *src/clj/algrand*.  (Traditionally, I've used Sean
+Luke's Java Mersenne Twister for pseudorandom number generation with
+Clojure, but that may change.)
 
 Some code is in Haskell, which is a good language for representing the
 kind of infinite trees that represent possible random sequences.  This
