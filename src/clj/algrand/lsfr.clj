@@ -5,6 +5,24 @@
               [utils.convertbase :as cb]
     ))
 
+
+;; Simple LFSR based on vectors of 0's and 1's.
+;; Example usage: (iterate (partial lfsr [1 4 5]) [1 0 0 1 0 1 0 1 0 1 1])
+(defn lfsr 
+  "Applies an LSFR specified by list of (zero-based) taps indexes to bit-vec,
+  which should be a vector of 0's and 1's.  The result drops the first element
+  in bit-vec, and tacks onto the end the bitwise xor of elements of bit-vec at
+  locations specified by taps."
+  [taps bit-vec]
+  (conj (vec (drop 1 bit-vec))
+        (apply bit-xor 
+               (map (partial nth bit-vec) taps))))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Experiments with matrix-based LFSRs
+
 ;; Note I use inner-product rather than mmul
 ;; Logically we need mmul, not inner-product, but the result is the same,
 ;; and mmul but not inner-product has a bug that turns everything
@@ -22,9 +40,7 @@
   [size shift]
    (mx/shift (mx/identity-matrix size) 1 shift))
 
-
-
-;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Marsaglia's 32-bit xorshift PRNG from Kneusel pp. 50ff:
 
 (def left13 (left-shift-mat 32 13))
