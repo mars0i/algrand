@@ -7,6 +7,7 @@
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [incanter/incanter "1.9.3"]
                  [net.mikera/core.matrix "0.62.0"]
+		 ;[bitwise "0.2.3"] ;; https://github.com/Sophia-Gold/bitwise
 
                  ;; The rest of these dependencies are for Neanderthal, if desired:
                  ;[uncomplicate/neanderthal "0.32.0"]
