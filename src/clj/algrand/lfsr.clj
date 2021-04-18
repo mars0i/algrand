@@ -1,4 +1,4 @@
-(ns algrand.lsfr
+(ns algrand.lfsr
     (:require [clojure.math.numeric-tower :as ma]
               [clojure.core.matrix :as mx]
               ;[denisovan.core] ; for Neanderthal experiments
