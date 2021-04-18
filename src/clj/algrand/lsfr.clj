@@ -15,7 +15,7 @@
   locations specified by taps."
   [taps bit-vec]
   (conj (vec (drop 1 bit-vec))
-        (apply bit-xor 
+        (reduce bit-xor 
                (map (partial nth bit-vec) taps))))
 
 
