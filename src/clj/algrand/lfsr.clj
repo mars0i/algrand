@@ -6,24 +6,33 @@
     ))
 
 
+;; OR SHOULD THE OLD ONE NOT BE DROPPED?  Let the sequence extend??
 ;; Simple LFSR based on vectors of 0's and 1's.
-;; Example usage: (iterate (partial lfsr [1 4 5]) [1 0 0 1 0 1 0 1 0 1 1])
+;; Example usage: (def states (iterate 
+;;                              (partial lfsr [1 4 5])
+;;                              [1 0 0 1 0 1 0 1 0 1 1]))
+;; (def bs (map first states))
 (defn lfsr 
   "Applies an LSFR specified by list of (zero-based) taps indexes to bit-vec,
   which should be a vector of 0's and 1's.  The result drops the first element
   in bit-vec, and tacks onto the end the bitwise xor of elements of bit-vec at
-  locations specified by taps."
-  [taps bit-vec]
-  (conj (vec (rest bit-vec)) ; alternatives: drop, pop, rest, next.  see below.
-        (reduce bit-xor 
-               (map (partial nth bit-vec) taps))))
+  locations specified by taps.  That is, a new value is constructed
+  from earlier values, and appended to the end (rhs) of the random
+  bits, while the first bit in the random bits is removed (perhaps
+  after having been examined)."
+  [taps bits]
+  (conj (vec (rest bits)) ; alternatives: drop, pop, rest, next.  see below.
+        (reduce 
+          (fn [sum tap] (bit-xor sum (nth bits tap)))
+          0 taps)))
 
 ;; pop strips the last element from a vector, or the first element
 ;; from a list.  conj adds to end of vector, or to front of list.
 ;; Other operations remove vector-ness, to one extent or another.
 ;; I want LIFO semantics, not stack semantics.
-
-
+;;
+;; Or, to put the new value on the front, so that the head of the
+;; random sequence is on the right, I could use butlast and cons or conj.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Experiments with matrix-based LFSRs
