@@ -13,10 +13,10 @@
 ;;                              [1 0 0 1 0 1 0 1 0 1 1]))
 ;; (def bs (map first states))
 (defn lfsr 
-  "Applies an LSFR specified by list of (zero-based) taps indexes to bit-vec,
-  which should be a vector of 0's and 1's.  The result drops the first element
-  in bit-vec, and tacks onto the end the bitwise xor of elements of bit-vec at
-  locations specified by taps.  That is, a new value is constructed
+  "Applies an LSFR specified by list of (zero-based) taps indexes to bits,
+  which should be a vector of 0's and 1's.  The result drops the first 
+  element in bits, and tacks onto the end the bitwise xor of elements of 
+  bits at locations specified by taps.  That is, a new value is constructed
   from earlier values, and appended to the end (rhs) of the random
   bits, while the first bit in the random bits is removed (perhaps
   after having been examined)."
