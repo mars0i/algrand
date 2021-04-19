@@ -14,9 +14,14 @@
   in bit-vec, and tacks onto the end the bitwise xor of elements of bit-vec at
   locations specified by taps."
   [taps bit-vec]
-  (conj (vec (drop 1 bit-vec))
+  (conj (vec (rest bit-vec)) ; alternatives: drop, pop, rest, next.  see below.
         (reduce bit-xor 
                (map (partial nth bit-vec) taps))))
+
+;; pop strips the last element from a vector, or the first element
+;; from a list.  conj adds to end of vector, or to front of list.
+;; Other operations remove vector-ness, to one extent or another.
+;; I want LIFO semantics, not stack semantics.
 
 
 
