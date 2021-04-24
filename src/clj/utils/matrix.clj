@@ -25,3 +25,8 @@
   filled.  Other offsets shift the diagonal 1's as you'd expect."
   [size offset]
   (mx/shift (mx/identity-matrix size) 0 offset))
+
+(defn reverse-rows
+  "Returns a matrix with rows in reverse order."
+  [m]
+  (mx/matrix (reverse (mx/slices m))))
