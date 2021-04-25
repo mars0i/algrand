@@ -1,10 +1,10 @@
 ;;;; Matrix utility functions not provided by clojure.core.matrix
 (ns utils.matrix
-    (:require [clojure.core.matrix :as mx]))
+    (:require [clojure.core.matrix :as m]))
 
-;(mx/set-current-implementation :persistent-vector)
-(mx/set-current-implementation :ndarray) ; better at preserving ints
-;(mx/set-current-implementation :vectorz)
+;(m/set-current-implementation :persistent-vector)
+(m/set-current-implementation :ndarray) ; better at preserving ints
+;(m/set-current-implementation :vectorz)
 
 ;; Maybe this can be done more simply with views
 (defn set-diag
@@ -12,7 +12,7 @@
   this is the main diagonal.  If offset = -1, it's the subdiagonal.
   If offset = 1, it's the superdiagaonl.  Etc."
   [m offset newval]
-   (mx/emap-indexed (fn [[i j] oldval]
+   (m/emap-indexed (fn [[i j] oldval]
                      (if (= (+ i offset) j)
                        newval
                        oldval))
@@ -20,13 +20,31 @@
 
 (defn shift-matrix
   "Returns a shift matrix, i.e. a square matrix with zero everywhere except
-  on one of the diagonals, which will be all ones.  If offset is 1, the 
-  superdiagonal is filled with 1's; if offset is -1, the subdiagonal is 
-  filled.  Other offsets shift the diagonal 1's as you'd expect."
+  on the subdiagonal or superdiagonal, which consists of ones.  If offset is
+  1, the superdiagonal is filled with 1's; if offset is -1, the subdiagonal is 
+  filled.  The function generalizes the concept of a shift matrix by
+  allowing other offsets to shift the diagonal of 1's further, or to return
+  an identity matrix when offset = 0."
   [size offset]
-  (mx/shift (mx/identity-matrix size) 0 offset))
+  (m/shift (m/identity-matrix size) 0 offset))
 
 (defn reverse-rows
   "Returns a matrix with rows in reverse order."
   [m]
-  (mx/matrix (reverse (mx/slices m))))
+  (m/matrix (reverse (m/slices m))))
+
+(defn zero-mat
+  "Returns a matrix consisting of 0's of integer long type.  If only one 
+  argument argument is given, a square matrix is returned.  (core.matrix's 
+  zero-matrix uses doubles.)"
+  ([size] (zero-mat size size))
+  ([h w] (m/emap long (m/zero-matrix h w))))
+
+(defn unit-leslie
+  "Returns a Leslie matrix with 1's for elements of the first row and
+  subdiagonal, and zeros elsewhere."
+  [size]
+  (m/add
+    (m/set-row (zero-mat size) 0 (repeat size 1))
+    (shift-matrix size -1)))
+
