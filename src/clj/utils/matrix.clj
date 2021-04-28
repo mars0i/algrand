@@ -33,6 +33,12 @@
   [m]
   (m/matrix (reverse (m/slices m))))
 
+(defn reverse-cols
+  "Returns a matrix with columns in reverse order."
+  [m]
+  (m/transpose 
+    (m/matrix (reverse (m/slices m 1)))))
+
 (defn zero-mat
   "Returns a matrix consisting of 0's of integer long type.  If only one 
   argument argument is given, a square matrix is returned.  (core.matrix's 
@@ -47,4 +53,3 @@
   (m/add
     (m/set-row (zero-mat size) 0 (repeat size 1))
     (shift-matrix size -1)))
-
