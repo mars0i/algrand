@@ -18,6 +18,20 @@
                        oldval))
                  m))
 
+(defn mpow
+  "Raise matrix m to the nth power, i.e. multiply it by itself n times."
+  [m n]
+  (reduce m/inner-product (repeat n m)))
+
+;(defn another-mpow
+; "Raise matrix m to the nth power, i.e. multiply it by itself n times."
+;  [m n]
+;  (loop [n' n
+;         acc m]
+;     (if (<= n' 1)
+;       acc
+;       (recur (dec n') (m/inner-product m acc)))))
+
 (defn shift-matrix
   "Returns a shift matrix, i.e. a square matrix with zero everywhere except
   on the subdiagonal or superdiagonal, which consists of ones.  If offset is
@@ -53,3 +67,11 @@
   (m/add
     (m/set-row (zero-mat size) 0 (repeat size 1))
     (shift-matrix size -1)))
+
+(defn upside-unit-leslie
+  "Returns an \"upside down\" Leslie matrix, with 1's for elements of the last
+  row and superdiagonal, and zeros elsewhere."
+  [size]
+  (m/add
+    (m/set-row (zero-mat size) (dec size) (repeat size 1))
+    (shift-matrix size 1)))
