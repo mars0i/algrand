@@ -72,27 +72,24 @@
   "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (map (partial add-coeff m) p1' p2'))
+  (map (partial add-coeff m) p1' p2')))
 
 (defn sub-poly
   [m p1 p2]
   "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (map (partial sub-coeff m) p1' p2'))
+  (map (partial sub-coeff m) p1' p2')))
 
 ;; TODO: mult-poly
 
 
 (defn largest-exponent
-  "Find the largest exponent in a sequence of integers representing coefficients
-  of a polynomial arranged from smallest to largest exponent in order."
+  "Find the largest exponent in a sequence of integers representing
+   coefficients of a polynomial arranged from largest to smallest exponent,
+  in order."
   [p]
-  (let [p' (vec p)]
-    (loop [i (dec (count p'))]
-      (cond (neg? i) nil
-            (zero? (p' i)) (recur (dec i))
-            :else i))))
+  (dec (count (strip-high-zeros p))))  ; could be more efficient, but so?
 
 (defn div-poly
   "Long division mod m for polynomials p1 and p2."
@@ -103,7 +100,6 @@
 
 ;; FIXME shouldn't be dividing by zero.
 ;; algorithm isn't right yet.
-;; assumed lerger exponents on left
 (defn old-div-poly
   "Long division mod m for polynomials p1 and p2."
   [m p1 p2]
