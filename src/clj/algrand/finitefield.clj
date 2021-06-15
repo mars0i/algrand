@@ -3,7 +3,10 @@
 
 ;; For now, polynomials are Clojure sequences of integers (preferably
 ;; vectors) that are elements of a prime field, with larger exponents on 
-;; the right so that the the Clojure index is the degree of the element.
+;; the left.  That means you can't read off exponents from degrees,
+;; but it also means that e.g. with long division, you don't have to
+;; count backwards all the time, which prevents some Clojure
+;; conveniences unless you keep reversing vectors.
 ;; TODO: Generalize to other subfields than prime fields.
 
 
@@ -17,6 +20,21 @@
 (def poly3 [2 1 2 1 0 1 2 2])
 (def poly4 [1 0 0 1 0 2 0 0])
 
+
+(defn strip-high-zeros
+  "Strip initial zeros from a sequence of coefficients.  Length of the
+  remaining sequence is one more than the degree of the polynomial."
+  [p]
+  (drop-while zero? p))
+
+(defn pad-high-zeros
+  "If sequence p is shorter than minimum-length, concatenate initial
+  zeros onto it so that it has minimum-length."
+  [minimum-length p]
+  (let [n-zeros (- minimum-length (count p))]
+    (if (pos? n-zeros)
+      (concat (repeat n-zeros 0) p)
+      p)))
 
 (defn add-coeff
   "Add x and y mod m."
@@ -51,7 +69,6 @@
   "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients."
   (map (partial sub-coeff m)
        p1 p2))
-
 
 ;; TODO: mult-poly
 
