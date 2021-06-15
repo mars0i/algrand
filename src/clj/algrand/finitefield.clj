@@ -21,21 +21,6 @@
 (def poly4 [1 0 0 1 0 2 0 0])
 
 
-(defn strip-high-zeros
-  "Strip initial zeros from a sequence of coefficients.  Length of the
-  remaining sequence is one more than the degree of the polynomial."
-  [p]
-  (drop-while zero? p))
-
-(defn pad-high-zeros
-  "If sequence p is shorter than minimum-length, concatenate initial
-  zeros onto it so that it has minimum-length."
-  [minimum-length p]
-  (let [n-zeros (- minimum-length (count p))]
-    (if (pos? n-zeros)
-      (concat (repeat n-zeros 0) p)
-      p)))
-
 (defn add-coeff
   "Add x and y mod m."
   [m x y]
@@ -57,18 +42,44 @@
   (mod (quot x y) m))
 
 
+(defn strip-high-zeros
+  "Strip initial zeros from a sequence of coefficients.  Length of the
+  remaining sequence is one more than the degree of the polynomial."
+  [p]
+  (drop-while zero? p))
+
+(defn pad-high-zeros
+  "If sequence p is shorter than minimum-length, concatenate initial
+  zeros onto it so that it has minimum-length."
+  [minimum-length p]
+  (let [n-zeros (- minimum-length (count p))]
+    (if (pos? n-zeros)
+      (concat (repeat n-zeros 0) p)
+      p)))
+
+(defn normalize-lengths
+  "If one of the polynomial sequences p1 or p2 is shorter than the
+  other, pad it with initial zeros."
+  [p1 p2]
+  (let [p1-len (count p1)
+        p2-len (count p2)]
+    (cond (< p1-len p2-len) [(pad-high-zeros p2-len p1) p2]
+          (> p1-len p2-len) [p1 (pad-high-zeros p1-len p2)]
+          :else [p1 p2])))
 
 (defn add-poly
   [m p1 p2]
-  "Add polynomials p1 and p2 with mod m arithmetic on coefficients."
-  (map (partial add-coeff m)
-       p1 p2))
+  "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
+  Does not carry."
+  (let [[p1' p2'] (normalize-lengths p1 p2)]
+  (map (partial add-coeff m) p1' p2'))
 
 (defn sub-poly
   [m p1 p2]
-  "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients."
-  (map (partial sub-coeff m)
-       p1 p2))
+  "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
+  Does not carry."
+  (let [[p1' p2'] (normalize-lengths p1 p2)]
+  (map (partial sub-coeff m) p1' p2'))
 
 ;; TODO: mult-poly
 
