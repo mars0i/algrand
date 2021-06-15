@@ -56,7 +56,6 @@
 ;; TODO: mult-poly
 
 
-
 (defn largest-exponent
   "Find the largest exponent in a sequence of integers representing coefficients
   of a polynomial arranged from smallest to largest exponent in order."
@@ -70,7 +69,9 @@
 (defn div-poly
   "Long division mod m for polynomials p1 and p2."
   [m pdividend pdivisor]
-)
+  (let [dividend-degree (largest-exponent pdividend)
+        divisor-degree (largest-exponent pdivisor)]
+))
 
 ;; FIXME shouldn't be dividing by zero.
 ;; algorithm isn't right yet.
