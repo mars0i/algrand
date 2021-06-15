@@ -28,10 +28,15 @@
   (mod (- x y) m))
 
 (defn mult-coeff
+  "Multiply x and y mod m."
   [m x y]
   (mod (* x y) m))
 
-;; use quot for raw division
+(defn quot-coeff
+  "Divide x and y mod m using integer division."
+  [m x y]
+  (mod (quot x y) m))
+
 
 
 (defn add-poly
@@ -49,17 +54,23 @@
 
 ;; TODO: mult-poly
 
+
+;; FIXME shouldn't be dividing by zero.
+;; algorithm isn't right yet.
 (defn div-poly
+  "Long division mod m for polynomials p1 and p2."
   [m p1 p2]
-  (loop [p1' p1
-         p2' p2
-         result []]
-      (let [dividend (first p1')
-            divisor  (first p2')
-            quotient (quot dividend divisor)
-            remainder (mod dividend divisor)]
-        (recur
-               (rest p1')
-               (rest p2') 
+  (when (or p1 p2)
+    (let [dividend (first p1)
+          divisor  (first p2)
+          p1' (rest p1)
+          p2' (rest p2)
+          remainder (mod dividend divisor)
+          quotient  (quot dividend divisor) ; should already be in prime field
+          to-subtract (map (mult-coeff m quotient) p2')
+          newdividend (sub-poly p1' to-subtract)]
+    (cons remainder (div-poly newdividend p2')))))
+
+
 
 
