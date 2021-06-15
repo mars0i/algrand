@@ -52,8 +52,14 @@
 (defn div-poly
   [m p1 p2]
   (loop [p1' p1
-         p2' p2]
+         p2' p2
+         result []]
       (let [dividend (first p1')
             divisor  (first p2')
             quotient (quot dividend divisor)
             remainder (mod dividend divisor)]
+        (recur
+               (rest p1')
+               (rest p2') 
+
+
