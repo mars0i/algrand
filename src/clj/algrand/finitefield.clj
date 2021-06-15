@@ -1,20 +1,21 @@
 (ns algrand.finitefield
     (:require [clojure.math.numeric-tower :as nt]))
 
-;; For now, polynomials are Clojure sequences of integers that are
-;; elements of a prime field.  I should generalize that later to
-;; other subfields.
+;; For now, polynomials are Clojure sequences of integers (preferably
+;; vectors) that are elements of a prime field, with larger exponents on 
+;; the right so that the the Clojure index is the degree of the element.
+;; TODO: Generalize to other subfields than prime fields.
 
 
 ;; Some polynomials for testing:
 
 ;; polynomials over F2 or F3:
-(def poly1 [1 1 0 1 0 0 1 0])
+(def poly1 [1 1 0 1 0 0 1 1])
 (def poly2 [0 1 1 1 0 1 1 0])
 
 ;; polynomials over F3:
-(def poly3 [2 1 2 1 0 1 2 0])
-(def poly3 [2 0 0 1 0 2 0 0])
+(def poly3 [2 1 2 1 0 1 2 2])
+(def poly4 [1 0 0 1 0 2 0 0])
 
 
 (defn add-coeff
@@ -55,9 +56,26 @@
 ;; TODO: mult-poly
 
 
+
+(defn largest-exponent
+  "Find the largest exponent in a sequence of integers representing coefficients
+  of a polynomial arranged from smallest to largest exponent in order."
+  [p]
+  (let [p' (vec p)]
+    (loop [i (dec (count p'))]
+      (cond (neg? i) nil
+            (zero? (p' i)) (recur (dec i))
+            :else i))))
+
+(defn div-poly
+  "Long division mod m for polynomials p1 and p2."
+  [m pdividend pdivisor]
+)
+
 ;; FIXME shouldn't be dividing by zero.
 ;; algorithm isn't right yet.
-(defn div-poly
+;; assumed lerger exponents on left
+(defn old-div-poly
   "Long division mod m for polynomials p1 and p2."
   [m p1 p2]
   (when (or p1 p2)
@@ -70,7 +88,3 @@
           to-subtract (map (mult-coeff m quotient) p2')
           newdividend (sub-poly p1' to-subtract)]
     (cons remainder (div-poly newdividend p2')))))
-
-
-
-
