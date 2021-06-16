@@ -47,6 +47,7 @@
   (mod (quot x y) m))
 
 
+;; FIXME I'm now putting high exponents on the right
 (defn strip-high-zeros
   "Strip initial zeros from a sequence of coefficients.  Length of the
   remaining sequence is one more than the degree of the polynomial."
@@ -86,57 +87,42 @@
   (let [[p1' p2'] (normalize-lengths p1 p2)]
     (map (partial sub-coeff m) p1' p2')))
 
-;; There doesn't seem to be a straightforward way to do this e.g. with into.
-(defn numeric-map-to-vec
-  "Convert a map whose keys are integers into a vector with the same
-  values, now indexed by the map keys."
-  [numeric-map]
-  (reduce (fn [newvec i]
-              (conj newvec (numeric-map i)))
-          []
-          (range (count numeric-map))))
-;; simpler, hackier: (vec (map second (sort m))))
-
-(defn mult-poly
-  "Polynomial multiplication mod m."
-  [m p1 p2]
-  (let [p1' (vec p1) ; in case a non-vector is passed in
-        p2' (vec p2)
-        p1-range (range (count p1'))
-        p2-range (range (count p2'))
-        sums-map (apply merge-with (partial add-coeff m)
-                        (for [i1 p1-range
-                              i2 p2-range]
-                             {(+ i1 i2)
-                              (mult-coeff m (p1' i1) (p2' i2))}))]
-    (numeric-map-to-vec sums-map)))
-;(do (println [i1 i2 (+ i1 i2)] [(p1' i1) (p2' i2) (* (p1' i1) (p2' i2))])
-
 (defn aupdate 
   "Update the value of Java array a at index i with function f. 
   f is passed the value of a at i and returns a new value to replace it."
   [a i f]
   (aset a i (f (aget a i))))
 
-;; Less Clojurely--imperatively updates a Java array--but may be easier to
-;; understand, and imperative aspect is local; it doesn't infect anything else.
-;; TODO: UNTESTED
-(defn mult-poly-new
-  "Polynomial multiplication mod m."
-  [m p1 p2]
+;; Polynomial multiplication without modulus may be independently useful, 
+;; is simpler, and may be more efficient fwiw.
+;; This version imperatively updates a Java array, but it's easier to 
+;; understand than a purely functional version. 
+;; Imperative aspect is local: it doesn't infect anything else.
+(defn mult-poly-generic
+  "Polynomial multiplication without modulus."
+  [p1 p2]
   (let [p1' (vec p1) ; in case a non-vector is passed in
         p2' (vec p2)
         p1-len (count p1')
         p2-len (count p2')
-        sum-array (long-array (repeat (+ p1-len p2-len) 0))]
-    (for [i1 (range p1-len)
-          i2 (range p2-len)]
-      (aupdate sum-array
+        ;; length is count-1 + count-1 + one more for zeroth place:
+        coeffs (long-array (repeat (+ p1-len p2-len -1) 0))]
+    (doseq [i1 (range p1-len)
+            i2 (range p2-len)]
+      (aupdate coeffs
                (+ i1 i2)
-               (fn [old] (add-coeff m old (mult-coeff m (p1' i1) (p2' i2))))))
-    (vec sum-array)))
+               (partial + (* (p1' i1) (p2' i2)))
+               ))
+    (vec coeffs)))
+
+(defn mult-poly
+  "Polynomial multiplication mod m."
+  [m p1 p2]
+  (mapv (fn [n] (mod n m))
+        (mult-poly-generic p1 p2)))
 
 
+;; FIXME I'm now putting high exponents on the right
 (defn largest-exponent
   "Find the largest exponent in a sequence of integers representing
    coefficients of a polynomial arranged from largest to smallest exponent,
@@ -153,6 +139,7 @@
 
 ;; FIXME shouldn't be dividing by zero.
 ;; algorithm isn't right yet.
+;; FIXME I'm now putting high exponents on the right
 (defn old-div-poly
   "Long division mod m for polynomials p1 and p2."
   [m p1 p2]
@@ -166,3 +153,30 @@
           to-subtract (map (mult-coeff m quotient) p2')
           newdividend (sub-poly p1' to-subtract)]
     (cons remainder (div-poly newdividend p2')))))
+
+
+;; Purely functional version of mult-poly-generic is slightly more convoluted:
+;
+;(defn numeric-map-to-vec
+;  "Convert a map whose keys are integers into a vector with the same
+;  values, now indexed by the map keys."
+;  [numeric-map]
+;  (reduce (fn [newvec i]    ; or: (vec (map second (sort m))))
+;              (conj newvec (numeric-map i)))
+;          []
+;          (range (count numeric-map))))
+;
+;(defn mult-poly-generic
+;  "Polynomial multiplication without modulus."
+;  [p1 p2]
+;  (let [p1' (vec p1) ; in case a non-vector is passed in
+;        p2' (vec p2)
+;        p1-range (range (count p1'))
+;        p2-range (range (count p2'))
+;        sums-map (apply merge-with +
+;                        (for [i1 p1-range
+;                              i2 p2-range]
+;                             {(+ i1 i2)
+;                              (* (p1' i1) (p2' i2))}))]
+;    (numeric-map-to-vec sums-map)))
+;;debugging: (do (println [i1 i2 (+ i1 i2)] [(p1' i1) (p2' i2) (* (p1' i1) (p2' i2))])
