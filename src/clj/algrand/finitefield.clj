@@ -92,6 +92,9 @@
           (range (count numeric-map))))
 ;; simpler, hackier: (vec (map second (sort m))))
 
+;; TODO: Maybe rewrite by creating a vector of zeros of max length
+;; of result, then use 'update' to sum into it.  (Won't need numeric-map
+;; to vec.)
 (defn mult-poly
   "Polynomial multiplication mod m."
   [m p1 p2]
