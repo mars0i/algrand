@@ -81,31 +81,30 @@
   (let [[p1' p2'] (normalize-lengths p1 p2)]
     (map (partial sub-coeff m) p1' p2')))
 
-;; TODO: mult-poly
-
+;; There doesn't seem to be a straightforward way to do this e.g. with into.
 (defn numeric-map-to-vec
   "Convert a map whose keys are integers into a vector with the same
   values, now indexed by the map keys."
-  [m]
-  (vec (map second (sort m))))
-;; Or: more efficient, less hacky, but harder to understand:
-;; (reduce (fn [acc i] (conj acc (m i))) [] (range (count m)))
+  [numeric-map]
+  (reduce (fn [newvec i]
+              (conj newvec (numeric-map i)))
+          []
+          (range (count numeric-map))))
+;; simpler, hackier: (vec (map second (sort m))))
 
-(defn mult-poly-inf
-  "Polynomial multiplication without mod'ing results."
-  [p1 p2]
+(defn mult-poly
+  "Polynomial multiplication mod m."
+  [m p1 p2]
   (let [p1' (vec p1) ; in case a non-vector is passed in
         p2' (vec p2)
         p1-range (range (count p1'))
         p2-range (range (count p2'))
-        sums-map (apply merge-with +
+        sums-map (apply merge-with (partial add-coeff m)
                         (for [i1 p1-range
                               i2 p2-range]
                              {(+ i1 i2)
-                              (* (p1' i1) (p2' i2))}))]
-
-    sums-map))
-
+                              (mult-coeff m (p1' i1) (p2' i2))}))]
+    (numeric-map-to-vec sums-map)))
 ;(do (println [i1 i2 (+ i1 i2)] [(p1' i1) (p2' i2) (* (p1' i1) (p2' i2))])
 
 
