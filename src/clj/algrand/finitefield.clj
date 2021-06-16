@@ -18,7 +18,7 @@
 
 ;; polynomials over F3:
 (def poly3 [2 1 2 1 0 1 2 2])
-(def poly4 [1 0 0 1 0 2 0 0])
+(def poly4 [0 0 0 1 0 2 0 0])
 
 
 (defn add-coeff
@@ -79,9 +79,25 @@
   "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (map (partial sub-coeff m) p1' p2')))
+    (map (partial sub-coeff m) p1' p2')))
 
 ;; TODO: mult-poly
+
+(defn mult-poly-inf
+  "Polynomial multiplication without mod'ing results."
+  [p1 p2]
+  (let [p1' (vec p1) ; in case a non-vector is passed in
+        p2' (vec p2)
+        p1-len (count p1')
+        p2-len (count p2')]
+    (apply merge-with +
+           (for [i1 (range p1-len)
+                 i2 (range p2-len)] 
+                (do
+                  {(+ i1 i2)
+                   (* (p1' i1) (p2' i2))})))))
+
+;; (println [i1 i2 (+ i1 i2)] [(p1' i1) (p2' i2) (* (p1' i1) (p2' i2))])
 
 
 (defn largest-exponent
