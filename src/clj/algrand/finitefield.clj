@@ -7,6 +7,11 @@
 ;; but it also means that e.g. with long division, you don't have to
 ;; count backwards all the time, which prevents some Clojure
 ;; conveniences unless you keep reversing vectors.
+
+;; FIXME Oh no--but I did multiplication the other way.  
+;; Multiplication is easier with low exponents on the left.
+;; Division is easier the other way.
+
 ;; TODO: Generalize to other subfields than prime fields.
 
 
@@ -92,9 +97,6 @@
           (range (count numeric-map))))
 ;; simpler, hackier: (vec (map second (sort m))))
 
-;; TODO: Maybe rewrite by creating a vector of zeros of max length
-;; of result, then use 'update' to sum into it.  (Won't need numeric-map
-;; to vec.)
 (defn mult-poly
   "Polynomial multiplication mod m."
   [m p1 p2]
@@ -109,6 +111,30 @@
                               (mult-coeff m (p1' i1) (p2' i2))}))]
     (numeric-map-to-vec sums-map)))
 ;(do (println [i1 i2 (+ i1 i2)] [(p1' i1) (p2' i2) (* (p1' i1) (p2' i2))])
+
+(defn aupdate 
+  "Update the value of Java array a at index i with function f. 
+  f is passed the value of a at i and returns a new value to replace it."
+  [a i f]
+  (aset a i (f (aget a i))))
+
+;; Less Clojurely--imperatively updates a Java array--but may be easier to
+;; understand, and imperative aspect is local; it doesn't infect anything else.
+;; TODO: UNTESTED
+(defn mult-poly-new
+  "Polynomial multiplication mod m."
+  [m p1 p2]
+  (let [p1' (vec p1) ; in case a non-vector is passed in
+        p2' (vec p2)
+        p1-len (count p1')
+        p2-len (count p2')
+        sum-array (long-array (repeat (+ p1-len p2-len) 0))]
+    (for [i1 (range p1-len)
+          i2 (range p2-len)]
+      (aupdate sum-array
+               (+ i1 i2)
+               (fn [old] (add-coeff m old (mult-coeff m (p1' i1) (p2' i2))))))
+    (vec sum-array)))
 
 
 (defn largest-exponent
