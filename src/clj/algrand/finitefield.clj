@@ -130,6 +130,17 @@
   [p]
   (dec (count (strip-high-zeros p))))  ; could be more efficient, but so?
 
+;; pcode
+;; let result vec = all zeros
+;;
+;; if degree dor > degree dend then ret result vec, and dend as the remainder
+;; let a = div max idx of dend by max idx of dor
+;; let b = div max coef of dend by max coef of dr, mod m
+;; place b in loc a in temp result vec (mostly zeros)
+;; let c = dor * temp result vec, mod m
+;; let new dend = dend - c, mod m
+;; recurse with result vec + temp result vec (filled at diff locs, so it's a merge)
+;;
 (defn div-poly
   "Long division mod m for polynomials p1 and p2."
   [m pdividend pdivisor]
