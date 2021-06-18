@@ -55,8 +55,9 @@
 ;; uses a Java array so that the summing into the data structure can
 ;; be done imperatively.  This is simpler, even though I define a
 ;; separate function to handle the updating so that the main code is
-;; less verbose.  However, if I ever want to run the code in
-;; Clojurescript, this one won't work, so I'm not using it.
+;; less verbose.  And externally, it's fine for Clojure since the
+;; array is created in the function and never escapes it.  However,
+;; if I ever want to run the code in Clojurescript, this one won't work.
 (defn aupdate 
   "Update the value of Java array a at index i with function f. 
   f is passed the value of a at i and returns a new value to replace it."
