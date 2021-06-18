@@ -145,7 +145,8 @@
          dend dividend]
         (let [dend-deg (degree dend)
               dsor-deg (degree divisor)]
-            ;; FIXME what if dividor degree < 0 i.e. zero-ploynomial?
+          (when (neg? dsor-deg)
+            (throw (Exception. "Division by zero polynomial.")))
           (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
             [quotient dend] ; remaining dividend is the remainder
             (let [qot-expt (- dend-deg dsor-deg)
