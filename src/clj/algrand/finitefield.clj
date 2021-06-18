@@ -98,7 +98,53 @@
 ;; This version imperatively updates a Java array, but it's easier to 
 ;; understand than a purely functional version. 
 ;; Imperative aspect is local: it doesn't infect anything else.
+
+(defn numeric-map-to-vec
+  "Convert a map whose keys are integers into a vector with the same
+  values, now indexed by the map keys."
+  [numeric-map]
+  (reduce (fn [newvec i]    ; or: (vec (map second (sort m))))
+              (conj newvec (numeric-map i)))
+          []
+          (range (count numeric-map))))
+
 (defn mult-poly-generic
+  "Polynomial multiplication without modulus."
+  [p1 p2]
+  (let [p1' (vec p1) ; in case a non-vector is passed in
+        p2' (vec p2)
+        p1-range (range (count p1'))
+        p2-range (range (count p2'))
+        sums (for [i1 p1-range
+                   i2 p2-range]
+                  {(+ i1 i2)
+                   (* (p1' i1) (p2' i2))})
+        sums-map (apply merge-with + sums)]
+    (numeric-map-to-vec sums-map)))
+;debugging: (do (println [i1 i2 (+ i1 i2)] [(p1' i1) (p2' i2) (* (p1' i1) (p2' i2))])
+
+(defn mult-poly-generic-vec
+  "Polynomial multiplication without modulus."
+  [p1 p2]
+  (let [p1' (vec p1) ; in case a non-vector is passed in
+        p2' (vec p2)
+        p1-len (count p1')
+        p2-len (count p2')
+        p1-range (range (count p1'))
+        p2-range (range (count p2'))
+        ;; length is count-1 + count-1 + one more for zeroth place:
+        starter (vec (repeat (+ p1-len p2-len -1) 0))
+        indexes (for [i (range p1-len)
+                      j (range p2-len)]
+                  [i j]) ]
+    (reduce (fn [pnew [i1 i2]] (update pnew
+                                    (+ i1 i2) ; multip sums coeffs
+                                    + (* (p1' i1) (p2' i2)))) ; add new product
+            starter indexes)))
+
+
+;; Simple version uses Java array (won't run in Clojurscript)
+(defn mult-poly-generic-array
   "Polynomial multiplication without modulus."
   [p1 p2]
   (let [p1' (vec p1) ; in case a non-vector is passed in
@@ -149,46 +195,20 @@
         divisor-degree (largest-exponent pdivisor)]
 ))
 
-;; FIXME shouldn't be dividing by zero.
+
+;; shouldn't be dividing by zero.
 ;; algorithm isn't right yet.
-;; FIXME I'm now putting high exponents on the right
-(defn old-div-poly
-  "Long division mod m for polynomials p1 and p2."
-  [m p1 p2]
-  (when (or p1 p2)
-    (let [dividend (first p1)
-          divisor  (first p2)
-          p1' (rest p1)
-          p2' (rest p2)
-          remainder (mod dividend divisor)
-          quotient  (quot dividend divisor) ; should already be in prime field
-          to-subtract (map (mult-coeff m quotient) p2')
-          newdividend (sub-poly p1' to-subtract)]
-    (cons remainder (div-poly newdividend p2')))))
-
-
-;; Purely functional version of mult-poly-generic is slightly more convoluted:
-;
-;(defn numeric-map-to-vec
-;  "Convert a map whose keys are integers into a vector with the same
-;  values, now indexed by the map keys."
-;  [numeric-map]
-;  (reduce (fn [newvec i]    ; or: (vec (map second (sort m))))
-;              (conj newvec (numeric-map i)))
-;          []
-;          (range (count numeric-map))))
-;
-;(defn mult-poly-generic
-;  "Polynomial multiplication without modulus."
-;  [p1 p2]
-;  (let [p1' (vec p1) ; in case a non-vector is passed in
-;        p2' (vec p2)
-;        p1-range (range (count p1'))
-;        p2-range (range (count p2'))
-;        sums-map (apply merge-with +
-;                        (for [i1 p1-range
-;                              i2 p2-range]
-;                             {(+ i1 i2)
-;                              (* (p1' i1) (p2' i2))}))]
-;    (numeric-map-to-vec sums-map)))
-;;debugging: (do (println [i1 i2 (+ i1 i2)] [(p1' i1) (p2' i2) (* (p1' i1) (p2' i2))])
+;; I'm now putting high exponents on the right
+;(defn old-div-poly
+;  "Long division mod m for polynomials p1 and p2."
+;  [m p1 p2]
+;  (when (or p1 p2)
+;    (let [dividend (first p1)
+;          divisor  (first p2)
+;          p1' (rest p1)
+;          p2' (rest p2)
+;          remainder (mod dividend divisor)
+;          quotient  (quot dividend divisor) ; should already be in prime field
+;          to-subtract (map (mult-coeff m quotient) p2')
+;          newdividend (sub-poly p1' to-subtract)]
+;    (cons remainder (div-poly newdividend p2')))))
