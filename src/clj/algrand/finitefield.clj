@@ -25,6 +25,9 @@
 (def poly3 [2 1 2 1 0 1 2 2])
 (def poly4 [0 0 0 1 0 2 0 0])
 
+(def poly5 [0 0 0 1 0 2])
+(def poly6 [0 1 1 1 0 1 1 0 2 4 3 0 3])
+
 
 (defn add-coef
   "Add x and y mod m."
@@ -141,20 +144,20 @@
   [m dividend divisor]
   (loop [quotient (make-zero-poly (count dividend))
          dend dividend
-         dsor divisor]
+         remainder (make-zero-poly 1)] ; in case change rep later
         (let [dend-deg (degree dend)
-              dsor-deg (degree dsor)]
+              dsor-deg (degree divisor)]
           (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
-            quotient
-            (let [quot-expt (- dend-deg dsor-deg)
-                  coef-expt (quot-coef (dend dend-deg) (dsor dsor-deg))
-                  mono (make-monomial quot-expt coef-expt)
-                  ]
+            [quotient remainder]
+            (let [qot-expt (- dend-deg dsor-deg)
+                  qot-coef (qot-coef (dend dend-deg) (divisor dsor-deg))
+                  mono (make-monomial qot-expt qot-coef)]
               ;; let c = dsor * temp result vec, mod m
               ;; let new dend = dend - c, mod m
               ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
-              (recur  nil nil nil)
-              )))))
+              (recur (add-poly m quotient mono)
+                     (sub-poly m dend mono)
+              'whatgoeshere?))))))
 
 
 ;; shouldn't be dividing by zero.
