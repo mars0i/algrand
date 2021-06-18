@@ -139,7 +139,7 @@
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
 ;;
 (defn div-poly
-  "Long division mod m of polyomial diviend by polynomial divisor."
+  "Long division mod m of polyomial dividend by polynomial divisor."
   [m dividend divisor]
   (loop [quotient (make-zero-poly (count dividend))
          dend dividend]
