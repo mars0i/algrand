@@ -56,7 +56,7 @@
   [minimum-length p]
   (let [n-zeros (- minimum-length (count p))]
     (if (pos? n-zeros)
-      (concat p (repeat n-zeros 0))
+      (vec (concat p (repeat n-zeros 0)))
       p)))
 
 (defn normalize-lengths
@@ -74,14 +74,14 @@
   "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (map (partial add-coef m) p1' p2')))
+  (mapv (partial add-coef m) p1' p2')))
 
 (defn sub-poly
   [m p1 p2]
   "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-    (map (partial sub-coef m) p1' p2')))
+    (mapv (partial sub-coef m) p1' p2')))
 
 ;; Polynomial multiplication without modulus may be independently useful, 
 ;; is simpler, and may be more efficient fwiw.  A separate function mods it.
@@ -120,9 +120,9 @@
   [exponent coef]
   (conj (vec (repeat exponent 0)) coef))
 
-;(defn make-zero-poly
-;  [len]
-;  (vec (repeat (count len) 0)))
+(defn make-zero-poly
+  [len]
+  (vec (repeat len 0)))
 
 ;; pcode
 ;; let result vec = all zeros
@@ -140,33 +140,18 @@
   "Long division mod m of polyomial dividend by polynomial divisor.  
   Returns pair containing quotient and remainder polynomials."
   [m dividend divisor]
-  (let [deg-dsor (degree divisor)]
-    (when (neg? deg-dsor) (throw (Exception. "Division by the zero polynomial.")))
-    (loop [quotient [0] ; zero-polynomial (add-poly will expand it if necess)
+  (let [deg-divisor (degree divisor)
+        deg-dividend (degree dividend)]
+    (when (neg? deg-divisor) (throw (Exception. "Division by the zero polynomial.")))
+    (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
           (let [deg-dend (degree dend)]
-            (if (> deg-dsor deg-dend) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
+            (if (> deg-divisor deg-dend) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
               [quotient dend] ; undivided dividend is remainder; TODO s/b a map?
-              (let [qexpt (- deg-dend deg-dsor) ; quotient exponent
-                    qcoef (quot-coef m (dend deg-dend) (divisor deg-dsor)) ; quotient coefficient
-                    result-mono (make-monomial qexpt qcoef)]
-                (recur (add-poly m quotient result-mono)
-                       (sub-poly m dend result-mono)))))))
+              ;; Divide largest term in dividend by largest term in divisor:
+              (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
+                    qcoef (quot-coef m (dend deg-dend) (divisor deg-divisor))] 
+                (recur (assoc quotient qexpt qcoef) ; quotient = 0 at qexpt
+                       (sub-poly m dend (make-monomial qexpt qcoef)))))))))
 
-
-;; shouldn't be dividing by zero.
-;; algorithm isn't right yet.
-;; I'm now putting high exponents on the right
-;(defn old-div-poly
-;  "Long division mod m for polynomials p1 and p2."
-;  [m p1 p2]
-;  (when (or p1 p2)
-;    (let [dividend (first p1)
-;          divisor  (first p2)
-;          p1' (rest p1)
-;          p2' (rest p2)
-;          remainder (mod dividend divisor)
-;          quotient  (quot dividend divisor) ; should already be in prime field
-;          to-subtract (map (mult-coef m quotient) p2')
-;          newdividend (sub-poly p1' to-subtract)]
-;    (cons remainder (div-poly newdividend p2')))))
+;(add-poly m quotient result-mono)
