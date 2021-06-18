@@ -90,8 +90,6 @@
   [p1 p2]
   (let [p1-len (count p1)
         p2-len (count p2)
-        p1-range (range (count p1))
-        p2-range (range (count p2))
         ;; length is count-1 + count-1 + one more for zeroth place:
         starter (vec (repeat (+ p1-len p2-len -1) 0))
         indexes (for [i (range p1-len), j (range p2-len)] [i j])]
