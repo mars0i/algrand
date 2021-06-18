@@ -120,9 +120,9 @@
   [exponent coef]
   (conj (vec (repeat exponent 0)) coef))
 
-(defn make-zero-poly
-  [len]
-  (vec (repeat (count len) 0)))
+;(defn make-zero-poly
+;  [len]
+;  (vec (repeat (count len) 0)))
 
 ;; pcode
 ;; let result vec = all zeros
@@ -137,22 +137,21 @@
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
 ;;
 (defn div-poly
-  "Long division mod m of polyomial dividend by polynomial divisor.  Returns
-  pair containing quotient and remainder polynomials."
+  "Long division mod m of polyomial dividend by polynomial divisor.  
+  Returns pair containing quotient and remainder polynomials."
   [m dividend divisor]
-  (let [dsor-deg (degree divisor)]
-    (when (neg? dsor-deg)
-      (throw (Exception. "Division by zero polynomial.")))
-  (loop [quotient (make-zero-poly (count dividend))
-         dend dividend]
-        (let [dend-deg (degree dend)]
-          (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
-            [quotient dend] ; undvided dividend is the remainder; TODO s/b a map?
-            (let [qexpt (- dend-deg dsor-deg) ; quotient exponent
-                  qcoef (quot-coef m (dend dend-deg) (divisor dsor-deg)) ; quotient coefficient
-                  mono (make-monomial qexpt qcoef)]
-              (recur (add-poly m quotient mono)
-                     (sub-poly m dend mono)))))))
+  (let [deg-dsor (degree divisor)]
+    (when (neg? deg-dsor) (throw (Exception. "Division by the zero polynomial.")))
+    (loop [quotient [0] ; zero-polynomial (add-poly will expand it if necess)
+           dend dividend]
+          (let [deg-dend (degree dend)]
+            (if (> deg-dsor deg-dend) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
+              [quotient dend] ; undivided dividend is remainder; TODO s/b a map?
+              (let [qexpt (- deg-dend deg-dsor) ; quotient exponent
+                    qcoef (quot-coef m (dend deg-dend) (divisor deg-dsor)) ; quotient coefficient
+                    result-mono (make-monomial qexpt qcoef)]
+                (recur (add-poly m quotient result-mono)
+                       (sub-poly m dend result-mono)))))))
 
 
 ;; shouldn't be dividing by zero.
