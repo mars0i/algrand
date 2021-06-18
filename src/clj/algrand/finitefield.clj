@@ -24,8 +24,9 @@
 ;; polynomials over F3:
 (def poly3 [2 1 2 1 0 1 2 2])
 (def poly4 [0 0 0 1 0 2 0 0])
-
 (def poly5 [0 0 0 1 0 2])
+
+;; F5
 (def poly6 [0 1 1 1 0 1 1 0 2 4 3 0 3])
 
 
@@ -143,21 +144,16 @@
   "Long division mod m of polyomial diviend by polynomial divisor."
   [m dividend divisor]
   (loop [quotient (make-zero-poly (count dividend))
-         dend dividend
-         remainder (make-zero-poly 1)] ; in case change rep later
+         dend dividend]
         (let [dend-deg (degree dend)
               dsor-deg (degree divisor)]
           (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
-            [quotient remainder]
+            [quotient dend] ; remaining dividend is the remainder
             (let [qot-expt (- dend-deg dsor-deg)
                   qot-coef (qot-coef (dend dend-deg) (divisor dsor-deg))
                   mono (make-monomial qot-expt qot-coef)]
-              ;; let c = dsor * temp result vec, mod m
-              ;; let new dend = dend - c, mod m
-              ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
               (recur (add-poly m quotient mono)
-                     (sub-poly m dend mono)
-              'whatgoeshere?))))))
+                     (sub-poly m dend mono))))))
 
 
 ;; shouldn't be dividing by zero.
