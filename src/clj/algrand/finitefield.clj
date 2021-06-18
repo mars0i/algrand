@@ -50,6 +50,16 @@
   [m x y]
   (mod (quot x y) m))
 
+(defn degree
+  "Returns the degree of (vector) polynomial p, or nil if all zeros, i.e.
+  it represents the zero polynomial."
+  [p]
+  (let [len (count p)]
+    (loop [i (dec len)]
+      (cond (neg? i) -1   ; i.e. all zeros, negative degree
+            (pos? (p i)) i ; note zero degree means pnomial is nonzero constant
+            :else (recur (dec i))))))
+
 (defn pad-high-zeros
   "If sequence p is shorter than minimum-length, concatenate zeros
   onto it so that it has minimum-length."
@@ -58,6 +68,12 @@
     (if (pos? n-zeros)
       (vec (concat p (repeat n-zeros 0)))
       p)))
+
+(defn strip-high-zeros
+  "If polynomial vector p has extra zeros after the largest nonzero
+  term, strip them off."
+  [p]
+  (vec (take (inc (degree p)) p)))
 
 (defn normalize-lengths
   "If one of the polynomial sequences p1 or p2 is shorter than the
@@ -106,16 +122,6 @@
   (mapv (fn [n] (mod n m))
         (mult-poly-generic p1 p2)))
 
-(defn degree
-  "Returns the degree of (vector) polynomial p, or nil if all zeros, i.e.
-  it represents the zero polynomial."
-  [p]
-  (let [len (count p)]
-    (loop [i (dec len)]
-      (cond (neg? i) -1   ; i.e. all zeros, negative degree
-            (pos? (p i)) i ; note zero degree means pnomial is nonzero constant
-            :else (recur (dec i))))))
-
 (defn make-monomial
   [exponent coef]
   (conj (vec (repeat exponent 0)) coef))
@@ -140,18 +146,26 @@
   "Long division mod m of polyomial dividend by polynomial divisor.  
   Returns pair containing quotient and remainder polynomials."
   [m dividend divisor]
-  (let [deg-divisor (degree divisor)
-        deg-dividend (degree dividend)]
+  (let [deg-dividend (degree dividend)
+        deg-divisor (degree divisor)]
+
     (when (neg? deg-divisor) (throw (Exception. "Division by the zero polynomial.")))
+
     (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
           (let [deg-dend (degree dend)]
-            (if (> deg-divisor deg-dend) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
-              [quotient dend] ; undivided dividend is remainder; TODO s/b a map?
+            (if (>= deg-divisor deg-dend) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
+              [quotient (strip-high-zeros dend)] ; undivided dividend is remainder; TODO s/b a map?
               ;; Divide largest term in dividend by largest term in divisor:
               (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
-                    qcoef (quot-coef m (dend deg-dend) (divisor deg-divisor))] 
-                (recur (assoc quotient qexpt qcoef) ; quotient = 0 at qexpt
-                       (sub-poly m dend (make-monomial qexpt qcoef)))))))))
-
-;(add-poly m quotient result-mono)
+                    qcoef (quot-coef m (dend deg-dend) (divisor deg-divisor))
+                    newquotient (assoc quotient qexpt qcoef)
+                    multiplier (make-monomial qexpt qcoef)
+                    newdend (sub-poly m dend (mult-poly m divisor multiplier))] 
+                (println "deg-dend:" deg-dend " deg-divisor:" deg-divisor) ; DEBUG
+                (println "qexpt:" qexpt " qcoef:" qcoef) ; DEBUG
+                (println "new quotient:" newquotient) ; DEBUG
+                (println "monomial multiplier:" multiplier) ; DEBUG
+                (println "new dividend:" newdend) ; DEBUG
+                (println)
+                (recur newquotient newdend)))))))
