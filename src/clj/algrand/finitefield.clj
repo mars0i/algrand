@@ -141,19 +141,19 @@
 (defn div-poly
   "Long division mod m of polyomial dividend by polynomial divisor."
   [m dividend divisor]
+  (let [dsor-deg (degree divisor)]
+    (when (neg? dsor-deg)
+      (throw (Exception. "Division by zero polynomial.")))
   (loop [quotient (make-zero-poly (count dividend))
          dend dividend]
-        (let [dend-deg (degree dend)
-              dsor-deg (degree divisor)]
-          (when (neg? dsor-deg)
-            (throw (Exception. "Division by zero polynomial.")))
+        (let [dend-deg (degree dend)]
           (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
             [quotient dend] ; undvided dividend is the remainder
             (let [qexpt (- dend-deg dsor-deg) ; quotient exponent
-                  qcoef (quot-coef (dend dend-deg) (divisor dsor-deg)) ; quotient coefficient
+                  qcoef (quot-coef m (dend dend-deg) (divisor dsor-deg)) ; quotient coefficient
                   mono (make-monomial qexpt qcoef)]
               (recur (add-poly m quotient mono)
-                     (sub-poly m dend mono))))))
+                     (sub-poly m dend mono)))))))
 
 
 ;; shouldn't be dividing by zero.
