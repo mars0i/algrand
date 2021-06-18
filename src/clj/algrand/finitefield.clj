@@ -84,10 +84,10 @@
 (defn mult-poly-generic
   "Polynomial multiplication without modulus."
   [p1 p2]
-  (let [p1-len (count p1')
-        p2-len (count p2')
-        p1-range (range (count p1'))
-        p2-range (range (count p2'))
+  (let [p1-len (count p1)
+        p2-len (count p2)
+        p1-range (range (count p1))
+        p2-range (range (count p2))
         ;; length is count-1 + count-1 + one more for zeroth place:
         starter (vec (repeat (+ p1-len p2-len -1) 0))
         indexes (for [i (range p1-len)
@@ -107,7 +107,7 @@
         (mult-poly-generic p1 p2)))
 
 
-(defn degree-of
+(defn degree
   "Returns the degree of (vector) polynomial p, or nil if all zeros, i.e.
   it represents the zero polynomial."
   [p]
