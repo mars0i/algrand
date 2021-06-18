@@ -107,6 +107,17 @@
         (mult-poly-generic p1 p2)))
 
 
+(defn degree-of
+  "Returns the degree of (vector) polynomial p, or nil if all zeros, i.e.
+  it represents the zero polynomial."
+  [p]
+  (let [len (count p)]
+    (loop [i (dec len)]
+      (cond (neg? i) nil   ; i.e. all zeros, negative degree
+            (pos? (p i)) i ; note zero degree means pnomial is nonzero constant
+            :else (recur (dec i))))))
+
+
 ;; pcode
 ;; let result vec = all zeros
 ;;
