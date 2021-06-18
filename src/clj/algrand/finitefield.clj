@@ -148,10 +148,10 @@
           (when (neg? dsor-deg)
             (throw (Exception. "Division by zero polynomial.")))
           (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
-            [quotient dend] ; remaining dividend is the remainder
-            (let [qot-expt (- dend-deg dsor-deg)
-                  qot-coef (qot-coef (dend dend-deg) (divisor dsor-deg))
-                  mono (make-monomial qot-expt qot-coef)]
+            [quotient dend] ; undvided dividend is the remainder
+            (let [qexpt (- dend-deg dsor-deg) ; quotient exponent
+                  qcoef (quot-coef (dend dend-deg) (divisor dsor-deg)) ; quotient coefficient
+                  mono (make-monomial qexpt qcoef)]
               (recur (add-poly m quotient mono)
                      (sub-poly m dend mono))))))
 
