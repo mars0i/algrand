@@ -51,8 +51,8 @@
   (mod (quot x y) m))
 
 (defn pad-high-zeros
-  "If sequence p is shorter than minimum-length, concatenate initial
-  zeros onto it so that it has minimum-length."
+  "If sequence p is shorter than minimum-length, concatenate zeros
+  onto it so that it has minimum-length."
   [minimum-length p]
   (let [n-zeros (- minimum-length (count p))]
     (if (pos? n-zeros)
