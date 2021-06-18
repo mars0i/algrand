@@ -26,22 +26,22 @@
 (def poly4 [0 0 0 1 0 2 0 0])
 
 
-(defn add-coeff
+(defn add-coef
   "Add x and y mod m."
   [m x y]
   (mod (+ x y) m))
 
-(defn sub-coeff
+(defn sub-coef
   "Subtract x and y mod m."
   [m x y]
   (mod (- x y) m))
 
-(defn mult-coeff
+(defn mult-coef
   "Multiply x and y mod m."
   [m x y]
   (mod (* x y) m))
 
-(defn quot-coeff
+(defn quot-coef
   "Divide x and y mod m using integer division."
   [m x y]
   (mod (quot x y) m))
@@ -70,14 +70,14 @@
   "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (map (partial add-coeff m) p1' p2')))
+  (map (partial add-coef m) p1' p2')))
 
 (defn sub-poly
   [m p1 p2]
   "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-    (map (partial sub-coeff m) p1' p2')))
+    (map (partial sub-coef m) p1' p2')))
 
 ;; Polynomial multiplication without modulus may be independently useful, 
 ;; is simpler, and may be more efficient fwiw.  A separate function mods it.
@@ -106,7 +106,6 @@
   (mapv (fn [n] (mod n m))
         (mult-poly-generic p1 p2)))
 
-
 (defn degree
   "Returns the degree of (vector) polynomial p, or nil if all zeros, i.e.
   it represents the zero polynomial."
@@ -116,6 +115,10 @@
       (cond (neg? i) nil   ; i.e. all zeros, negative degree
             (pos? (p i)) i ; note zero degree means pnomial is nonzero constant
             :else (recur (dec i))))))
+
+(defn make-monomial
+  [exponent coef]
+  (conj (vec (repeat exponent 0)) coef))
 
 
 ;; pcode
@@ -131,11 +134,24 @@
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
 ;;
 (defn div-poly
-  "Long division mod m for polynomials p1 and p2."
-  [m pdividend pdivisor]
-  (let [dividend-degree (largest-exponent pdividend)
-        divisor-degree (largest-exponent pdivisor)]
-))
+  "Long division mod m of polyomial diviend by polynomial divisor."
+  [m dividend divisor]
+  (loop [quotient (vec (repeat (count dividend) 0))
+         dend dividend
+         dsor divisor]
+        (let [dend-deg (degree dend)
+              dsor-deg (degree dsor)]
+          (if (> dsor-deg dend-deg)
+            quotient
+            (let [quot-expt (- dend-deg dsor-deg)
+                  coef-expt (quot-coef (dend dend-deg) (dsor dsor-deg))
+                  mono (make-monomial quot-expt coef-expt)
+                  ]
+              ;; let c = dsor * temp result vec, mod m
+              ;; let new dend = dend - c, mod m
+              ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
+              (recur  nil nil nil)
+              )))))
 
 
 ;; shouldn't be dividing by zero.
@@ -151,6 +167,6 @@
 ;          p2' (rest p2)
 ;          remainder (mod dividend divisor)
 ;          quotient  (quot dividend divisor) ; should already be in prime field
-;          to-subtract (map (mult-coeff m quotient) p2')
+;          to-subtract (map (mult-coef m quotient) p2')
 ;          newdividend (sub-poly p1' to-subtract)]
 ;    (cons remainder (div-poly newdividend p2')))))
