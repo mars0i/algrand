@@ -46,21 +46,13 @@
   [m x y]
   (mod (quot x y) m))
 
-
-;; FIXME I'm now putting high exponents on the right
-(defn strip-high-zeros
-  "Strip initial zeros from a sequence of coefficients.  Length of the
-  remaining sequence is one more than the degree of the polynomial."
-  [p]
-  (drop-while zero? p))
-
 (defn pad-high-zeros
   "If sequence p is shorter than minimum-length, concatenate initial
   zeros onto it so that it has minimum-length."
   [minimum-length p]
   (let [n-zeros (- minimum-length (count p))]
     (if (pos? n-zeros)
-      (concat (repeat n-zeros 0) p)
+      (concat p (repeat n-zeros 0))
       p)))
 
 (defn normalize-lengths
@@ -92,9 +84,7 @@
 (defn mult-poly-generic
   "Polynomial multiplication without modulus."
   [p1 p2]
-  (let [p1' (vec p1) ; in case a non-vector is passed in
-        p2' (vec p2)
-        p1-len (count p1')
+  (let [p1-len (count p1')
         p2-len (count p2')
         p1-range (range (count p1'))
         p2-range (range (count p2'))
@@ -107,7 +97,7 @@
     (reduce (fn [poly [i1 i2]]
                (update poly
                        (+ i1 i2) ; multiplication sums exponents
-                       + (* (p1' i1) (p2' i2)))) ; add new product
+                       +  (* (p1 i1) (p2 i2)))) ; add new product
             starter indexes)))
 
 (defn mult-poly
@@ -116,14 +106,6 @@
   (mapv (fn [n] (mod n m))
         (mult-poly-generic p1 p2)))
 
-
-;; FIXME I'm now putting high exponents on the right
-(defn largest-exponent
-  "Find the largest exponent in a sequence of integers representing
-   coefficients of a polynomial arranged from largest to smallest exponent,
-  in order."
-  [p]
-  (dec (count (strip-high-zeros p))))  ; could be more efficient, but so?
 
 ;; pcode
 ;; let result vec = all zeros
