@@ -120,6 +120,9 @@
   [exponent coef]
   (conj (vec (repeat exponent 0)) coef))
 
+(defn make-zero-poly
+  [len]
+  (vec (repeat (count len) 0)))
 
 ;; pcode
 ;; let result vec = all zeros
@@ -136,12 +139,12 @@
 (defn div-poly
   "Long division mod m of polyomial diviend by polynomial divisor."
   [m dividend divisor]
-  (loop [quotient (vec (repeat (count dividend) 0))
+  (loop [quotient (make-zero-poly (count dividend))
          dend dividend
          dsor divisor]
         (let [dend-deg (degree dend)
               dsor-deg (degree dsor)]
-          (if (> dsor-deg dend-deg)
+          (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
             quotient
             (let [quot-expt (- dend-deg dsor-deg)
                   coef-expt (quot-coef (dend dend-deg) (dsor dsor-deg))
