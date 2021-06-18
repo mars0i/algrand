@@ -137,7 +137,8 @@
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
 ;;
 (defn div-poly
-  "Long division mod m of polyomial dividend by polynomial divisor."
+  "Long division mod m of polyomial dividend by polynomial divisor.  Returns
+  pair containing quotient and remainder polynomials."
   [m dividend divisor]
   (let [dsor-deg (degree divisor)]
     (when (neg? dsor-deg)
@@ -146,7 +147,7 @@
          dend dividend]
         (let [dend-deg (degree dend)]
           (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
-            [quotient dend] ; undvided dividend is the remainder
+            [quotient dend] ; undvided dividend is the remainder; TODO s/b a map?
             (let [qexpt (- dend-deg dsor-deg) ; quotient exponent
                   qcoef (quot-coef m (dend dend-deg) (divisor dsor-deg)) ; quotient coefficient
                   mono (make-monomial qexpt qcoef)]
