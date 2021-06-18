@@ -94,9 +94,7 @@
         p2-range (range (count p2))
         ;; length is count-1 + count-1 + one more for zeroth place:
         starter (vec (repeat (+ p1-len p2-len -1) 0))
-        indexes (for [i (range p1-len)
-                      j (range p2-len)]
-                  [i j]) ]
+        indexes (for [i (range p1-len), j (range p2-len)] [i j])]
     ;; Vectors are associative in Clojure, so we can construct using update:
     (reduce (fn [poly [i1 i2]]
                (update poly
@@ -116,7 +114,7 @@
   [p]
   (let [len (count p)]
     (loop [i (dec len)]
-      (cond (neg? i) nil   ; i.e. all zeros, negative degree
+      (cond (neg? i) -1   ; i.e. all zeros, negative degree
             (pos? (p i)) i ; note zero degree means pnomial is nonzero constant
             :else (recur (dec i))))))
 
@@ -147,6 +145,7 @@
          dend dividend]
         (let [dend-deg (degree dend)
               dsor-deg (degree divisor)]
+            ;; FIXME what if dividor degree < 0 i.e. zero-ploynomial?
           (if (> dsor-deg dend-deg) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
             [quotient dend] ; remaining dividend is the remainder
             (let [qot-expt (- dend-deg dsor-deg)
