@@ -51,6 +51,8 @@
 ;; I think what it should do is:
 ;; (a) determine the inverse of the divisor
 ;; (b) multiply that by the dividend
+;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
+;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
 (defn quot-coef
   "Divide x and y mod m using integer division."
   [m x y]
