@@ -17,17 +17,19 @@
 
 ;; Some polynomials for testing:
 
-;; polynomials over F2 or F3:
-(def poly1 [1 1 0 1 0 0 1 1])
-(def poly2 [0 1 1 1 0 1 1 0])
+;; polynomials over F2 (or higher):
+(def poly2a [1 1 0 1 0 0 1 1])
+(def poly2b [0 1 1 1 0 1 1 0])
 
-;; polynomials over F3:
-(def poly3 [2 1 2 1 0 1 2 2])
-(def poly4 [0 0 0 1 0 2 0 0])
-(def poly5 [0 0 0 1 0 2])
+;; polynomials over F3 (or higher):
+(def poly3a  [2 1 2 1 0 1 2 2])
+(def poly3b  [0 0 0 1 0 2])
+(def poly3b+ [0 0 0 1 0 2 0 0])
 
 ;; F5
-(def poly6 [0 1 1 1 0 1 1 0 2 4 3 0 3])
+(def poly5a [0 1 1 1 0 1 1 0 2 4 3 0 3])
+(def poly5b [1 0 2 4])
+(def poly5c [3 2 4 3])
 
 
 (defn add-coef
@@ -45,6 +47,10 @@
   [m x y]
   (mod (* x y) m))
 
+;; NOT RIGHT
+;; I think what it should do is:
+;; (a) determine the inverse of the divisor
+;; (b) multiply that by the dividend
 (defn quot-coef
   "Divide x and y mod m using integer division."
   [m x y]
@@ -148,9 +154,7 @@
   [m dividend divisor]
   (let [deg-dividend (degree dividend)
         deg-divisor (degree divisor)]
-
     (when (neg? deg-divisor) (throw (Exception. "Division by the zero polynomial.")))
-
     (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
           (let [deg-dend (degree dend)]
@@ -158,6 +162,7 @@
               [quotient (strip-high-zeros dend)] ; undivided dividend is remainder; TODO s/b a map?
               ;; Divide largest term in dividend by largest term in divisor:
               (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
+                    ;; I DON'T THINK MY quot-coef IS RIGHT:
                     qcoef (quot-coef m (dend deg-dend) (divisor deg-divisor))
                     newquotient (assoc quotient qexpt qcoef)
                     multiplier (make-monomial qexpt qcoef)
