@@ -9,10 +9,6 @@
 ;; count backwards all the time, which prevents some Clojure
 ;; conveniences unless you keep reversing vectors.
 
-;; FIXME Oh no--but I did multiplication the other way.  
-;; Multiplication is easier with low exponents on the left.
-;; Division is easier the other way.
-
 ;; TODO: Generalize to other subfields than prime fields.
 
 
@@ -190,10 +186,10 @@
                     newquotient (assoc quotient qexpt qcoef)
                     multiplier (make-monomial qexpt qcoef)
                     newdend (sub-poly m dend (mult-poly m divisor multiplier))] 
-                (println "deg-dend:" deg-dend " deg-divisor:" deg-divisor) ; DEBUG
-                (println "qexpt:" qexpt " qcoef:" qcoef) ; DEBUG
-                (println "new quotient:" newquotient) ; DEBUG
-                (println "monomial multiplier:" multiplier) ; DEBUG
-                (println "new dividend:" newdend) ; DEBUG
-                (println)
+                ;(println "deg-dend:" deg-dend " deg-divisor:" deg-divisor) ; DEBUG
+                ;(println "qexpt:" qexpt " qcoef:" qcoef) ; DEBUG
+                ;(println "new quotient:" newquotient) ; DEBUG
+                ;(println "monomial multiplier:" multiplier) ; DEBUG
+                ;(println "new dividend:" newdend) ; DEBUG
+                ;(println)
                 (recur newquotient newdend)))))))
