@@ -53,7 +53,7 @@
 ;; won't use such large numbers, as specified here:
 ;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
 ;; Also consider wrapping this in memoize.
-(defn invert-mod-aux
+(defn invert-mod-no-memo
   "Computes the inverse of a nonzero x, mod m, assuming that m is prime.
   Does not memoize: Recomputes every time the same arguments are provided."
   [m x]
@@ -61,13 +61,13 @@
     (mod (nt/expt x (- m 2))
        m)))
 
-(def invert-mod (memoize invert-mod-aux))
-(utils.clojutils/add-to-docstr invert-mod 
+(def invert-mod 
   "([m x])
   Computes the inverse of a nonzero x, mod m, assuming that m is prime.
   Memoizes: The inverse of x mod m is only computed the first time the
   function is called with m and x.  Then the result is stored for future
-  use in the same Clojure session.")
+  use in the same Clojure session."
+  (memoize invert-mod-no-memo))
 
 ;; Note that it's not enough to simply divide usng quot and then mod the result.
 (defn quot-mod
