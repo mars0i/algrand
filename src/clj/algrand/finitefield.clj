@@ -48,7 +48,6 @@
   [m x y]
   (mod (* x y) m))
 
-
 ;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
 ;; Current version uses theorem that for nonzero elements of a field of prime 
 ;; order m, zero, x^{m-1} = 1 mod m, so x^{m-2} mod m is x's multiplicative 
@@ -74,16 +73,11 @@
   function is called with m and x.  Then the result is stored for future
   use in the same Clojure session.")
 
-;; NOT RIGHT
-;; I think what it should do is:
-;; (a) determine the inverse of the divisor
-;; (b) multiply that by the dividend
-;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
-;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
+;; Note that it's not enough to simply divide usng quot and then mod the result.
 (defn quot-mod
-  "Divide x and y mod m using integer division."
+  "Divides x by y mod m, or rather, multiplies x by the inverse of y mod m."
   [m x y]
-  (mod (quot x y) m))
+  (mult-mod m x (invert-mod m y)))
 
 (defn degree
   "Returns the degree of (vector) polynomial p, or nil if all zeros, i.e.
