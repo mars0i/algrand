@@ -181,7 +181,6 @@
               [quotient (strip-high-zeros dend)] ; undivided dividend is remainder; TODO s/b a map?
               ;; Divide largest term in dividend by largest term in divisor:
               (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
-                    ;; I DON'T THINK MY quot-mod IS RIGHT:
                     qcoef (quot-mod m (dend deg-dend) (divisor deg-divisor))
                     newquotient (assoc quotient qexpt qcoef)
                     multiplier (make-monomial qexpt qcoef)
