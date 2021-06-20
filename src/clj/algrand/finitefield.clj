@@ -1,5 +1,6 @@
 (ns algrand.finitefield
-    (:require [clojure.math.numeric-tower :as nt]))
+    (:require [clojure.math.numeric-tower :as nt]
+              [utils.clojutils]))
 
 ;; For now, polynomials are Clojure sequences of integers (preferably
 ;; vectors) that are elements of a prime field, with larger exponents on 
@@ -32,20 +33,46 @@
 (def poly5c [3 2 4 3])
 
 
-(defn add-coef
+(defn add-mod
   "Add x and y mod m."
   [m x y]
   (mod (+ x y) m))
 
-(defn sub-coef
+(defn sub-mod
   "Subtract x and y mod m."
   [m x y]
   (mod (- x y) m))
 
-(defn mult-coef
+(defn mult-mod
   "Multiply x and y mod m."
   [m x y]
   (mod (* x y) m))
+
+
+;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
+;; Current version uses theorem that for nonzero elements of a field of prime 
+;; order m, zero, x^{m-1} = 1 mod m, so x^{m-2} mod m is x's multiplicative 
+;; inverse.  This can produce very large integers internally, making use
+;; of Clojure's BigInt facility..
+;; Consider revising to make use of the extended Euclidean algorithm,  which
+;; won't use such large numbers, as specified here:
+;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
+;; Also consider wrapping this in memoize.
+(defn invert-mod-aux
+  "Computes the inverse of a nonzero x, mod m, assuming that m is prime.
+  Does not memoize: Recomputes every time the same arguments are provided."
+  [m x]
+  (long
+    (mod (nt/expt x (- m 2))
+       m)))
+
+(def invert-mod (memoize invert-mod-aux))
+(utils.clojutils/add-to-docstr invert-mod 
+  "([m x])
+  Computes the inverse of a nonzero x, mod m, assuming that m is prime.
+  Memoizes: The inverse of x mod m is only computed the first time the
+  function is called with m and x.  Then the result is stored for future
+  use in the same Clojure session.")
 
 ;; NOT RIGHT
 ;; I think what it should do is:
@@ -53,7 +80,7 @@
 ;; (b) multiply that by the dividend
 ;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
 ;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
-(defn quot-coef
+(defn quot-mod
   "Divide x and y mod m using integer division."
   [m x y]
   (mod (quot x y) m))
@@ -98,14 +125,14 @@
   "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (mapv (partial add-coef m) p1' p2')))
+  (mapv (partial add-mod m) p1' p2')))
 
 (defn sub-poly
   [m p1 p2]
   "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[p1' p2'] (normalize-lengths p1 p2)]
-    (mapv (partial sub-coef m) p1' p2')))
+    (mapv (partial sub-mod m) p1' p2')))
 
 ;; Polynomial multiplication without modulus may be independently useful, 
 ;; is simpler, and may be more efficient fwiw.  A separate function mods it.
@@ -164,8 +191,8 @@
               [quotient (strip-high-zeros dend)] ; undivided dividend is remainder; TODO s/b a map?
               ;; Divide largest term in dividend by largest term in divisor:
               (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
-                    ;; I DON'T THINK MY quot-coef IS RIGHT:
-                    qcoef (quot-coef m (dend deg-dend) (divisor deg-divisor))
+                    ;; I DON'T THINK MY quot-mod IS RIGHT:
+                    qcoef (quot-mod m (dend deg-dend) (divisor deg-divisor))
                     newquotient (assoc quotient qexpt qcoef)
                     multiplier (make-monomial qexpt qcoef)
                     newdend (sub-poly m dend (mult-poly m divisor multiplier))] 
