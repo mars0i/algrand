@@ -23,6 +23,7 @@
 (def ff20-divisor   [1 0 3])
 (def ff20-quotient  [1 2 2 4])
 (def ff20-remainder [2 2])
+;; (maybe I should put this in a unit test)
 
 ;; Other F5 (or higher):
 (def poly5a [0 1 1 1 0 1 1 0 2 4 3 0 3])
@@ -174,24 +175,8 @@
                        (partial add-int m) (mult-int m (poly1 i1) (poly2 i2)))) ; add new product (old value is passed as first arg to updating fn)
             starter indexes)))
 
-;; FIXME: Don't I need mod by the defining primitive polynomial?
-;; (Or only in mult-poly?) (Will that the mutual recursion terminate?)
-;;
-;; FIXME: What should the test for termination be?  If we allow dividing the
-;; leading polynomials when they have the same degree, one will keep dividing
-;; forever.  If I don't, that won't loop forever, but why shouldn't the 
-;; coefficients divide each other?  Or should it be something more complicated,
-;; like "divide once" or "divide if the dividend's coefficient is larger?
-;; (What is "larger" in modular arithmetic?)
-;;
-;; Would it help to divide both terms by the leading coefficient of the 
-;; divsor, so that it's monic?  Then the leading term of the dividend
-;; will go away after the first subtraction.
-;;
-;; Or maybe the problem is that sub-int is wrong?  Or there's something else 
-;; that's wrong in my polynomial division implementation?
-;;
-;; (Incorrect?) pseudocode for the following function:
+
+;; Pseudocode for div-poly below:
 ;; let result vec = all zeros
 ;; if degree dsor > degree dend then ret result vec, and dend as the remainder
 ;; let a = div max idx of dend by max idx of dsor
@@ -200,6 +185,12 @@
 ;; let c = dsor * temp result vec, mod m
 ;; let new dend = dend - c, mod m
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
+
+;; Question: Don't I need mod by the defining primitive polynomial?
+;; No--as long as the coefficients can only be elements of a finite prime
+;; field, it doesn't need it; it just deals with individual terms in a
+;; polynomial one at a time, and it doesn't care about the wider field.
+;; But sometimes maybe that should be done before this function is called.
 (defn div-poly
   "Long division mod primitive polynomial p, with coefficients mod m of,
   polyomial dividend by polynomial divisor.  
@@ -211,19 +202,21 @@
     (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
           (let [deg-dend (degree dend)]
-            (if (>= deg-divisor deg-dend)
+            (if (> deg-divisor deg-dend)
               {:quotient quotient, :remainder (strip-high-zeros dend)}
               ;; Divide largest term in dividend by largest term in divisor:
               (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
                     qcoef (div-int m (dend deg-dend) (divisor deg-divisor))
-                    newquotient (assoc quotient qexpt qcoef)
+                    newquotient (assoc quotient qexpt qcoef) ; add this term to result
                     multiplier (make-monomial qexpt qcoef)
                     newdend (sub-poly m dend (mult-poly m divisor multiplier))] 
-                ;(println "deg-dend:" deg-dend " deg-divisor:" deg-divisor) ; DEBUG
-                ;(println "qexpt:" qexpt " qcoef:" qcoef) ; DEBUG
-                ;(println "new quotient:" newquotient) ; DEBUG
-                ;(println "monomial multiplier:" multiplier) ; DEBUG
-                ;(println "new dividend:" newdend) ; DEBUG
-                ;(println)
                 (recur newquotient newdend)))))))
+
+;; For debugging div-poly, place immediately above the recur line above:
+;                (println "deg-dend:" deg-dend " deg-divisor:" deg-divisor) ; DEBUG
+;                (println "qexpt:" qexpt " qcoef:" qcoef) ; DEBUG
+;                (println "new quotient:" newquotient) ; DEBUG
+;                (println "monomial multiplier:" multiplier) ; DEBUG
+;                (println "new dividend:" newdend) ; DEBUG
+;                (println)
 
