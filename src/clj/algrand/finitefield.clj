@@ -160,14 +160,23 @@
             starter indexes)))
 
 ;; FIXME: Don't I need mod by the defining primitive polynomial?
-;; (Or only in mult-poly?) (Is that an OK recursion?)
+;; (Or only in mult-poly?) (Will that the mutual recursion terminate?)
+;;
 ;; FIXME: What should the test for termination be?  If we allow dividing the
 ;; leading polynomials when they have the same degree, one will keep dividing
 ;; forever.  If I don't, that won't loop forever, but why shouldn't the 
 ;; coefficients divide each other?  Or should it be something more complicated,
 ;; like "divide once" or "divide if the dividend's coefficient is larger?
 ;; (What is "larger" in modular arithmetic?)
-;; Pseudocode for the following function:
+;;
+;; Would it help to divide both terms by the leading coefficient of the 
+;; divsor, so that it's monic?  Then the leading term of the dividend
+;; will go away after the first subtraction.
+;;
+;; Or maybe the problem is that sub-int is wrong?  Or there's something else 
+;; that's wrong in my polynomial division implementation?
+;;
+;; (Incorrect) pseudocode for the following function:
 ;; let result vec = all zeros
 ;; if degree dsor > degree dend then ret result vec, and dend as the remainder
 ;; let a = div max idx of dend by max idx of dsor
