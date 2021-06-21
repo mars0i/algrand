@@ -85,6 +85,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn mult-poly
+  "Polynomial multiplication mod m."
+  [m p1 p2]
+  (let [p1-len (count p1)
+        p2-len (count p2)
+        ;; result length is count-1 + count-1 + one more for zeroth place:
+        starter (make-zero-poly (+ p1-len p2-len -1))
+        indexes (for [i (range p1-len), j (range p2-len)] [i j])]
+    ;; Vectors are associative in Clojure, so we can construct using update:
+    (reduce (fn [poly [i1 i2]]
+               (update poly
+                       (+ i1 i2) ; multiplication sums exponents
+                       (partial add-int m) (mult-int m (p1 i1) (p2 i2)))) ; add new product
+            starter indexes)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; Polynomial multiplication without modulus may be independently useful, 
 ;; is simpler, and may be more efficient fwiw.  A separate function mods it.
 (defn mult-poly-generic
