@@ -201,9 +201,9 @@
   [p m dividend divisor]
   (let [deg-dividend (degree dividend)
         deg-divisor (degree divisor)
-        ;dend 
-        ;dsor
-        ]
+        dsor-lead-coef (divisor deg-divsor) ;; make divisor monic:
+        dend (div-int-poly m dend-lead-coef dividend)
+        dsor (div-int-poly m dsor-lead-coef divisor)]
     (when (neg? deg-divisor) (throw (Exception. "Division by the zero polynomial.")))
     (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
