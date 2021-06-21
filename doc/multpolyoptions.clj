@@ -81,3 +81,28 @@
                (partial + (* (p1' i1) (p2' i2)))
                ))
     (vec coeffs)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Polynomial multiplication without modulus may be independently useful, 
+;; is simpler, and may be more efficient fwiw.  A separate function mods it.
+(defn mult-poly-generic
+  "Polynomial multiplication without modulus."
+  [p1 p2]
+  (let [p1-len (count p1)
+        p2-len (count p2)
+        ;; length is count-1 + count-1 + one more for zeroth place:
+        starter (vec (repeat (+ p1-len p2-len -1) 0))
+        indexes (for [i (range p1-len), j (range p2-len)] [i j])]
+    ;; Vectors are associative in Clojure, so we can construct using update:
+    (reduce (fn [poly [i1 i2]]
+               (update poly
+                       (+ i1 i2) ; multiplication sums exponents
+                       +  (* (p1 i1) (p2 i2)))) ; add new product
+            starter indexes)))
+
+(defn mult-poly
+  [m p1 p2]
+  (mapv (fn [x] (mod x m))
+        (mult-poly-generic p1 p2)))
