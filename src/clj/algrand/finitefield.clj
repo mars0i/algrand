@@ -157,7 +157,6 @@
                        (partial add-int m) (mult-int m (p1 i1) (p2 i2)))) ; add new product
             starter indexes)))
 
-
 ;; Pseudocode for the following function:
 ;; let result vec = all zeros
 ;; if degree dsor > degree dend then ret result vec, and dend as the remainder
