@@ -18,7 +18,13 @@
 (def poly3b  [0 0 0 1 0 2])
 (def poly3b+ [0 0 0 1 0 2 0 0])
 
-;; F5
+;; In F5, division example, Lidl & Niederreiter _Finite Fields_, pp. 20f:
+(def ff20-dividend  [3 4 0 0 1 2])
+(def ff20-divisor   [1 0 3])
+(def ff20-quotient  [1 2 2 4])
+(def ff20-remainder [2 2])
+
+;; Other F5 (or higher):
 (def poly5a [0 1 1 1 0 1 1 0 2 4 3 0 3])
 (def poly5b [1 0 2 4])
 (def poly5c [3 2 4 3])
@@ -185,7 +191,7 @@
 ;; Or maybe the problem is that sub-int is wrong?  Or there's something else 
 ;; that's wrong in my polynomial division implementation?
 ;;
-;; (Incorrect) pseudocode for the following function:
+;; (Incorrect?) pseudocode for the following function:
 ;; let result vec = all zeros
 ;; if degree dsor > degree dend then ret result vec, and dend as the remainder
 ;; let a = div max idx of dend by max idx of dsor
@@ -198,7 +204,7 @@
   "Long division mod primitive polynomial p, with coefficients mod m of,
   polyomial dividend by polynomial divisor.  
   Returns pair containing quotient and remainder polynomials."
-  [p m dividend divisor]
+  [m dividend divisor]
   (let [deg-dividend (degree dividend)
         deg-divisor (degree divisor)]
     (when (neg? deg-divisor) (throw (Exception. "Division by the zero polynomial.")))
@@ -220,3 +226,4 @@
                 ;(println "new dividend:" newdend) ; DEBUG
                 ;(println)
                 (recur newquotient newdend)))))))
+
