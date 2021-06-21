@@ -1,18 +1,13 @@
 (ns algrand.finitefield
-    (:require [clojure.math.numeric-tower :as nt]
-              [utils.clojutils]))
+    (:require [clojure.math.numeric-tower :as nt]))
 
-;; For now, polynomials are Clojure sequences of integers (preferably
-;; vectors) that are elements of a prime field, with larger exponents on 
-;; the left.  That means you can't read off exponents from degrees,
-;; but it also means that e.g. with long division, you don't have to
-;; count backwards all the time, which prevents some Clojure
-;; conveniences unless you keep reversing vectors.
-
-;; TODO: Generalize to other subfields than prime fields.
+;; For now, polynomials are Clojure vectors of integers that are elements 
+;; of a prime field, with smaller exponents on the left.  
+;; Later: Possibly generalize to subfields other than prime fields.
 
 
-;; Some polynomials for testing:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; POLYNOMIALS FOR TESTING
 
 ;; polynomials over F2 (or higher):
 (def poly2a [1 1 0 1 0 0 1 1])
@@ -29,51 +24,8 @@
 (def poly5c [3 2 4 3])
 
 
-(defn add-mod
-  "Add x and y mod m."
-  [m x y]
-  (mod (+ x y) m))
-
-(defn sub-mod
-  "Subtract x and y mod m."
-  [m x y]
-  (mod (- x y) m))
-
-(defn mult-mod
-  "Multiply x and y mod m."
-  [m x y]
-  (mod (* x y) m))
-
-;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
-;; Current version uses theorem that for nonzero elements of a field of prime 
-;; order m, zero, x^{m-1} = 1 mod m, so x^{m-2} mod m is x's multiplicative 
-;; inverse.  This can produce very large integers internally, making use
-;; of Clojure's BigInt facility..
-;; Consider revising to make use of the extended Euclidean algorithm,  which
-;; won't use such large numbers, as specified here:
-;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
-;; Also consider wrapping this in memoize.
-(defn invert-mod-no-memo
-  "Computes the inverse of a nonzero x, mod m, assuming that m is prime.
-  Does not memoize: Recomputes every time the same arguments are provided."
-  [m x]
-  (long
-    (mod (nt/expt x (- m 2))
-       m)))
-
-(def invert-mod 
-  "([m x])
-  Computes the inverse of a nonzero x, mod m, assuming that m is prime.
-  Memoizes: The inverse of x mod m is only computed the first time the
-  function is called with m and x.  Then the result is stored for future
-  use in the same Clojure session."
-  (memoize invert-mod-no-memo))
-
-;; Note that it's not enough to simply divide usng quot and then mod the result.
-(defn quot-mod
-  "Divides x by y mod m, or rather, multiplies x by the inverse of y mod m."
-  [m x y]
-  (mult-mod m x (invert-mod m y)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; MISC UTILITY FUNCTIONS
 
 (defn degree
   "Returns the degree of (vector) polynomial p, or nil if all zeros, i.e.
@@ -110,43 +62,6 @@
           (> p1-len p2-len) [p1 (pad-high-zeros p1-len p2)]
           :else [p1 p2])))
 
-(defn add-poly
-  [m p1 p2]
-  "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
-  Does not carry."
-  (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (mapv (partial add-mod m) p1' p2')))
-
-(defn sub-poly
-  [m p1 p2]
-  "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
-  Does not carry."
-  (let [[p1' p2'] (normalize-lengths p1 p2)]
-    (mapv (partial sub-mod m) p1' p2')))
-
-;; Polynomial multiplication without modulus may be independently useful, 
-;; is simpler, and may be more efficient fwiw.  A separate function mods it.
-(defn mult-poly-generic
-  "Polynomial multiplication without modulus."
-  [p1 p2]
-  (let [p1-len (count p1)
-        p2-len (count p2)
-        ;; length is count-1 + count-1 + one more for zeroth place:
-        starter (vec (repeat (+ p1-len p2-len -1) 0))
-        indexes (for [i (range p1-len), j (range p2-len)] [i j])]
-    ;; Vectors are associative in Clojure, so we can construct using update:
-    (reduce (fn [poly [i1 i2]]
-               (update poly
-                       (+ i1 i2) ; multiplication sums exponents
-                       +  (* (p1 i1) (p2 i2)))) ; add new product
-            starter indexes)))
-
-(defn mult-poly
-  "Polynomial multiplication mod m."
-  [m p1 p2]
-  (mapv (fn [n] (mod n m))
-        (mult-poly-generic p1 p2)))
-
 (defn make-monomial
   [exponent coef]
   (conj (vec (repeat exponent 0)) coef))
@@ -155,18 +70,103 @@
   [len]
   (vec (repeat len 0)))
 
-;; pcode
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; INTEGER ARITHMETIC MOD m
+
+(defn add-int
+  "Add x and y mod m."
+  [m x y]
+  (mod (+ x y) m))
+
+(defn sub-int
+  "Subtract x and y mod m."
+  [m x y]
+  (mod (- x y) m))
+
+(defn mult-int
+  "Multiply x and y mod m."
+  [m x y]
+  (mod (* x y) m))
+
+;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
+;; Current version uses theorem that for nonzero elements of a field of prime 
+;; order m, zero, x^{m-1} = 1 mod m, so x^{m-2} mod m is x's multiplicative 
+;; inverse.  This can produce very large integers internally, making use
+;; of Clojure's BigInt facility..
+;; Consider revising to make use of the extended Euclidean algorithm,  which
+;; won't use such large numbers, as specified here:
+;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
+;; Also consider wrapping this in memoize.
+(defn invert-int-nomemo
+  "Computes the inverse of a nonzero x, mod m, assuming that m is prime.
+  Does not memoize: Recomputes every time the same arguments are provided."
+  [m x]
+  (long
+    (mod (nt/expt x (- m 2))
+       m)))
+
+(def invert-int 
+  "([m x])
+  Computes the inverse of a nonzero x, mod m, assuming that m is prime.
+  Memoizes: The inverse of x mod m is only computed the first time the
+  function is called with m and x.  Then the result is stored for future
+  use in the same Clojure session."
+  (memoize invert-int-nomemo))
+
+;; Note that it's not enough to simply divide usng quot and then mod the result.
+(defn div-int
+  "Divides x by y mod m, or rather, multiplies x by the inverse of y mod m."
+  [m x y]
+  (mult-int m x (invert-int m y)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; POLYNOMIAL ARITHMETIC MOD POLY
+
+(defn add-poly
+  [m p1 p2]
+  "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
+  Does not carry."
+  (let [[p1' p2'] (normalize-lengths p1 p2)]
+  (mapv (partial add-int m) p1' p2')))
+
+(defn sub-poly
+  [m p1 p2]
+  "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
+  Does not borrow."
+  (let [[p1' p2'] (normalize-lengths p1 p2)]
+    (mapv (partial sub-int m) p1' p2')))
+
+;; Note: Although in 'update', you can pass additional arguments to the
+;; updating function, the argument from the old vector/map will be the
+;; first arg, so if you need something else first, you can use partial
+;; or (fn [...] ...).
+(defn mult-poly
+  "Polynomial multiplication mod m."
+  [m p1 p2]
+  (let [p1-len (count p1)
+        p2-len (count p2)
+        ;; result length is count-1 + count-1 + one more for zeroth place:
+        starter (make-zero-poly (+ p1-len p2-len -1))
+        indexes (for [i (range p1-len), j (range p2-len)] [i j])]
+    ;; Vectors are associative in Clojure, so we can construct using update:
+    (reduce (fn [poly [i1 i2]]
+               (update poly
+                       (+ i1 i2) ; multiplication sums exponents
+                       (partial add-int m) (mult-int m (p1 i1) (p2 i2)))) ; add new product
+            starter indexes)))
+
+;; Pseudocode for the following function:
 ;; let result vec = all zeros
-;;
 ;; if degree dsor > degree dend then ret result vec, and dend as the remainder
 ;; let a = div max idx of dend by max idx of dsor
 ;; let b = div max coef of dend by max coef of dsor, mod m
 ;; place b in loc a in temp result vec (mostly zeros)
 ;; let c = dsor * temp result vec, mod m
-;;   (or last step could be broken out into separate coef and index mults)
 ;; let new dend = dend - c, mod m
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
-;;
+;; TODO wait don't I have to mod by the defining polynomial?
 (defn div-poly
   "Long division mod m of polyomial dividend by polynomial divisor.  
   Returns pair containing quotient and remainder polynomials."
@@ -181,7 +181,7 @@
               [quotient (strip-high-zeros dend)] ; undivided dividend is remainder; TODO s/b a map?
               ;; Divide largest term in dividend by largest term in divisor:
               (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
-                    qcoef (quot-mod m (dend deg-dend) (divisor deg-divisor))
+                    qcoef (div-int m (dend deg-dend) (divisor deg-divisor))
                     newquotient (assoc quotient qexpt qcoef)
                     multiplier (make-monomial qexpt qcoef)
                     newdend (sub-poly m dend (mult-poly m divisor multiplier))] 
