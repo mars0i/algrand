@@ -138,6 +138,8 @@
   (let [[p1' p2'] (normalize-lengths p1 p2)]
     (mapv (partial sub-int m) p1' p2')))
 
+;; FIXME: Don't I need mod by the defining primitive polynomial?
+;; And there should be an additional argument?
 ;; Note: Although in 'update', you can pass additional arguments to the
 ;; updating function, the argument from the old vector/map will be the
 ;; first arg, so if you need something else first, you can use partial
@@ -157,6 +159,14 @@
                        (partial add-int m) (mult-int m (p1 i1) (p2 i2)))) ; add new product
             starter indexes)))
 
+;; FIXME: Don't I need mod by the defining primitive polynomial?
+;; (Or only in mult-poly?) (Is that an OK recursion?)
+;; FIXME: What should the test for termination be?  If we allow dividing the
+;; leading polynomials when they have the same degree, one will keep dividing
+;; forever.  If I don't, that won't loop forever, but why shouldn't the 
+;; coefficients divide each other?  Or should it be something more complicated,
+;; like "divide once" or "divide if the dividend's coefficient is larger?
+;; (What is "larger" in modular arithmetic?)
 ;; Pseudocode for the following function:
 ;; let result vec = all zeros
 ;; if degree dsor > degree dend then ret result vec, and dend as the remainder
@@ -166,7 +176,6 @@
 ;; let c = dsor * temp result vec, mod m
 ;; let new dend = dend - c, mod m
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
-;; TODO wait don't I have to mod by the defining polynomial?
 (defn div-poly
   "Long division mod m of polyomial dividend by polynomial divisor.  
   Returns pair containing quotient and remainder polynomials."
@@ -177,8 +186,8 @@
     (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
           (let [deg-dend (degree dend)]
-            (if (>= deg-divisor deg-dend) ; TODO: If they are =, do we always divide?  Yes?? because even if divisor coeff is larger, we can divide mod m (?)
-              [quotient (strip-high-zeros dend)] ; undivided dividend is remainder; TODO s/b a map?
+            (if (>= deg-divisor deg-dend)
+              {:quotient quotient, :remainder (strip-high-zeros dend)}
               ;; Divide largest term in dividend by largest term in divisor:
               (let [qexpt (- deg-dend deg-divisor) ; divide exponent = subtract
                     qcoef (div-int m (dend deg-dend) (divisor deg-divisor))
