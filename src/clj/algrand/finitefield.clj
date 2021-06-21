@@ -53,14 +53,14 @@
   (vec (take (inc (degree p)) p)))
 
 (defn normalize-lengths
-  "If one of the polynomial sequences p1 or p2 is shorter than the
+  "If one of the polynomial sequences poly1 or poly2 is shorter than the
   other, pad it with initial zeros."
-  [p1 p2]
-  (let [p1-len (count p1)
-        p2-len (count p2)]
-    (cond (< p1-len p2-len) [(pad-high-zeros p2-len p1) p2]
-          (> p1-len p2-len) [p1 (pad-high-zeros p1-len p2)]
-          :else [p1 p2])))
+  [poly1 poly2]
+  (let [poly1-len (count poly1)
+        poly2-len (count poly2)]
+    (cond (< poly1-len poly2-len) [(pad-high-zeros poly2-len poly1) poly2]
+          (> poly1-len poly2-len) [poly1 (pad-high-zeros poly1-len poly2)]
+          :else [poly1 poly2])))
 
 (defn make-monomial
   [exponent coef]
@@ -120,43 +120,52 @@
   [m x y]
   (mult-int m x (invert-int m y)))
 
+(defn mult-int-poly
+  "Multiply coefficients of polynomial poly by scalar value x mod m."
+  [m x poly]
+  (mapv (partial mult-int m x)
+        poly))
+
+(defn div-int-poly
+  "Divide coefficients of polynomial poly by scalar value y mod m."
+  [m y poly]
+  (mapv (partial mult-int m (invert-int y))
+        poly))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; POLYNOMIAL ARITHMETIC MOD POLY
 
 (defn add-poly
-  [m p1 p2]
-  "Add polynomials p1 and p2 with mod m arithmetic on coefficients.
+  [m poly1 poly2]
+  "Add polynomials poly1 and poly2 with mod m arithmetic on coefficients.
   Does not carry."
-  (let [[p1' p2'] (normalize-lengths p1 p2)]
-  (mapv (partial add-int m) p1' p2')))
+  (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
+  (mapv (partial add-int m) poly1' poly2')))
 
 (defn sub-poly
-  [m p1 p2]
-  "Subtract polynomials p1 and p2 with mod m arithmetic on coefficients.
+  [m poly1 poly2]
+  "Subtract polynomials poly1 and poly2 with mod m arithmetic on coefficients.
   Does not borrow."
-  (let [[p1' p2'] (normalize-lengths p1 p2)]
-    (mapv (partial sub-int m) p1' p2')))
+  (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
+    (mapv (partial sub-int m) poly1' poly2')))
 
 ;; FIXME: Don't I need mod by the defining primitive polynomial?
 ;; And there should be an additional argument?
-;; Note: Although in 'update', you can pass additional arguments to the
-;; updating function, the argument from the old vector/map will be the
-;; first arg, so if you need something else first, you can use partial
-;; or (fn [...] ...).
+;; Yes: If degree of result is >= degree of primitive poly, then
+;; divide by the latter and return the remainder.
 (defn mult-poly
   "Polynomial multiplication mod m."
-  [m p1 p2]
-  (let [p1-len (count p1)
-        p2-len (count p2)
+  [m poly1 poly2]
+  (let [poly1-len (count poly1)
+        poly2-len (count poly2)
         ;; result length is count-1 + count-1 + one more for zeroth place:
-        starter (make-zero-poly (+ p1-len p2-len -1))
-        indexes (for [i (range p1-len), j (range p2-len)] [i j])]
+        starter (make-zero-poly (+ poly1-len poly2-len -1))
+        indexes (for [i (range poly1-len), j (range poly2-len)] [i j])]
     ;; Vectors are associative in Clojure, so we can construct using update:
     (reduce (fn [poly [i1 i2]]
                (update poly
                        (+ i1 i2) ; multiplication sums exponents
-                       (partial add-int m) (mult-int m (p1 i1) (p2 i2)))) ; add new product
+                       (partial add-int m) (mult-int m (poly1 i1) (poly2 i2)))) ; add new product (old value is passed as first arg to updating fn)
             starter indexes)))
 
 ;; FIXME: Don't I need mod by the defining primitive polynomial?
@@ -186,11 +195,14 @@
 ;; let new dend = dend - c, mod m
 ;; recurse with result vec += temp result vec (filled at diff locs: a merge)
 (defn div-poly
-  "Long division mod m of polyomial dividend by polynomial divisor.  
+  "Long division mod primitive polynomial p, with coefficients mod m of,
+  polyomial dividend by polynomial divisor.  
   Returns pair containing quotient and remainder polynomials."
-  [m dividend divisor]
+  [p m dividend divisor]
   (let [deg-dividend (degree dividend)
-        deg-divisor (degree divisor)]
+        deg-divisor (degree divisor)
+        dend 
+        dsor]
     (when (neg? deg-divisor) (throw (Exception. "Division by the zero polynomial.")))
     (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
