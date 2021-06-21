@@ -6,6 +6,9 @@
 ;; Later: Possibly generalize to subfields other than prime fields.
 
 
+;(declare mult-poly div-poly) ; mutually recursive
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; POLYNOMIALS FOR TESTING
 
@@ -142,6 +145,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; POLYNOMIAL ARITHMETIC MOD POLY
 
+;; TODO add optional polynomial arg
 (defn add-poly
   [m poly1 poly2]
   "Add polynomials poly1 and poly2 with mod m arithmetic on coefficients.
@@ -149,6 +153,7 @@
   (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
   (mapv (partial add-int m) poly1' poly2')))
 
+;; TODO add optional polynomial arg
 (defn sub-poly
   [m poly1 poly2]
   "Subtract polynomials poly1 and poly2 with mod m arithmetic on coefficients.
@@ -156,12 +161,10 @@
   (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
     (mapv (partial sub-int m) poly1' poly2')))
 
-;; FIXME: Don't I need mod by the defining primitive polynomial?
-;; And there should be an additional argument?
-;; Yes: If degree of result is >= degree of primitive poly, then
-;; divide by the latter and return the remainder.
-(defn mult-poly
-  "Polynomial multiplication mod m."
+;; TODO add optional polynomial arg??
+(defn mult-poly-raw
+  "Polynomial multiplication of polynomials poly1 and poly2, with
+  coefficient multiplication mod m."
   [m poly1 poly2]
   (let [poly1-len (count poly1)
         poly2-len (count poly2)
@@ -175,6 +178,14 @@
                        (partial add-int m) (mult-int m (poly1 i1) (poly2 i2)))) ; add new product (old value is passed as first arg to updating fn)
             starter indexes)))
 
+(defn mult-poly-mod-poly
+  "Polynomial multiplication of polynomials poly1 and poly2, with
+  coefficient multiplication mod m, in a finite field with primitive
+  polynomial p."
+  [p m poly1 poly2]
+  (:remainder
+    (div-poly m (mult-poly-raw m poly1 poly2)
+                p)))
 
 ;; Pseudocode for div-poly below:
 ;; let result vec = all zeros
@@ -209,7 +220,8 @@
                     qcoef (div-int m (dend deg-dend) (divisor deg-divisor))
                     newquotient (assoc quotient qexpt qcoef) ; add this term to result
                     multiplier (make-monomial qexpt qcoef)
-                    newdend (sub-poly m dend (mult-poly m divisor multiplier))] 
+                    newdend (sub-poly m dend
+                                        (mult-poly-raw m divisor multiplier))] 
                 (recur newquotient newdend)))))))
 
 ;; For debugging div-poly, place immediately above the recur line above:
