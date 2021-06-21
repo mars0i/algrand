@@ -129,7 +129,7 @@
 (defn div-int-poly
   "Divide coefficients of polynomial poly by scalar value y mod m."
   [m y poly]
-  (mapv (partial mult-int m (invert-int y))
+  (mapv (partial mult-int m (invert-int m y))
         poly))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -201,8 +201,9 @@
   [p m dividend divisor]
   (let [deg-dividend (degree dividend)
         deg-divisor (degree divisor)
-        dend 
-        dsor]
+        ;dend 
+        ;dsor
+        ]
     (when (neg? deg-divisor) (throw (Exception. "Division by the zero polynomial.")))
     (loop [quotient (make-zero-poly (inc (- deg-dividend deg-divisor))) 
            dend dividend]
