@@ -103,6 +103,9 @@
             starter indexes)))
 
 (defn mult-poly
+  "Polynomial multiplication mod m."
   [m p1 p2]
-  (mapv (fn [x] (mod x m))
+  (mapv (fn [n] (mod n m))
         (mult-poly-generic p1 p2)))
+
+
