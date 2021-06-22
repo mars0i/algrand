@@ -5,9 +5,7 @@
 ;; of a prime field, with smaller exponents on the left.  
 ;; Later: Possibly generalize to subfields other than prime fields.
 
-
-;(declare mult-poly div-poly) ; mutually recursive
-
+(declare div-poly mod-poly)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; POLYNOMIALS FOR TESTING
@@ -88,7 +86,6 @@
   [len]
   (vec (repeat len 0)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; INTEGER ARITHMETIC MOD m
 
@@ -153,6 +150,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; POLYNOMIAL ARITHMETIC MOD POLY
 
+;; Additiion and substraction need to mod wrt the underlying integer
+;; modulus, but don't need to mod wrt the primitive polynomial as long
+;; as the arguments have already been normalized by modding.
+
+;; Division needs to be able to mod wrt the integer modulus, but doesn't 
+;; need to mod wrt to the primitive polynomial, as long as the
+;; arguments have already been modded wrt it, because the result can't
+;; be any longer than the dividend, so they don't need modding wrt the 
+;; polynomial.  Even though division uses multiplication, it's always
+;; just single-term multiplication, so it doesn't need the polynomial mod.
+
+;; Only multiplication needs mod wrt the primitive polynomial, because
+;; the raw result might have higher degree than is allowed.
+
+;; (Perhaps I should add a polynomial arg to addition, subtraction, and
+;; division, but it won't do anything.  I suppose it might be useful
+;; for passing these functions as options with the same args.  Cross that
+;; bridge if and when the need arises.)
+
 (defn add-poly
   [m poly1 poly2]
   "Add polynomials poly1 and poly2 with mod m arithmetic on coefficients.
@@ -183,6 +199,13 @@
                        (+ i1 i2) ; multiplication sums exponents
                        (partial add-int m) (mult-int m (poly1 i1) (poly2 i2)))) ; add new product (old value is passed as first arg to updating fn)
             starter indexes)))
+
+(defn mult-poly
+  "Polynomial multiplication of polynomials poly1 and poly2, with
+  coefficient multiplication mod m, in a finite field with primitive
+  polynomial p."
+  [p m poly1 poly2]
+  (mod-poly p m (mult-poly-raw m poly1 poly2)))
 
 ;; Pseudocode for div-poly below:
 ;; let result vec = all zeros
@@ -232,10 +255,3 @@
 (defn mod-poly
   [p m poly]
   (:remainder (div-poly m poly p)))
-
-(defn mult-poly
-  "Polynomial multiplication of polynomials poly1 and poly2, with
-  coefficient multiplication mod m, in a finite field with primitive
-  polynomial p."
-  [p m poly1 poly2]
-  (mod-poly p m (mult-poly-raw m poly1 poly2)))
