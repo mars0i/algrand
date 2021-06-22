@@ -21,18 +21,23 @@
 (def poly3b  [0 0 0 1 0 2])
 (def poly3b+ [0 0 0 1 0 2 0 0])
 
-;; In F5, division example, Lidl & Niederreiter _Finite Fields_, pp. 20f:
-(def ff20-dividend  [3 4 0 0 1 2])
-(def ff20-divisor   [1 0 3])
-(def ff20-quotient  [1 2 2 4])
-(def ff20-remainder [2 2])
-;; (maybe I should put this in a unit test)
-
 ;; Other F5 (or higher):
 (def poly5a [0 1 1 1 0 1 1 0 2 4 3 0 3])
 (def poly5b [1 0 2 4])
 (def poly5c [3 2 4 3])
 
+;; In F5, division example, Lidl & Niederreiter _Finite Fields_, pp. 20f:
+(def ff20-dividend  [3 4 0 0 1 2])
+(def ff20-divisor   [1 0 3])
+(def ff20-quotient  [1 2 2 4])
+(def ff20-remainder [2 2])
+
+;; Primitive polynomials over F2 from Niederreiter & Winterhof p. 37:
+(def nw37-F2prim2 [1 1 1])
+(def nw37-F2prim3 [1 1 0 1])
+(def nw37-F2prim4 [1 1 0 0 1])
+(def nw37-F2prim5 [1 0 1 0 0 1])
+(def nw37-F2prim6 [1 1 0 0 0 0 1])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; MISC UTILITY FUNCTIONS
@@ -58,9 +63,12 @@
 
 (defn strip-high-zeros
   "If polynomial vector p has extra zeros after the largest nonzero
-  term, strip them off."
+  term, strip them off.  If nothing is left, return [0]."
   [p]
-  (vec (take (inc (degree p)) p)))
+  (let [deg (degree p)]
+    (if (neg? deg)
+      [0] ; looks better than []
+      (vec (take (inc deg) p)))))
 
 (defn normalize-lengths
   "If one of the polynomial sequences poly1 or poly2 is shorter than the
@@ -145,7 +153,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; POLYNOMIAL ARITHMETIC MOD POLY
 
-;; TODO add optional polynomial arg
 (defn add-poly
   [m poly1 poly2]
   "Add polynomials poly1 and poly2 with mod m arithmetic on coefficients.
@@ -153,7 +160,6 @@
   (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
   (mapv (partial add-int m) poly1' poly2')))
 
-;; TODO add optional polynomial arg
 (defn sub-poly
   [m poly1 poly2]
   "Subtract polynomials poly1 and poly2 with mod m arithmetic on coefficients.
@@ -161,7 +167,7 @@
   (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
     (mapv (partial sub-int m) poly1' poly2')))
 
-;; TODO add optional polynomial arg??
+;; See below for version that's mod wrt a primitive polynomial
 (defn mult-poly-raw
   "Polynomial multiplication of polynomials poly1 and poly2, with
   coefficient multiplication mod m."
@@ -177,15 +183,6 @@
                        (+ i1 i2) ; multiplication sums exponents
                        (partial add-int m) (mult-int m (poly1 i1) (poly2 i2)))) ; add new product (old value is passed as first arg to updating fn)
             starter indexes)))
-
-(defn mult-poly-mod-poly
-  "Polynomial multiplication of polynomials poly1 and poly2, with
-  coefficient multiplication mod m, in a finite field with primitive
-  polynomial p."
-  [p m poly1 poly2]
-  (:remainder
-    (div-poly m (mult-poly-raw m poly1 poly2)
-                p)))
 
 ;; Pseudocode for div-poly below:
 ;; let result vec = all zeros
@@ -232,3 +229,13 @@
 ;                (println "new dividend:" newdend) ; DEBUG
 ;                (println)
 
+(defn mod-poly
+  [p m poly]
+  (:remainder (div-poly m poly p)))
+
+(defn mult-poly
+  "Polynomial multiplication of polynomials poly1 and poly2, with
+  coefficient multiplication mod m, in a finite field with primitive
+  polynomial p."
+  [p m poly1 poly2]
+  (mod-poly p m (mult-poly-raw m poly1 poly2)))
