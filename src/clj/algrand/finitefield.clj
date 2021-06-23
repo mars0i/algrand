@@ -106,13 +106,12 @@
 
 ;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
 ;; Current version uses theorem that for nonzero elements of a field of prime 
-;; order m, zero, x^{m-1} = 1 mod m, so x^{m-2} mod m is x's multiplicative 
+;; order m, x^{m-1} = 1 mod m, so x^{m-2} mod m is x's multiplicative 
 ;; inverse.  This can produce very large integers internally, making use
-;; of Clojure's BigInt facility..
-;; Consider revising to make use of the extended Euclidean algorithm,  which
+;; of Clojure's BigInt facility.
+;; I might consider revising to make use of the extended Euclidean algorithm, which
 ;; won't use such large numbers, as specified here:
 ;; and https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Modular_integers
-;; Also consider wrapping this in memoize.
 (defn invert-int-nomemo
   "Computes the inverse of a nonzero x, mod m, assuming that m is prime.
   Does not memoize: Recomputes every time the same arguments are provided."
