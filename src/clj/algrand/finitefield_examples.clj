@@ -30,7 +30,7 @@
 (def nw37F2prim6 [1 1 0 0 0 0 1])
 
 ;; F3^4 = F81 from Alanenen & Knuth. See doc/finitefieldTestsNotes2.txt.
-(def akF3prim4 [2 0 0 3 4]) ; primitive polynomial (pp. 321, 316, cf. p. 310)
+(def akF3prim4 [2 0 0 1 1]) ; primitive polynomial (pp. 321, 316, cf. p. 310)
 (def akF3_4 [[1 0 0 0] ; elements of F3^4 in order of powers of x, i.e. [0 1]
              [0 1 0 0] ; x^1
              [0 0 1 0] ; x^2

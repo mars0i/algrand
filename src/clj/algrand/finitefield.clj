@@ -148,7 +148,8 @@
   "Add polynomials poly1 and poly2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
-  (mapv (partial add-int m) poly1' poly2')))
+    (println poly1' poly2')
+    (mapv (partial add-int m) poly1' poly2')))
 
 (defn sub-poly
   [m poly1 poly2]
@@ -240,6 +241,13 @@
 (defn mod-poly
   [p m poly]
   (:remainder (div-poly m poly p)))
+
+(defn =-poly
+  "Tests two polynomials for equality, ignoring differences in number
+  of zeros at the end of the representation."
+  [poly1 poly2]
+  (= (strip-high-zeros poly1)
+     (strip-high-zeros poly2)))
 
 ;; Since I'm restricting the subfield to prime fields, should I extract
 ;; the integer from the result, rather than returning a singleton polynomial?
