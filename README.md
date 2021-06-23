@@ -7,10 +7,6 @@ the fun stuff in *src/clj/algrand*.  (Traditionally, I've used Sean
 Luke's Java Mersenne Twister for pseudorandom number generation with
 Clojure, but that may change.)
 
-Some code is in Haskell, which is a good language for representing the
-kind of infinite trees that represent possible random sequences.  This
-code is in *src/haskell*.
-
 There are also a few functions written for the Racket dialect of Scheme
 in *src/racket*.  Racket is useful here because it makes it easy to
 enter and print out fractional numbers in human-readable binary form,
