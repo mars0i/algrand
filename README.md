@@ -1,6 +1,6 @@
 # algrand
 A motley collection of code written to help me think about algorithmic
-randomness.
+randomness. and pseudorandom number generation.
 
 Most of this is in Clojure. The Clojure source is under *src/clj*`, with
 the fun stuff in *src/clj/algrand*.  (Traditionally, I've used Sean
