@@ -148,7 +148,6 @@
   "Add polynomials poly1 and poly2 with mod m arithmetic on coefficients.
   Does not carry."
   (let [[poly1' poly2'] (normalize-lengths poly1 poly2)]
-    (println poly1' poly2')
     (mapv (partial add-int m) poly1' poly2')))
 
 (defn sub-poly
