@@ -104,6 +104,11 @@
   [m x y]
   (mod (* x y) m))
 
+(defn expt-int
+  "Raise integer x to integer power e, mod m."
+  [m x e]
+  (long (mod (nt/expt x e) m))) ; may use Clojure BigInt; after mod, long is OK
+
 ;; See https://en.wikipedia.org/wiki/Finite_field_arithmetic#Multiplicative_inverse
 ;; Current version uses theorem that for nonzero elements of a field of prime 
 ;; order m, x^{m-1} = 1 mod m, so x^{m-2} mod m is x's multiplicative 
@@ -116,9 +121,7 @@
   "Computes the inverse of a nonzero x, mod m, assuming that m is prime.
   Does not memoize: Recomputes every time the same arguments are provided."
   [m x]
-  (long
-    (mod (nt/expt x (- m 2))
-       m)))
+  (expt-int m x (- m 2)))
 
 (def invert-int 
   "([m x])
@@ -206,6 +209,17 @@
   [p m poly1 poly2]
   (mod-poly p m (mult-poly-raw m poly1 poly2)))
 
+(defn expt-poly
+  "Raise polynomial poly to integer power e, with coefficient multiplication 
+  mod m in a finite field with primitive polynomial p."
+  [p m poly e]
+  (when (neg? e) (throw (Exception. "Exponent is negagive.")))
+  (mod-poly p m 
+            (loop [i e, product [1]]
+              (if (zero? i)
+                product
+                (recur (dec i) (mult-poly-raw m product poly))))))
+
 ;; Pseudocode for div-poly below:
 ;; let result vec = all zeros
 ;; if degree dsor > degree dend then ret result vec, and dend as the remainder
@@ -254,3 +268,15 @@
 (defn mod-poly
   [p m poly]
   (:remainder (div-poly m poly p)))
+
+;; Since I'm restricting the subfield to prime fields, should I extract
+;; the integer from the result, rather than returning a singleton polynomial?
+(defn trace
+  "Compute the trace of polynomial poly in Fm^n (with primitive polynomial p) 
+  to to Fm, where m is prime."
+  [p m n poly]
+  (reduce 
+    (fn [sum i] 
+        (add-poly m sum
+                  (expt-poly p m poly (nt/expt m i))))
+          [0] (range n)))
