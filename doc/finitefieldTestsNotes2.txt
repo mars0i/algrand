@@ -1,0 +1,193 @@
+
+From Alanen and Knuth's "Tables of Finite Fields", Sankhya, 1964, pp.
+305-328, section 5:
+
+-------------------------------------
+F3^4
+
+From p. 312, the following is a list of coefficients for the elements in
+F81, more specifically in F3^4 - {0}.
+
+Per p. 310, the primitive ("indexing") polynomial is on page 321: 
+
+        x^4 + x^3 + 2
+
+This is represented as "1002", where 1 is the coefficient of the fourth
+term starting from lowest terms on the right.  The first x^4 is assumed.
+(This is a slightly clearer in section 6, where same primitive
+polynomial is the first listed primitive polynomial in the table of all
+such for GF(3^4) on page 316.)
+
+Below, higher powers are on the left, arranged in order as powers of x.
+This is a cut-and-past from the PDF.  The second element in the list is
+x^1, i.e. 0x^3 + 0 x^2 + x + 0.  The first is x^0 = 1, i.e.  0x^3 + 0
+x^2 + 0x + 1.  The last entry is equal to x^79.  (Note x^80 = x^{81-1} =
+1 per a well-known theorem that A&K state, or 1.4.13 in N&W.) Further
+below I give this transformed into my Clojure representation of
+polynomials.
+
+0001
+0010
+0100
+1000
+2001
+1012
+2121
+2212
+0122
+1220
+1201
+1011
+2111
+2112
+2122
+2222
+0222
+2220
+0202
+2020
+1202
+1021
+2211
+0112
+1120
+0201
+2010
+1102
+0021
+0210
+2100
+2002
+1022
+2221
+0212
+2120
+2202
+0022
+0220
+2200
+0002
+0020
+0200
+2000
+1002
+2021
+1212
+1121
+0211
+2110
+2102
+2022
+1222
+1221
+1211
+1111
+0111
+1110
+0101
+1010
+2101
+2012
+1122
+0221
+2210
+0102
+1020
+2201
+0012
+0120
+1200
+1001
+2011
+1112
+0121
+1210
+1101
+0011
+0110
+1100
+
+Here is the same list in my Clojure vector representation of
+polynomials, with lowest terms on the left--i.e. the reverse of A&K's
+representation:
+
+[[1 0 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 0 1]
+[1 0 0 2]
+[2 1 0 1]
+[1 2 1 2]
+[2 1 2 2]
+[2 2 1 0]
+[0 2 2 1]
+[1 0 2 1]
+[1 1 0 1]
+[1 1 1 2]
+[2 1 1 2]
+[2 2 1 2]
+[2 2 2 2]
+[2 2 2 0]
+[0 2 2 2]
+[2 0 2 0]
+[0 2 0 2]
+[2 0 2 1]
+[1 2 0 1]
+[1 1 2 2]
+[2 1 1 0]
+[0 2 1 1]
+[1 0 2 0]
+[0 1 0 2]
+[2 0 1 1]
+[1 2 0 0]
+[0 1 2 0]
+[0 0 1 2]
+[2 0 0 2]
+[2 2 0 1]
+[1 2 2 2]
+[2 1 2 0]
+[0 2 1 2]
+[2 0 2 2]
+[2 2 0 0]
+[0 2 2 0]
+[0 0 2 2]
+[2 0 0 0]
+[0 2 0 0]
+[0 0 2 0]
+[0 0 0 2]
+[2 0 0 1]
+[1 2 0 2]
+[2 1 2 1]
+[1 2 1 1]
+[1 1 2 0]
+[0 1 1 2]
+[2 0 1 2]
+[2 2 0 2]
+[2 2 2 1]
+[1 2 2 1]
+[1 1 2 1]
+[1 1 1 1]
+[1 1 1 0]
+[0 1 1 1]
+[1 0 1 0]
+[0 1 0 1]
+[1 0 1 2]
+[2 1 0 2]
+[2 2 1 1]
+[1 2 2 0]
+[0 1 2 2]
+[2 0 1 0]
+[0 2 0 1]
+[1 0 2 2]
+[2 1 0 0]
+[0 2 1 0]
+[0 0 2 1]
+[1 0 0 1]
+[1 1 0 2]
+[2 1 1 1]
+[1 2 1 0]
+[0 1 2 1]
+[1 0 1 1]
+[1 1 0 0]
+[0 1 1 0]
+[0 0 1 1]]
