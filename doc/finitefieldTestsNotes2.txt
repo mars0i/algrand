@@ -26,6 +26,9 @@ x^2 + 0x + 1.  The last entry is equal to x^79.  (Note x^80 = x^{81-1} =
 below I give this transformed into my Clojure representation of
 polynomials.
 
+These strings can be converted to my polynomial vector format using
+finitefield-examples/alanenknuth-strings-to-polys.
+
 0001
 0010
 0100
