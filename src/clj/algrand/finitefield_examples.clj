@@ -51,6 +51,8 @@
 (def ff20quotient  [1 2 2 4])
 (def ff20remainder [2 2])
 
+;; Underscore means exponent below, so e.g. "F2_5" means F_{2^5}, i.e. GF(32)
+
 ;; Primitive polynomials over F2 from Niederreiter & Winterhof p. 37:
 (def nw37F2_2prim [1 1 1])  ; for F2^2
 (def nw37F2_3prim [1 1 0 1])  ; also in Aspnes "Notes on Finite Fields" p. 5
