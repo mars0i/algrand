@@ -3,6 +3,15 @@
 ;; Examples of polynomial vectors for experiments, testing, etc.
 ;; with functions in algrand.finitefield.
 
+(defn generate-from-x
+  "Returns an infinite sequence of elements from Fm^n, where m is a prime
+  number and n is the degree of primitive polynomial p, generated from initial 
+  element x = [0 1].
+  That is, the sequence consists of x^0 = [1], x^1 = [0 1], x^2 = ... ."
+  [p m]
+  (iterate (partial ff/mult-poly p m [0 1])
+           [1]))
+
 (defn alanenknuth-string-to-poly
   "Transform a string in \"Alanen-Knuth\" format--i.e. a string of
   digits representing polynomial coefficients, with hight exponents
@@ -21,15 +30,6 @@
   polynomials using alanenknuth-string-to-poly."
   [ak-strs]
   (mapv alanenknuth-strings-to-polys ak-strs))
-
-(defn generate-from-x
-  "Returns an infinite sequence of elements from Fm^n, where m is a prime
-  number and n is the degree of primitive polynomial p, generated from initial 
-  element x = [0 1].
-  That is, the sequence consists of x^0 = [1], x^1 = [0 1], x^2 = ... ."
-  [p m]
-  (iterate (partial ff/mult-poly p m [0 1])
-           [1]))
 
 ;; polynomials over F2 (or higher):
 (def poly2a [1 1 0 1 0 0 1 1])
@@ -59,14 +59,14 @@
 (def nw37F2_6prim [1 1 0 0 0 0 1])
 
 ;; A few primitive polynomials from section 7 of from Alanenen & Knuth
-(def akF3_4prim [2 0 0 1 1]) ; F81 (pp. 321, 316, cf. p. 310)
-(def akF5_2prim [2 1 1])     ; F25
-(def akF5_3prim [2 0 1 1])   ; F125
-(def akF5_4prim [3 0 1 1 1]) ; F625
-(def akF7_2prim [3 1 1])     ; F49
-(def akF7_3prim [2 1 1 1])   ; F343
-(def akF11_2prim [7 1 1])    ; F121
-(def akF11_3prim [5 0 1 1])  ; F1332
+(def alF3_4prim [2 0 0 1 1]) ; F81 (pp. 321, 316, cf. p. 310)
+(def alF5_2prim [2 1 1])     ; F25
+(def alF5_3prim [2 0 1 1])   ; F125
+(def alF5_4prim [3 0 1 1 1]) ; F625
+(def alF7_2prim [3 1 1])     ; F49
+(def alF7_3prim [2 1 1 1])   ; F343
+(def alF11_2prim [7 1 1])    ; F121
+(def alF11_3prim [5 0 1 1])  ; F1332
 
 
 (def akF3_4 [[1 0 0 0] ; elements of F3^4 in order of powers of x, i.e. [0 1]
