@@ -248,14 +248,16 @@
   (= (strip-high-zeros poly1)
      (strip-high-zeros poly2)))
 
-;; Since I'm restricting the subfield to prime fields, should I extract
-;; the integer from the result, rather than returning a singleton polynomial?
+;; Since I'm restricting the subfield to prime fields, I extract
+;; the integer from the result rather than returning a singleton polynomial.
 (defn trace
   "Compute the trace of polynomial poly in Fm^n (with primitive polynomial p) 
-  to to Fm, where m is prime."
+  to to Fm, where m is prime.  (Since only prime subfields are allowed here,
+  the returned value is an integer.)"
   [p m n poly]
-  (reduce 
-    (fn [sum i] 
-        (add-poly m sum
-                  (expt-poly p m poly (nt/expt m i))))
-          [0] (range n)))
+  (first 
+    (reduce 
+      (fn [sum i] 
+          (add-poly m sum
+                    (expt-poly p m poly (nt/expt m i))))
+      [0] (range n))))
