@@ -12,7 +12,48 @@
 ;; these operations on F_2_n polynomials represented as integers with
 ;; all operations implemented as bit manipulations using Java functions.)
 
-(declare div-poly mod-poly)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Code sections listed below, in order:
+;;
+;; HIGH-LEVEL FUNCTIONS
+;; MISC UTILITY FUNCTIONS
+;; INTEGER ARITHMETIC MOD m
+;; POLYNOMIAL ARITHMETIC MOD POLY
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(declare generate-from-x trace degree pad-high-zeros strip-high-zeros
+         normalize-lengths make-monomial make-zero-poly add-int sub-int
+         mult-int expt-int invert-int-nomemo div-int mult-int-poly
+         div-int-poly add-poly sub-poly mult-poly-raw mult-poly
+         expt-poly div-poly mod-poly =-poly)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; HIGH-LEVEL FUNCTIONS 
+;; The ones most handy for experimenting.
+
+(defn generate-from-x
+  "Returns an infinite sequence of elements from Fm^n, where m is a prime
+  number and n is the degree of primitive polynomial p, generated from initial 
+  element x = [0 1].
+  That is, the sequence consists of x^0 = [1], x^1 = [0 1], x^2 = ... ."
+  [p m]
+  (iterate (partial mult-poly p m [0 1])
+           [1]))
+
+;; Since I'm restricting the subfield to prime fields, I extract
+;; the integer from the result rather than returning a singleton polynomial.
+(defn trace
+  "Compute the trace of polynomial poly in Fm^n (with primitive polynomial p) 
+  to to Fm, where m is prime.  (Since only prime subfields are allowed here,
+  the returned value is an integer.)"
+  [p m n poly]
+  (first 
+    (reduce 
+      (fn [sum i] 
+          (add-poly m sum
+                    (expt-poly p m poly (nt/expt m i))))
+      [0] (range n))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; MISC UTILITY FUNCTIONS
@@ -252,17 +293,3 @@
   [poly1 poly2]
   (= (strip-high-zeros poly1)
      (strip-high-zeros poly2)))
-
-;; Since I'm restricting the subfield to prime fields, I extract
-;; the integer from the result rather than returning a singleton polynomial.
-(defn trace
-  "Compute the trace of polynomial poly in Fm^n (with primitive polynomial p) 
-  to to Fm, where m is prime.  (Since only prime subfields are allowed here,
-  the returned value is an integer.)"
-  [p m n poly]
-  (first 
-    (reduce 
-      (fn [sum i] 
-          (add-poly m sum
-                    (expt-poly p m poly (nt/expt m i))))
-      [0] (range n))))

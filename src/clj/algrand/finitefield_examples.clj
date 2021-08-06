@@ -3,15 +3,6 @@
 ;; Examples of polynomial vectors for experiments, testing, etc.
 ;; with functions in algrand.finitefield.
 
-(defn generate-from-x
-  "Returns an infinite sequence of elements from Fm^n, where m is a prime
-  number and n is the degree of primitive polynomial p, generated from initial 
-  element x = [0 1].
-  That is, the sequence consists of x^0 = [1], x^1 = [0 1], x^2 = ... ."
-  [p m]
-  (iterate (partial ff/mult-poly p m [0 1])
-           [1]))
-
 (defn alanenknuth-string-to-poly
   "Transform a string in \"Alanen-Knuth\" format--i.e. a string of
   digits representing polynomial coefficients, with hight exponents
