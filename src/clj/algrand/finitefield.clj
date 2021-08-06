@@ -7,6 +7,11 @@
 
 ;; See also algrand.finitefield-examples.
 
+;; (Future project:
+;; Create an overlapping set of functions (in another namespace) that performs
+;; these operations on F_2_n polynomials represented as integers with
+;; all operations implemented as bit manipulations using Java functions.)
+
 (declare div-poly mod-poly)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
