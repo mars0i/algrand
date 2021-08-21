@@ -10,11 +10,6 @@
     (:require [clojure.math.numeric-tower :as math]
               [clojure.string :as string]))
 
-(defn log
-  "Returns the logarithm of x in base (as a double)."
-  [base x]
-  (/ (Math/log x) (Math/log base)))
-
 ;; Note:
 ;; It's useful to distinguish between the integer part and the
 ;; fractional part of a number, because converting the fractional side

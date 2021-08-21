@@ -6,6 +6,6 @@
 ;; answers here:
 ;; https://stackoverflow.com/questions/6827516/logarithm-for-biginteger
 (defn log-base-n
-  [base m]
-  (/ (Math/log m)
-     (Math/log base)))
+  "Returns the logarithm of x in base (as a double)."
+  [base x]
+  (/ (Math/log x) (Math/log base)))
