@@ -1,9 +1,31 @@
+
+;; Miscellaneous experiments.  Not systematic.
 (ns algrand.lfsr
     (:require [clojure.math.numeric-tower :as ma]
               [clojure.core.matrix :as mx]
               ;[denisovan.core] ; for Neanderthal experiments
               [utils.convertbase :as cb]
     ))
+
+
+(defn matrec
+  "Linear recurrence (LFSR) in Fq using matrix m and initial value vector v.
+   Returns a new state vector.  q must be prime; doesn't currently handle 
+  non-prime fields."
+  [q m v]
+  (map #(mod % q) (mx/inner-product v m)))
+
+;; Lidl & Niederreiter p. 402, Ex. 8.14:
+(def m814 (mx/matrix [[0 0 0 0 1][1 0 0 0 1][0 1 0 0 0][0 0 1 0 0][0 0 0 1 0]]))
+(def xs814 (iterate (partial matrec 2 m814) [0 0 0 0 1]))
+;; or:
+(defn linrec814
+  "Lidl and Niederreiter example 8.14 using explicit sums rather than 
+  matrix multiplication."
+  [v]
+  [(v 1) (v 2) (v 3) (v 4) (mod (+ (v 0) (v 1)) 2)])
+
+(def ys814 (iterate linrec814 [0 0 0 0 1]))
 
 
 ;; OR SHOULD THE OLD ONE NOT BE DROPPED?  Let the sequence extend??
@@ -13,8 +35,8 @@
 ;;                              [1 0 0 1 0 1 0 1 0 1 1]))
 ;; (def bs (map first states)) ; <-- a sequence of supposedly random bits
 ;; 
-(defn lfsr 
-  "Applies an LSFR specified by taps, a sequence of (zero-based) indexes,
+(defn lfsr2
+  "Applies an F2 LSFR specified by taps, a sequence of (zero-based) indexes,
   and bits, which should be a seed vector of 0's and 1's.  The result drops 
   the first element in bits, and tacks onto the end the bitwise xor of
   elements of bits at locations specified by taps.  That is, a new value
@@ -44,7 +66,7 @@
 ;; into doubles, rather than preserving Ratio types.
 
 ;(mx/set-current-implementation :persistent-vector)
-(mx/set-current-implementation :ndarray)
+;(mx/set-current-implementation :ndarray)
 ;(mx/set-current-implementation :vectorz)
 
 (defn right-shift-mat
