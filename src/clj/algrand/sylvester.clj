@@ -3,17 +3,28 @@
               [clojure.core.matrix :as mx]
               [utils.math :as um]))
 
-(defn make-sylvester
-  "Generates a Hadamard-Sylvester matrix of size 2^n X 2^n."
-  [n]
-  (if (== n 0)
-    (mx/matrix [[1]])
-    (let [m (make-sylvester (dec n))
-          m- (mx/mul -1 m)]
-      (mx/join-along 1 (mx/join m m) (mx/join m m-)))))
+;; Sometimes this is all I need in the repl from core.matrix.
+(def prm 
+  "Local convenience abbreviation for clojure.core.matrix/pm."
+  mx/pm)
 
-;; Maybe this belongs elsewhere or this ns should be renamed
-;; Inefficiently reconstructs the needed Sylvester-Hadamard matrix every time
+;; docstring attempts to emulate what defn does.  Adding backspaces
+;; to the param list would do more, but could be annoying in some context.
+(def make-sylvester
+  "([n])
+  Generates a Hadamard-Sylvester matrix of size 2^n X 2^n.  Memoizes
+  the result."
+  (memoize
+    (fn [n]
+        (if (== n 0)
+          (mx/matrix [[1]])
+          (let [m (make-sylvester (dec n))
+                m- (mx/mul -1 m)]
+            (mx/join-along 1 (mx/join m m) (mx/join m m-)))))))
+
+;; Maybe this belongs elsewhere or this ns should be renamed.
+;; Seems to recreates the necessary Sylvester matrix each time, but
+;; that's OK because make-sylvester memoizes.
 (defn fourier
   "Boolean function Fourier transformation using Sylvester matrix.
   Vector s, which will be treated as a column vector, should have a 
