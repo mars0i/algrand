@@ -23,6 +23,7 @@
   "Lidl and Niederreiter example 8.14 using explicit sums rather than 
   matrix multiplication."
   [v]
+  ;;   the shift           calc new elem for end
   [(v 1) (v 2) (v 3) (v 4) (mod (+ (v 0) (v 1)) 2)])
 
 (def ys814 (iterate linrec814 [0 0 0 0 1]))
