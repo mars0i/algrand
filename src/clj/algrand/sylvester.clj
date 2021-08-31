@@ -3,6 +3,12 @@
               [clojure.core.matrix :as mx]
               [utils.math :as um]))
 
+;; Note that clojure.core.matrix's inner-product and mmul can be used
+;; to do all of the same operations, except that mmul converts integer
+;; inputs to float outputs, while inner-product preserves numeric 
+;; character.  (This is a bug in mmul.)  So I always use inner-product
+;; to multiply matrices, vectors, etc..
+
 ;; Sometimes this is all I need in the repl from core.matrix.
 (def prm 
   "Local convenience abbreviation for clojure.core.matrix/pm."
@@ -28,7 +34,7 @@
 (defn fourier
   "Boolean function Fourier transformation using Sylvester matrix.
   Vector s, which will be treated as a column vector, should have a 
-  length that's a power of 2."
+  length that is a power of 2."
   [s]
   (let [len (count s)
         len-log-double (um/log-base-n 2 len)
