@@ -17,8 +17,11 @@
 
 ;; Lidl & Niederreiter p. 402, Ex. 8.14:
 (def m814 (mx/matrix [[0 0 0 0 1][1 0 0 0 1][0 1 0 0 0][0 0 1 0 0][0 0 0 1 0]]))
+
 (def xs814 (iterate (partial matrec 2 m814) [0 0 0 0 1]))
+
 ;; or:
+
 (defn linrec814
   "Lidl and Niederreiter example 8.14 using explicit sums rather than 
   matrix multiplication."
@@ -28,6 +31,16 @@
 
 (def ys814 (iterate linrec814 [0 0 0 0 1]))
 
+
+;; Here's another recurrence, not in L&N.  It generates all 1's at first.
+(defn linrecA
+  [v]
+  [(v 1) (v 2) (v 3) (v 4) (mod (+ (v 0) (v 4)) 2)])
+
+(def ysA (iterate linrecA [0 0 0 0 1]))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; OR SHOULD THE OLD ONE NOT BE DROPPED?  Let the sequence extend??
 ;; Simple LFSR based on vectors of 0's and 1's.
