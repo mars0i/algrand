@@ -28,15 +28,6 @@
   [m n]
   (g/iter #(inner-product m %) m n))
 
-;(defn another-mpow
-; "Raise matrix m to the nth power, i.e. multiply it by itself n times."
-;  [m n]
-;  (loop [n' n
-;         acc m]
-;     (if (<= n' 1)
-;       acc
-;       (recur (dec n') (m/inner-product m acc)))))
-
 (defn shift-matrix
   "Returns a shift matrix, i.e. a square matrix with zero everywhere except
   on the subdiagonal or superdiagonal, which consists of ones.  If offset is
