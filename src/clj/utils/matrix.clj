@@ -1,6 +1,7 @@
 ;;;; Matrix utility functions not provided by clojure.core.matrix
 (ns utils.matrix
-    (:require [clojure.core.matrix :as m]))
+    (:require [clojure.core.matrix :as m]
+              [utils.genl :as g]))
 
 
 ;; SEE ALSO algrand.finitefield for operations on matrices over prime fields
@@ -21,10 +22,11 @@
                        oldval))
                  m))
 
+;; TODO? For large powers, use divide and conquer.
 (defn mpow
   "Raise matrix m to the nth power, i.e. multiply it by itself n times."
   [m n]
-  (reduce m/inner-product (repeat n m)))
+  (g/iter #(inner-product m %) m n))
 
 ;(defn another-mpow
 ; "Raise matrix m to the nth power, i.e. multiply it by itself n times."
