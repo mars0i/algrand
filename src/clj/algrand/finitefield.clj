@@ -1,6 +1,7 @@
 (ns algrand.finitefield
     (:require [clojure.math.numeric-tower :as nt]
-              [clojure.core.matrix :as mx]))
+              [clojure.core.matrix :as mx]
+              [utils.genl :as g]))
 
 ;; For now, polynomials are Clojure vectors of integers that are elements 
 ;; of a prime field, with smaller exponents on the left.  
@@ -305,21 +306,24 @@
   [q m1 m2]
   (mx/emap #(mod % q) (mx/inner-product m1 m2)))
 
-;; For higher powers, it would be more efficient to divide and conquer.
+;; Not sure which of the following is more efficient for large powers.
+;; Quick tests suggest they're quite similar.  BigInts are slow, perhaps.
+;; TODO? For higher powers, it would be more efficient to divide and conquer.
+
+;; This version calls mod only once at the end, performing matrix mult
+;; using BigInts.
 (defn finite-mpow
-  "Raises matrix m over a finite field of size q to power n.  q must be prime."
+  "Raises matrix m over a finite field of size q to power n.  q must be prime.
+  (Uses BigInts internally, performing mod only at the final step.)"
   [q m n]
-  (loop [n' n acc (mx/emap bigint m)]
-    (if (< n' 1)
-      (mx/emap (fn [n] (long (mod n q)))
-               acc)
-      (recur (dec n') (mx/inner-product acc m)))))
+  (mx/emap (fn [n] (long (mod n q)))
+           (g/iter #(mx/inner-product m %)
+                   (mx/emap bigint m)
+                   n)))
 
+;; This version runs mod each time.
 (defn finite-mpow-alt
-  "Raises matrix m over a finite field of size q to power n.  q must be prime."
+  "Raises matrix m over a finite field of size q to power n.  q must be prime.
+  (Performs mod at each step.)"
   [q m n]
-  (loop [n' n acc m]
-    (if (< n' 1)
-      acc
-      (recur (dec n') (finite-mmul q acc m)))))
-
+  (g/iter #(finite-mmul q m %) m n))
