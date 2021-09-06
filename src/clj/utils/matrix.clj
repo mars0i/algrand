@@ -2,6 +2,9 @@
 (ns utils.matrix
     (:require [clojure.core.matrix :as m]))
 
+
+;; SEE ALSO algrand.finitefield for operations on matrices over prime fields
+
 ;(m/set-current-implementation :persistent-vector)
 (m/set-current-implementation :ndarray) ; better at preserving ints
 ;(m/set-current-implementation :vectorz)
