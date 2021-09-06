@@ -1,5 +1,6 @@
 (ns algrand.finitefield
-    (:require [clojure.math.numeric-tower :as nt]))
+    (:require [clojure.math.numeric-tower :as nt]
+              [clojure.core.matrix :as mx]))
 
 ;; For now, polynomials are Clojure vectors of integers that are elements 
 ;; of a prime field, with smaller exponents on the left.  
@@ -293,3 +294,32 @@
   [poly1 poly2]
   (= (strip-high-zeros poly1)
      (strip-high-zeros poly2)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; FUNCTIONS FOR MATRICES OVER PRIME FIELDS
+
+(defn finite-mmul
+  "Finite field matrix multiplication. m1 and m2 could be matrices or vectors.
+  Returns a new matrix or vector.  q must be prime.  (core.matrix/inner-product
+  will adopt the correct orientation for 1-D vectors.)"
+  [q m1 m2]
+  (mx/emap #(mod % q) (mx/inner-product m1 m2)))
+
+;; For higher powers, it would be more efficient to divide and conquer.
+(defn finite-mpow
+  "Raises matrix m over a finite field of size q to power n.  q must be prime."
+  [q m n]
+  (loop [n' n acc (mx/emap bigint m)]
+    (if (< n' 1)
+      (mx/emap (fn [n] (long (mod n q)))
+               acc)
+      (recur (dec n') (mx/inner-product acc m)))))
+
+(defn finite-mpow-alt
+  "Raises matrix m over a finite field of size q to power n.  q must be prime."
+  [q m n]
+  (loop [n' n acc m]
+    (if (< n' 1)
+      acc
+      (recur (dec n') (finite-mmul q acc m)))))
+

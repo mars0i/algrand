@@ -1,36 +1,17 @@
 
 ;; Miscellaneous experiments.  Not systematic.
 (ns algrand.lfsr
-    (:require [clojure.math.numeric-tower :as ma]
+    (:require ;[clojure.math.numeric-tower :as nt]
               [clojure.core.matrix :as mx]
-              ;[denisovan.core] ; for Neanderthal experiments
+              [algrand.finitefield :as ff]
               [utils.convertbase :as cb]
     ))
-
-(defn finite-mmul
-  "Finite field matrix multiplication. m1 and m2 could be matrices or
-  vectors.  clojure.core.matrix/inner-product will adopt the correct
-  orientation for vectors.  Returns a new matrix or vector.  q must be 
-  prime: doesn't yet handle non-prime fields."
-  [q m1 m2]
-  (mx/emap #(mod % q) (mx/inner-product m1 m2)))
-
-;; Inefficient: for higher powers, it would be better to divide and conquer.
-;; Also, do I need to apply the mod every time?
-(defn finite-mpow
-  "Raises matrix m over a finite field of size q to power n.  q must be 
-  prime: doesn't yet handle non-prime fields."
-  [q m n]
-  (loop [n' n acc m]
-    (if (< n' 1)
-      acc
-      (recur (dec n') (finite-mmul q acc m)))))
 
 
 ;; Lidl & Niederreiter p. 402, Ex. 8.14:
 (def m814 (mx/matrix [[0 0 0 0 1][1 0 0 0 1][0 1 0 0 0][0 0 1 0 0][0 0 0 1 0]]))
 
-(def xs814 (iterate (fn [prev-state] (matrec 2 prev-state m814))
+(def xs814 (iterate (fn [prev-state] (ff/finite-mmul 2 prev-state m814))
                     [0 0 0 0 1]))
 
 ;; or:
