@@ -21,6 +21,7 @@
 ;; MISC UTILITY FUNCTIONS
 ;; INTEGER ARITHMETIC MOD m
 ;; POLYNOMIAL ARITHMETIC MOD POLY
+;; MATRICES OVER PRIME FIELDS
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -297,7 +298,7 @@
      (strip-high-zeros poly2)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; FUNCTIONS FOR MATRICES OVER PRIME FIELDS
+;; MATRICES OVER PRIME FIELDS
 
 (defn finite-mmul
   "Finite field matrix multiplication. m1 and m2 could be matrices or vectors.
