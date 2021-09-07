@@ -2,8 +2,9 @@
 (ns utils.genl)
 
 
+;; Alternative to (reduce f (repeat init n))
 (defn iter 
-  "Iteratively apply f to init n times."
+  "Iteratively apply f to init n times without using a seq."
   [f init n]
   (loop [n n
          acc init]

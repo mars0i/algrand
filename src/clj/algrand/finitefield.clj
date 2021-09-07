@@ -301,9 +301,10 @@
 ;; MATRICES OVER PRIME FIELDS
 
 (defn finite-mmul
-  "Finite field matrix multiplication. m1 and m2 could be matrices or vectors.
-  Returns a new matrix or vector.  q must be prime.  (core.matrix/inner-product
-  will adopt the correct orientation for 1-D vectors.)"
+  "Matrix multiplication over the finite field F_q where q is prime.  
+  m1 and m2 could be matrices, including row or column vectors in
+  matrix form, or simple 1-D vectors.  (core.matrix/inner-product
+  will usually adopt the correct orientation for 1-D vectors.)"
   [q m1 m2]
   (mx/emap #(mod % q) (mx/inner-product m1 m2)))
 
@@ -314,17 +315,16 @@
 ;; This version calls mod only once at the end, performing matrix mult
 ;; using BigInts.
 (defn finite-mpow
-  "Raises matrix m over a finite field of size q to power n.  q must be prime.
+  "Raises matrix m over the finite field F_q to power n.  q must be prime.
   (Uses BigInts internally, performing mod only at the final step.)"
   [q m n]
-  (mx/emap (fn [n] (long (mod n q)))
-           (g/iter #(mx/inner-product m %)
-                   (mx/emap bigint m)
-                   n)))
+  (let [big-m (mx/emap bigint m)]
+    (mx/emap (fn [n] (long (mod n q))) ; convert to F_q longs
+             (g/iter #(mx/inner-product big-m %) big-m n))))
 
 ;; This version runs mod each time.
 (defn finite-mpow-alt
-  "Raises matrix m over a finite field of size q to power n.  q must be prime.
+  "Raises matrix m over the finite field F_q to power n.  q must be prime.
   (Performs mod at each step.)"
   [q m n]
   (g/iter #(finite-mmul q m %) m n))
