@@ -1,7 +1,8 @@
 (ns algrand.sylvester
     (:require [clojure.math.numeric-tower :as ma]
               [clojure.core.matrix :as mx]
-              [utils.math :as um]))
+              [utils.math :as um]
+              [utils.convertbase :as cb]))
 
 ;; Note that clojure.core.matrix's inner-product and mmul can be used
 ;; to do all of the same operations, except that mmul converts integer
@@ -13,6 +14,9 @@
 (def prm 
   "Local convenience abbreviation for clojure.core.matrix/pm."
   mx/pm)
+
+;; IN THE FOLLOWING, vector and matrix elements are represented in the
+;; natural Clojure order: vector element 1 is Clojure vector element 0, etc.
 
 ;; docstring attempts to emulate what defn does.  Adding backspaces
 ;; to the param list would do more, but could be annoying in some context.
@@ -46,3 +50,26 @@
                (mx/inner-product (make-sylvester len-log-long)
                                  s)))))
 
+(defn variance
+  "Calculate the Fourier/Walsh variance from a sequence of Fourier
+  coefficients, i.e. sum the squares of elements other than the zeroth."
+  [v]
+  (reduce + (map #(* % %) (rest v))))
+  ;; or (reduce (fn [sum coef] (+ sum (* coef coef))) 0 (rest v)))
+
+(defn integer-hamming-weight
+  "Calculate the Hamming weight (i.e. the number of 1 bits) in a binary 
+  representation of integer n."
+  [n]
+  (reduce + (cb/convert-int-to-seq 2 n)))
+
+(def levels (map integer-hamming-weight (range)))
+
+(defn total-roughness
+  [v]
+  (reduce + (map (fn [level coef] (* level coef coef))
+                 levels v)))
+
+(defn relative-total-roughness
+  [v]
+  (/ (total-roughness v) (variance v)))
