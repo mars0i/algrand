@@ -50,12 +50,16 @@
                (mx/inner-product (make-sylvester len-log-long)
                                  s)))))
 
-(defn variance
+(defn coef-variance
   "Calculate the Fourier/Walsh variance from a sequence of Fourier
   coefficients, i.e. sum the squares of elements other than the zeroth."
   [v]
   (reduce + (map #(* % %) (rest v))))
   ;; or (reduce (fn [sum coef] (+ sum (* coef coef))) 0 (rest v)))
+
+(defn variance
+  [s]
+  (variance-from-coefs (fourier s)))
 
 (defn integer-hamming-weight
   "Calculate the Hamming weight (i.e. the number of 1 bits) in a binary 
@@ -65,11 +69,20 @@
 
 (def levels (map integer-hamming-weight (range)))
 
-(defn total-roughness
+(defn coef-total-roughness
   [v]
   (reduce + (map (fn [level coef] (* level coef coef))
                  levels v)))
 
-(defn relative-total-roughness
+(defn total-roughness
+  [s]
+  (coef-total-roughness (fourier s)))
+
+
+(defn coef-relative-total-roughness
   [v]
   (/ (total-roughness v) (variance v)))
+
+(defn total-roughness
+  [s]
+  (coef-relative-total-roughness (fourier s)))
