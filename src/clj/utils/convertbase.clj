@@ -29,7 +29,7 @@
   [base x]
   (loop [y (bigint x), digits nil]
      (if (zero? y)
-       digits
+       (map long digits)
        (recur (quot y base)
               (cons (mod y base) digits)))))
 
