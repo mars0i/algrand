@@ -59,7 +59,7 @@
 
 (defn variance
   [s]
-  (variance-from-coefs (fourier s)))
+  (coef-variance (fourier s)))
 
 (defn integer-hamming-weight
   "Calculate the Hamming weight (i.e. the number of 1 bits) in a binary 
@@ -83,6 +83,6 @@
   [v]
   (/ (total-roughness v) (variance v)))
 
-(defn total-roughness
+(defn relative-total-roughness
   [s]
   (coef-relative-total-roughness (fourier s)))
