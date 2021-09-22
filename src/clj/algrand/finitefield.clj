@@ -80,6 +80,16 @@
       (vec (concat p (repeat n-zeros 0)))
       p)))
 
+;; Not used here, but useful elsewhere
+(defn pad-low-zeros
+  "If sequence p is shorter than minimum-length, concatenate zeros
+  onto it so that it has minimum-length."
+  [minimum-length p]
+  (let [n-zeros (- minimum-length (count p))]
+    (if (pos? n-zeros)
+      (vec (concat (repeat n-zeros 0) p))
+      p)))
+
 (defn strip-high-zeros
   "If polynomial vector p has extra zeros after the largest nonzero
   term, strip them off.  If nothing is left, return [0]."

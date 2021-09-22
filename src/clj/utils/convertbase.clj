@@ -25,13 +25,36 @@
   
 (defn convert-int-to-seq
   "Given an integer, returns a sequence of digits (or two-digit numbers, 
-  for bases greater than 10) representing the number in the given base."
+  for bases greater than 10) representing the number in the given base.
+  Low digits will be on the right; high numbers on the left."
   [base x]
   (loop [y (bigint x), digits nil]
      (if (zero? y)
        (map long digits)
        (recur (quot y base)
               (cons (mod y base) digits)))))
+
+(defn convert-int-to-reverse-seq
+  "Given an integer, returns a sequence of digits (or two-digit numbers, 
+  for bases greater than 10) representing the number in the given base.
+  Low digits will be on the left; high numbers on the right."
+  [base x]
+  (reverse (convert-int-to-seq base x)))
+
+(defn convert-reverse-seq-to-int
+  "Undo result of convert-int-to-reverse-seq: convert a sequence of
+  digits in a base into the integer represented by them."
+  [base digit-seq]
+  (reduce (fn [sum [digit exponent]]
+              (+ sum (* digit (math/expt base exponent))))
+          0
+          (map vector digit-seq (range))))
+
+(defn convert-seq-to-int
+  "Undo result of convert-int-to-seq: convert a sequence of
+  digits in a base into the integer represented by them."
+  [base digit-seq]
+  (convert-reverse-seq-to-int base (reverse digit-seq))) 
 
 (defn convert-fract-to-seq
   "Given a number x in [0,1), generates a lazy sequence of digits (or 
