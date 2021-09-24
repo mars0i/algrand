@@ -33,6 +33,21 @@
 
 (def ysA (iterate linrecA [0 0 0 0 1]))
 
+(defn linrec5
+  "Full period n=5 using taps based on polynomial N&W p. 37."
+  [v]
+  [(v 1) (v 2) (v 3) (v 4) (mod (+ (v 0) (v 2)) 2)])
+
+(defn linrec6
+  "Full period n=6 using taps based on polynomial N&W p. 37."
+  [[a0 a1 a2 a3 a4 a5]]
+  [a1 a2 a3 a4 a5 (mod (+ a0 a1) 2)])
+
+(defn linrec8
+  "Full period n=8 using taps based on polynomial N&W p. 37."
+  [[a0 a1 a2 a3 a4 a5 a6 a7]]
+  [a1 a2 a3 a4 a5 a6 a7 (mod (+ a0 a2 a3 a4) 2)])
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
