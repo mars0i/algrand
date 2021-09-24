@@ -46,6 +46,9 @@
 
 ;; Primitive polynomials over F2 from Niederreiter & Winterhof p. 37:
 (def nw37F2_2prim [1 1 1])  ; for F2^2
+;; implementation of linear recurrence based on preceding:
+(defn f [v] [(v 1) (v 2) (mod (+ (v 0) (v 1)) 2)])
+
 (def nw37F2_3prim [1 1 0 1])  ; also in Aspnes "Notes on Finite Fields" p. 5
 (def nw37F2_4prim [1 1 0 0 1]) ; for F2^4
 (def nw37F2_5prim [1 0 1 0 0 1])
