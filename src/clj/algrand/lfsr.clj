@@ -8,7 +8,7 @@
     ))
 
 
-;; Lidl & Niederreiter p. 402, Ex. 8.14:
+;; Lidl & Niederreiter p. 402, Example 8.14:
 (def m814 (mx/matrix [[0 0 0 0 1][1 0 0 0 1][0 1 0 0 0][0 0 1 0 0][0 0 0 1 0]]))
 
 (def xs814 (iterate (fn [prev-state] (ff/finite-mmul 2 prev-state m814))
@@ -16,11 +16,18 @@
 
 ;; or:
 
+;; Think of the LFSR algorithm this way:
+;; Calculate the new highest-index element.  
+;; (You can think of it as now sitting just past the end of the register.)
+;; Then shift every element to the lower element, losing the old lowest one.
+;; And as part of this, the old highest element is replaced by the newly
+;; calculated value, which is "shifted" in from its "location" off the
+;; high end of the register.
 (defn linrec814
   "Lidl and Niederreiter example 8.14 using explicit sums rather than 
   matrix multiplication."
   [v]
-  ;;   the shift           calc new elem for end
+  ;; shift to lower locs   calc new elem for high index
   [(v 1) (v 2) (v 3) (v 4) (mod (+ (v 0) (v 1)) 2)])
 
 (def ys814 (iterate linrec814 [0 0 0 0 1]))
