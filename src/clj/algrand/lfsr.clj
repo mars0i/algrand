@@ -46,6 +46,11 @@
 
 (def ys822 (iterate linrec822 [1 1])) ; Lidl and Niederreiter example 8.22
 
+(defn linrec4
+  "Full period n=4 using taps based on polynomial from N&W p. 37."
+  [[a0 a1 a2 a3]]
+  [a1 a2 a3 (mod (+ a0 a1) 2)])
+
 (defn linrec5
   "Full period n=5 using taps based on polynomial from N&W p. 37."
   [v]
