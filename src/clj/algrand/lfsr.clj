@@ -46,6 +46,15 @@
 
 (def ys822 (iterate linrec822 [1 1])) ; Lidl and Niederreiter example 8.22
 
+(defn linrec830
+  "Lidl and Niederreiter example 8.30."
+  [[a0 a1 a2 a3 a4 a5]]
+  [a1 a2 a3 a4 a5 (mod (+ a4 a2 a1 a0) 2)])
+
+(def ys830impulse (iterate linrec830 [0 0 0 0 0 1]))
+(def ys830_11 (iterate linrec830 [0 0 0 0 1 1]))
+(def ys830_100 (iterate linrec830 [0 0 0 1 0 0]))
+
 (defn linrec4
   "Full period n=4 using taps based on polynomial from N&W p. 37."
   [[a0 a1 a2 a3]]
@@ -66,6 +75,29 @@
   [[a0 a1 a2 a3 a4 a5 a6 a7]]
   [a1 a2 a3 a4 a5 a6 a7 (mod (+ a0 a2 a3 a4) 2)])
 
+
+(defn linrec12
+  "Full period n=12 using four taps based on polynomial from N&W p. 37."
+  [[a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11]]
+  [a1 a2 a3 a4 a5 a6 a7 (mod (+ a0 a1 a4 a6) 2)])
+
+(defn linrec12seq
+  "Returns a lazy sequence from linrec12 starting from seed."
+  [seed]
+  (iterate linrec12 seed))
+
+;; FIXME doesn't work because linrec12 returns a sequence of states,
+;; not a sequence of digits.
+(defn tausworthe12
+  "Returns a paid containing the new state and a new output number as
+  a Clojure fraction.  (Pass to a function such as double to convert to a 
+  floating point number.)"
+  [state wordsize decimation]
+  (let [after-decimation (drop decimation (linrec12seq state));; IS THIS RIGHT?
+        word (take wordsize after-decimation)
+        _ (prn word)
+        newstate (take (count state) (drop wordsize after-decimation))]
+    [newstate (cb/sum-digits 2 [0] word)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
