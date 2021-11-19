@@ -70,7 +70,7 @@
 (def alF7_2prim [3 1 1])      ; F49
 (def alF7_3prim [2 1 1 1])    ; F343
 (def alF11_2prim [7 1 1])     ; F121
-(def alF11_3prim [5 0 1 1])   ; F1332
+(def alF11_3prim [5 0 1 1])   ; F1331
 
 
 (def akF3_4 [[1 0 0 0] ; elements of F3^4 in order of powers of x, i.e. [0 1]
