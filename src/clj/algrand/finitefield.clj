@@ -39,11 +39,11 @@
 (defn generate-from-x
   "Returns an infinite sequence of elements from Fm^n, where m is a prime
   number and n is the degree of primitive polynomial p, generated from initial 
-  element x = [0 1].
-  That is, the sequence consists of x^0 = [1], x^1 = [0 1], x^2 = ... ."
-  [p m]
-  (iterate (partial mult-poly p m [0 1])
-           [1]))
+  element e as it is multiplied by 1, then the result e*1, and so on.  If e is
+  not supplied, it be the polynomial x (which is represented by [0 1]).  That 
+  is, the sequence will then consists of x^0 = [1], x^1 = [0 1], x^2 = ... ."
+  ([p m] (generate-from-x p m [0 1]))
+  ([p m e] (iterate (partial mult-poly p m e) [1])))
 
 ;; Since I'm restricting the subfield to prime fields, I extract
 ;; the integer from the result rather than returning a singleton polynomial.
