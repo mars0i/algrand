@@ -35,6 +35,7 @@
 ;; HIGH-LEVEL FUNCTIONS 
 ;; The ones most handy for experimenting.
 
+;; Examples of primitive polynomials for p: see finitefield_examples.clj .
 (defn generate-from-x
   "Returns an infinite sequence of elements from Fm^n, where m is a prime
   number and n is the degree of primitive polynomial p, generated from initial 
