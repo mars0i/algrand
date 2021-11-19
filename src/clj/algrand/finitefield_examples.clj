@@ -55,10 +55,13 @@
 (def nw37F2_6prim [1 1 0 0 0 0 1])
 
 ;; A few primitive polynomials from section 7 of from Alanenen & Knuth
+;; We write these in reverse order of what's in the article, add a 1 at end.
+(def alF3_2prim [2 1 1])   ; F9 (pp. 321, 316, cf. p. 310)
+;(def alF3_3prim [2 0 1 1])   ; NOT RIGHT--not full period. s/b F27 (pp. 321, 316, cf. p. 310)
 (def alF3_4prim [2 0 0 1 1]) ; F81 (pp. 321, 316, cf. p. 310)
 (def alF5_2prim [2 1 1])     ; F25
 (def alF5_3prim [2 0 1 1])   ; F125
-(def alF5_4prim [3 0 1 1 1]) ; F625
+(def alF5_4prim [3 1 0 1 1]) ; F625
 (def alF7_2prim [3 1 1])     ; F49
 (def alF7_3prim [2 1 1 1])   ; F343
 (def alF11_2prim [7 1 1])    ; F121
