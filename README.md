@@ -14,3 +14,6 @@ and because one can easily make plots using numbers in such forms.
 
 See files in doc/ directory or docstrings and comments in source files
 for brief documentation.
+
+SEE ALSO my repo corpsfini.  Some of the source files that used to be
+here have been moved there.
